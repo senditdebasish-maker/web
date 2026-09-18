@@ -1,0 +1,9 @@
+/config.php
+/storage/*
+!/storage/.gitkeep
+/node_modules/
+/.tools/
+*.log
+
+__pycache__/
+*.pyc

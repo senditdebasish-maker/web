@@ -1,0 +1,8 @@
+# If accidentally served from the repository root, deny private files.
+Options -Indexes
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^(?:app|bin|storage|tests|\.git)(?:/|$) - [F,L,NC]
+RewriteRule ^(?:config(?:\.example)?\.php|README\.md|.*\.sqlite.*)$ - [F,L,NC]
+RewriteRule ^$ public/ [R=302,L]
+</IfModule>

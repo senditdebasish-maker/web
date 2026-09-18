@@ -1,0 +1,23 @@
+name: CRM checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  php:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ["8.2", "8.4"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pdo_sqlite, pdo_mysql
+          coverage: none
+      - name: Check PHP syntax
+        run: find app bin public -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Run isolated HTTP integration checks
+        run: python3 tests/smoke.py
