@@ -1640,3 +1640,21 @@ textarea {
     gap: 8px;
   }
 }
+.support-message {
+  padding: 18px 0;
+  border-bottom: 1px solid #e9e3f0;
+  overflow-wrap: anywhere;
+}
+.support-message small {
+  display: block;
+  color: #81758e;
+  margin-top: 5px;
+}
+.revision-json {
+  max-width: 650px;
+  max-height: 300px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}

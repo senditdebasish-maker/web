@@ -607,3 +607,26 @@ td small {
   vertical-align: middle;
   accent-color: var(--purple);
 }
+.sp-content textarea,
+.sp-content select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ded5e9;
+  border-radius: 8px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+}
+.sp-content form label {
+  display: block;
+  margin: 16px 0;
+}
+.sp-support-message {
+  padding: 18px 0;
+  border-bottom: 1px solid #ebe5f1;
+  overflow-wrap: anywhere;
+}
+.sp-notice {
+  margin-bottom: 18px;
+  overflow-wrap: anywhere;
+}

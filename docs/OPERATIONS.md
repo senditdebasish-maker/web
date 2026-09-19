@@ -42,7 +42,7 @@ Create a batch for an institute's active course and an active teacher, with a na
 5. The history screen lists the actor, time and reason for the latest 20 revisions. Full before/after snapshots are retained in the database for an administrator audit; there is not yet a full visual diff/revision-export UI.
 6. Download that class's CSV if needed. The CSV labels whether the register is finalized and includes unmarked statuses for drafts.
 
-Students see **their own** published attendance, batch allocation history and current batch teacher/room in **Academic record**. Attendance percentage is explicitly `(Present + Late) / (Present + Late + Absent)`; excused and draft days are excluded. It is a daily-class-record statistic, not a subject/term-based attendance calculation. Exams/marks/results remain a future module.
+Students see **their own** published attendance, batch allocation history and current batch teacher/room in **Academic record**. Attendance percentage is explicitly `(Present + Late) / (Present + Late + Absent)`; excused and draft days are excluded. It is a daily-class-record statistic, not a subject/term-based attendance calculation. Independent assessments and published marks are now available; see [Student services](STUDENT-SERVICES.md). Term aggregates and official transcripts remain future work.
 
 ## Installment plans and dues
 
@@ -82,7 +82,7 @@ Staff authentication now includes a server-side security version and a fingerpri
 
 ## Owner deployment checks
 
-**Deployment checks** shows PHP version, environment mode, secure-cookie setting, mail transport, database driver, and pending/failed notification counts. It never displays SMTP/database passwords or private filesystem paths. These are informational observations, **not** an automated security scan, SMTP-deliverability guarantee, worker heartbeat, backup verification, or production certification.
+**Deployment checks** shows PHP version, environment mode, secure-cookie setting, mail transport, database driver, pending/failed notification counts, and worker heartbeat observations. It never displays SMTP/database passwords or private filesystem paths. These are informational observations, **not** an automated security scan, SMTP-deliverability guarantee, external host monitoring, backup verification, or production certification.
 
 ### Minimum go-live gate
 
@@ -92,7 +92,7 @@ Staff authentication now includes a server-side security version and a fingerpri
 - [ ] Run `composer audit` for each release. Scan the application and review authentication, data exports, financial integrity and privilege boundaries with a qualified reviewer.
 - [ ] Configure actual SMTP, test inbox delivery, monitor bounces/provider quotas, and schedule the notification worker. Alert on failures/stuck messages; the displayed queue count is not monitoring.
 - [ ] Automate **encrypted database backups**, keep an off-server copy, define retention and secure access. Use MySQL/MariaDB's supported dump tooling with credentials supplied privately, not command-line passwords. Never store backups under `public/` or commit them to Git.
-- [ ] Restore a backup into a **separate test database**, verify student/payment/document/attendance counts and account isolation, and record the drill externally. A successful dump command is not proof of a working restore. Backup and restore automation are not bundled here.
+- [ ] Restore a backup into a **separate test database**, verify student/payment/document/attendance counts and account isolation, and record the drill externally. A successful dump command is not proof of a working restore. The backup helper does not automate encryption, scheduling or restore validation; see [Recovery](RECOVERY.md).
 - [ ] Set external uptime checks, private error-log monitoring/rotation, disk-space alerts and incident response ownership. Define recovery time and acceptable data-loss targets.
 - [ ] Obtain appropriate student consent; document privacy notices, retention and account/email-verification processes. Email/PDF exports carry personal and financial information and are not end-to-end encryption.
 - [ ] Reconcile financial entries against your real accounting process. Deploy a tested reversal/refund workflow before treating the CRM ledger as authoritative accounting.
@@ -105,6 +105,7 @@ python3 tests/communications.py
 python3 tests/setup.py
 python3 tests/portal.py
 python3 tests/operations.py
+python3 tests/services.py
 ```
 
 The operations suite covers institute/role separation, batch capacity, frozen rosters, date limits, stale-form conflicts, attendance revisions, atomic fee-plan replacement, FIFO installment coverage, protected/formula-neutralized CSV exports, portal-only student views, and staff-session revocation. The workspace tests use PHP WebAssembly, SQLite and private local email capture; no real Gmail delivery, native MySQL concurrency, live browser rendering or full production load/security audit has been performed here.

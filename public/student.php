@@ -5,6 +5,7 @@ require dirname(__DIR__).'/app/bootstrap.php';
 require_once dirname(__DIR__).'/app/otp.php';
 require_once dirname(__DIR__).'/app/documents.php';
 require_once dirname(__DIR__).'/app/operations.php';
+require_once dirname(__DIR__).'/app/services.php';
 header('Cache-Control: no-store'); header('X-Content-Type-Options: nosniff'); header('Referrer-Policy: same-origin');
 header("Content-Security-Policy: default-src 'self'; script-src 'none'; style-src 'self'; img-src 'self' data:; form-action 'self'; base-uri 'none'; object-src 'none'");
 ini_set('session.use_strict_mode','1'); session_name('northstar_student');
@@ -21,6 +22,7 @@ try {
             $action=input('action',40);
             if ($action==='request_otp') $next=requestOtp('student');
             elseif ($action==='verify_otp') $next=verifyOtp('student');
+            elseif (in_array($action,['support_create','support_reply'],true)) $next=studentSupportAction($action);
             elseif ($action==='logout') {
                 $s=portalStudent(); if($s) portalEvent((int)$s['id'],'logout');
                 $_SESSION=[];session_regenerate_id(true);$next='login';
@@ -38,9 +40,10 @@ try {
         }
         if (!$student) $page='login';
         elseif ($page==='login') { header('Location: student.php');exit; }
-        elseif (!in_array($page,['dashboard','payments','documents','profile','academics'],true)) { http_response_code(404);$page='notfound'; }
+        elseif (!in_array($page,['dashboard','payments','documents','profile','academics','results','announcements','support'],true)) { http_response_code(404);$page='notfound'; }
+        if($student && $page==='support' && isset($_GET['ticket']) && servicesReady()) ticketForStudent($student,(int)$_GET['ticket']);
     }
-} catch(DomainException $e) { $error=$e->getMessage();$student=$ready?portalStudent():null;if(!$student)$page='login'; }
+} catch(DomainException $e) { $error=$e->getMessage();if($page==='support' && isset($_GET['ticket'])){unset($_GET['ticket']);if($_SERVER['REQUEST_METHOD']==='GET')http_response_code(403);}$student=$ready?portalStudent():null;if(!$student)$page='login'; }
 catch(Throwable $e) { http_response_code(503);$error='Your portal is temporarily unavailable. Please contact your institute.';$page='unavailable';error_log('Northstar student portal operation failed.'); }
 $flash=$_SESSION['flash'] ?? null;unset($_SESSION['flash']);
 require dirname(__DIR__).'/app/student-views.php';

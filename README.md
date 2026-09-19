@@ -4,6 +4,15 @@ A PHP/MySQL CRM for pharma, medical, and other educational institutes. Includes 
 
 > Functional development foundation, not a fully audited production ERP. Before using real student data, validate the application on your XAMPP/MySQL stack, configure HTTPS, protect secrets, and test backup/restore. No real Gmail delivery has been performed in the development environment.
 
+## Latest release: student services and recovery tooling
+
+- **Exams & results:** frozen rosters, exact decimal marks, draft/publish/withdraw workflow and full revision history.
+- **Announcements:** institute/current-batch targeting, scheduled visibility and audited edits.
+- **Student support:** private conversations, office replies/statuses, CSRF, duplicate protection and usage limits.
+- **Operations:** worker heartbeat, machine-readable health checks, a private database-backup helper and a recovery runbook.
+
+**[Student services guide](docs/STUDENT-SERVICES.md)** · **[Backup and recovery guide](docs/RECOVERY.md)**. Students can now send support requests; admissions, fees, official documents and results remain read-only to them. These additions do not implement teacher logins, refunds/reversals, gateway settlement, accredited transcripts, external monitoring or a completed security audit.
+
 ## Already installed? Upgrade without reinstalling
 
 **Do not rerun setup.php.** Back up your database and private files, replace application files from the updated ZIP while preserving `config.php` and `storage/`, then sign in as group owner and open **`public/upgrade.php`**. See **[Operations upgrade guide](docs/OPERATIONS.md)** or open `UPGRADE.html` from the package.
@@ -14,7 +23,7 @@ Then use **Students → Enable student access** and share **`public/student.php`
 
 **[Download the installer ZIP from GitHub](https://github.com/senditdebasish-maker/web/raw/refs/heads/arena/01a0b5d7-web/releases/northstar-setup.zip)** · [Open its GitHub file page](https://github.com/senditdebasish-maker/web/blob/arena/01a0b5d7-web/releases/northstar-setup.zip)
 
-The dependency-included installer is tracked at `releases/northstar-setup.zip` so downloading does not depend on a temporary Arena preview or a GitHub Release upload. It contains no configured credentials or student data. This ZIP now includes the academic operations and fee-schedule phase plus UPGRADE.html. Rebuild it explicitly when updating the packaged application.
+The dependency-included installer is tracked at `releases/northstar-setup.zip` so downloading does not depend on a temporary Arena preview or a GitHub Release upload. It contains no configured credentials or student data. This ZIP includes academic operations, student services, recovery tooling, tests and UPGRADE.html. Rebuild it explicitly when updating the packaged application.
 
 Use the **ready-to-install `northstar-setup.zip`** (libraries included), extract its `institute-crm` folder into XAMPP's `htdocs`, start Apache/MySQL, and open:
 
@@ -36,7 +45,7 @@ A GitHub **source** download still needs `composer install --no-dev --prefer-dis
 - Students can view their own batch history, published attendance and fee schedules.
 - Owner deployment checks and stronger staff-session revocation.
 
-**[Operations guide and production go-live checklist](docs/OPERATIONS.md)**. These additions are not a claim that the entire CRM is production-certified. Teacher logins, exams/results, refunds/reversals, automated backups/monitoring and independent security/load validation remain outstanding.
+**[Operations guide and production go-live checklist](docs/OPERATIONS.md)**. These additions are not a claim that the entire CRM is production-certified. Teacher logins, refunds/reversals, automatic backup scheduling/encryption, external monitoring and independent security/load validation remain outstanding. Exams and individual published results are included in the latest release.
 
 ### Core CRM and communications
 
@@ -235,6 +244,7 @@ python3 tests/communications.py
 python3 tests/setup.py
 python3 tests/portal.py
 python3 tests/operations.py
+python3 tests/services.py
 ```
 
 If PHP isn't on PATH (PowerShell):
@@ -246,13 +256,14 @@ python tests/communications.py
 python tests/setup.py
 python tests/portal.py
 python tests/operations.py
+python tests/services.py
 ```
 
 All suites use disposable SQLite databases and local test servers, not your normal database. The communication suite captures mail privately and sends no real emails. Coverage includes OTP expiry/replay/attempt limits, CSRF, staff disabling, permission checks, transactional admission/queue creation, real PDF downloads/attachments, payment amounts/idempotency/balance validation, blocked recipients, worker retries and recovery.
 
-**Validation here:** 64 baseline checks + 71 communication checks + 52 browser-setup checks + 65 student-portal checks + 89 operations checks passed with PHP 8.5 WebAssembly/PDO SQLite and the pinned PDF/mail dependencies. Native Apache/XAMPP, MySQL/MariaDB, real Gmail SMTP and mailbox delivery still need validation on your server. The sandbox had no Composer network access; dependencies were checked out at the pinned upstream tags for testing. Run the standard Composer installation/audit on your target server before launch.
+**Validation here:** 64 baseline checks + 71 communication checks + 52 browser-setup checks + 65 student-portal checks + 89 operations checks + 82 student-services/recovery checks passed with PHP 8.5 WebAssembly/PDO SQLite and the pinned PDF/mail dependencies. Native Apache/XAMPP, MySQL/MariaDB, real Gmail SMTP and mailbox delivery still need validation on your server. The sandbox had no Composer network access; dependencies were checked out at the pinned upstream tags for testing. Run the standard Composer installation/audit on your target server before launch.
 
-The optional GitHub Actions template in `docs/github-actions-tests.yml.example` includes all five suites. An administrator with workflow permission can copy it to `.github/workflows/tests.yml`.
+The optional GitHub Actions template in `docs/github-actions-tests.yml.example` includes all six suites. An administrator with workflow permission can copy it to `.github/workflows/tests.yml`.
 
 ## Deployment checklist
 
@@ -260,7 +271,7 @@ The optional GitHub Actions template in `docs/github-actions-tests.yml.example` 
 - Use HTTPS, `secure_cookies=true`, patched PHP/MySQL/server, server-level HSTS and appropriate anti-framing headers.
 - Use a dedicated least-privilege database user. Installation/migration needs DDL privileges; normal operation does not.
 - Configure Gmail credentials privately, test an inbox, and schedule/monitor the worker. Do not disable TLS certificate verification.
-- Keep database backups encrypted; define retention and test restores, including payments/documents/notification states. No automated backup system is bundled.
+- Keep database backups encrypted; define retention and test restores, including payments/documents/notification states. A CLI snapshot/dump helper is bundled; scheduling, encryption, off-server copies and restore validation are not automated.
 - Re-test access with two institutes and all roles, including direct document URL changes.
 - Run `composer audit`; maintain dependencies and server security updates.
 - Add monitoring for failed logins, stuck pending mail, failed workers, bounced email and backup failures. These alerts are not automated here.
@@ -272,7 +283,7 @@ Sessions expire after 30 minutes of inactivity. Disabling an account removes its
 
 ## Still planned
 
-Teacher logins, subject/period timetables, exams/results, parent portals, uploads, automatic due reminders, refunds/reversals, accounting/gateway integrations, SMS/WhatsApp, bulk imports and broader exports, device/session management and production load/security auditing. Follow-ups are in-app tasks; they do not send automatic reminders in this version.
+Teacher logins, subject/period timetables, term aggregates/accredited transcripts, parent portals, uploads, automatic due reminders, refunds/reversals, accounting/gateway integrations, SMS/WhatsApp, bulk imports and broader exports, device/session management and production load/security auditing. Follow-ups are in-app tasks; they do not send automatic reminders in this version.
 
 ## Structure
 
@@ -295,10 +306,15 @@ public/setup.php            Guided setup page
 public/upgrade.php          Owner-only additive upgrade
 public/student.php          Isolated student session and PDF endpoint
 app/portal.php              Portal provisioning, migrations and access checks
-app/student-views.php       Responsive read-only student workspace
+app/student-views.php       Responsive student workspace and own-record views
 app/operations.php          Academic/fee workflows, migrations and session revocation
 app/operations-views.php    Teaching, attendance, fee and deployment screens
 public/export.php           Authorized POST-only CSV exports
+app/services.php           Exams, notices, support and worker heartbeat
+app/services-views.php      Staff assessment, notice and help-desk screens
+app/student-services.php    Own published results, notices and support
+bin/backup.php              Private SQLite/local-MySQL backup helper
+bin/health.php              Credential-free JSON operational observations
 bin/build-release.php       Creates a dependency-included installation ZIP
 public/document.php         Authorized PDF download endpoint
 bin/install.php             First-time installation

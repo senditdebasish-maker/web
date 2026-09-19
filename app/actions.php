@@ -4,6 +4,7 @@ require_once __DIR__.'/portal.php';
 require_once __DIR__.'/otp.php';
 require_once __DIR__.'/finance.php';
 require_once __DIR__.'/operations.php';
+require_once __DIR__.'/services.php';
 function handleAction(): string {
     $action = input('action', 40);
     if (!hash_equals($_SESSION['csrf'], input('csrf', 128))) fail('Your form expired. Refresh the page and try again.');
@@ -50,6 +51,11 @@ function handleAction(): string {
             'payment' => recordPayment(),
             'student_email' => studentEmail(),
             'portal_access' => managePortalAccess(),
+            'exam_create' => createExam(),
+            'exam_grade' => gradeExam(),
+            'exam_publish' => publishExam(),
+            'announcement' => saveAnnouncement(),
+            'support_reply' => staffSupportReply(),
             'teacher' => saveTeacher(),
             'batch' => saveBatch(),
             'enrollment' => enrollStudent(),

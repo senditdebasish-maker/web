@@ -77,6 +77,10 @@ function enrollStudent(): string {
     if($current && $start<=$current['starts_on'])fail('A transfer must be later than the previous allocation date.');
     $latest=one('SELECT ends_on last_end FROM enrollments WHERE student_id=? AND ends_on IS NOT NULL ORDER BY ends_on DESC LIMIT 1'.lockSuffix(),[$sid]);
     if($latest && $latest['last_end'] && $start<=$latest['last_end'])fail('Allocation cannot overlap prior batch history.');
+    if(function_exists('servicesReady') && servicesReady()) {
+        if(one('SELECT r.id FROM exam_results r JOIN exams x ON x.id=r.exam_id WHERE r.student_id=? AND x.held_on>=?'.lockSuffix(),[$sid,$start]))fail('Cannot change allocation across a frozen exam roster. Choose a later date.');
+        if(one('SELECT id FROM exams WHERE batch_id=? AND held_on>=?'.lockSuffix(),[$bid,$start]))fail('Destination batch already has a frozen exam roster. Choose a later date.');
+    }
     if(one('SELECT a.id FROM attendance a JOIN class_days c ON c.id=a.class_id WHERE a.student_id=? AND c.held_on>=?'.lockSuffix(),[$sid,$start]))fail('Cannot transfer or backdate an allocation across an existing attendance roster. Use a later date.');
     if(one('SELECT id FROM class_days WHERE batch_id=? AND held_on>=?'.lockSuffix(),[$bid,$start]))fail('This batch already has a roster on or after that date. Choose a date after its latest recorded class.');
     $members=rows('SELECT id FROM enrollments WHERE batch_id=? AND ends_on IS NULL'.lockSuffix(),[$bid]);

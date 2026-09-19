@@ -31,6 +31,8 @@ jobs:
         run: python3 tests/portal.py
       - name: Run operations, fee schedule and revocation checks
         run: python3 tests/operations.py
+      - name: Run student services and recovery checks
+        run: python3 tests/services.py
   native-database:
     runs-on: ubuntu-latest
     strategy:

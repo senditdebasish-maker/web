@@ -29,6 +29,14 @@ try {
     mutate('openClassDay',['batch_id'=>(string)$bid,'held_on'=>$today,'topic'=>'Test class']);$day=(int)query('SELECT id FROM class_days')->fetchColumn();
     mutate('saveAttendance',['class_id'=>(string)$day,'version'=>'1','reason'=>'','attendance'=>[$sid=>'Present']]);
     verify((int)query('SELECT COUNT(*) FROM attendance_revisions')->fetchColumn()===1,'native allocation and finalized attendance persist');
+    mutate('createExam',['batch_id'=>(string)$bid,'title'=>'Native assessment','held_on'=>$today,'maximum'=>'100','pass_mark'=>'40']);$exam=(int)query('SELECT id FROM exams')->fetchColumn();
+    mutate('gradeExam',['exam_id'=>(string)$exam,'version'=>'1','reason'=>'Native grade','marks'=>[$sid=>'75.25'],'result_status'=>[$sid=>'Present']]);
+    mutate('publishExam',['exam_id'=>(string)$exam,'version'=>'2','state'=>'Published','reason'=>'Native publication']);
+    verify((int)query('SELECT score_minor FROM exam_results')->fetchColumn()===7525,'native assessment publication retains exact marks');
+    mutate('saveAnnouncement',['institute_id'=>(string)$iid,'batch_id'=>'0','title'=>'Native notice','body'=>'Fictional test notice','starts_on'=>$today,'ends_on'=>$today,'state'=>'Published','reason'=>'Native test']);
+    verify(count(studentAnnouncements(['id'=>$sid,'institute_id'=>$iid]))===1,'native student notice targeting works');
+    jobHeartbeat('running','Native smoke gate',true);jobHeartbeat('ok','Native smoke gate');
+    verify(query("SELECT outcome FROM runtime_jobs WHERE job_key='notifications'")->fetchColumn()==='ok','native worker heartbeat upsert works');
     $plan=['student_id'=>(string)$sid,'version'=>'0','reason'=>'Test agreement','due_on'=>[$today],'installment_amount'=>['1000.00']];
     mutate('saveFeePlan',$plan);verify((int)query('SELECT SUM(amount_minor) FROM fee_installments')->fetchColumn()===100000,'native fee plan totals remain integer paise');
     try{mutate('saveFeePlan',$plan);throw new RuntimeException('Stale version accepted.');}catch(DomainException $e){verify(str_contains($e->getMessage(),'another window'),'native stale fee plan rejected');}

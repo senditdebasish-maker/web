@@ -52,6 +52,10 @@ $list=feeReportRows($scope,31,$offset);$more=count($list)>30;$list=array_slice($
 <section class="panel"><div class="panel-heading"><div><h2>Outstanding & overdue fees</h2><p>Overdue = installments due before today, minus all recorded payments, floored at zero. No schedule means no computed overdue amount.</p></div><?=opsExport('fees',$scope)?></div><?php table(['Student / institute','Agreed fee','Paid','Total unpaid','Overdue','Schedule'],$list,fn($s)=>[person($s['name'],$s['institute_name']),money((int)$s['fee_minor']),money((int)$s['paid_minor']),money((int)$s['fee_minor']-(int)$s['paid_minor']),$s['plan_id']?money(max(0,(int)$s['scheduled_before_today']-(int)$s['paid_minor'])):'Not scheduled','<a class="text-link" href="?page=fee-plans&student='.$s['id'].'">'.($s['plan_id']?'View schedule':'Create schedule').' ↗</a>']); ?>
 <?php elseif($page==='health'):
 requireRole(['owner']);global $config;
+require_once __DIR__.'/health.php';
+$operational=operationalHealth();
+echo '<section class="panel"><div class="panel-heading"><h2>Live operational observations</h2></div>';table(['Check','Status','Observation'],$operational,fn($c)=>[e($c['check']),badge($c['status']),e($c['detail'])]);echo '</section>';
+
 $checks=[
  ['Runtime','PHP '.PHP_VERSION,'Use a supported, patched PHP version; keep extensions and dependencies updated.'],
  ['Environment',$config['environment']??'Not set','Production should use environment=production.'],
@@ -60,7 +64,7 @@ $checks=[
  ['Database',db()->getAttribute(PDO::ATTR_DRIVER_NAME),'Use a dedicated least-privilege account. MySQL/MariaDB must be tested on your hosting stack.'],
  ['Failed email notifications',(string)query("SELECT COUNT(*) FROM notifications WHERE status='failed'")->fetchColumn(),'Check SMTP and dependencies, then requeue failed items in Email notifications.'],
  ['Pending email notifications',(string)query("SELECT COUNT(*) FROM notifications WHERE status IN ('pending','sending')")->fetchColumn(),'Schedule the worker every minute. Queue counts alone do not prove it is running.'],
- ['Backups & restore','External setup required','No automatic backup or restore verification is bundled. Schedule encrypted backups and test a restore into a separate database.'],
+ ['Backups & restore','External setup required','CLI backup helper available; scheduling, encryption, off-server copies and isolated restore verification remain operator responsibilities. See docs/RECOVERY.md.'],
  ['Monitoring & security audit','External review required','These checks are informational, not a production certification or vulnerability scan.']
 ];
 ?>
