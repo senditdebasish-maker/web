@@ -62,7 +62,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-test-') as temp:
     temp = Path(temp)
     db = temp / 'test.sqlite'
     cfg = temp / 'config.php'
-    cfg.write_text("<?php return ['dsn'=>'sqlite:" + str(db) + "', 'timezone'=>'Asia/Kolkata'];")
+    cfg.write_text("<?php return ['dsn'=>'sqlite:" + str(db) + "', 'timezone'=>'Asia/Kolkata', 'auth_mode'=>'password'];")
     env = dict(os.environ, CRM_CONFIG_FILE=str(cfg), CRM_ADMIN_PASSWORD='Test-Owner-Password!')
     install = subprocess.run(PHP + ['bin/install.php', '--name=Test Owner', '--email=owner@example.test'],
                              cwd=ROOT, env=env, text=True, capture_output=True, check=True)
@@ -149,7 +149,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-test-') as temp:
         check('Changes saved' in counsellor.post('complete_followup',page='followups',id=fid,outcome='Interested in joining'), 'complete follow-up with outcome')
         check('already been completed' in counsellor.post('complete_followup',page='followups',id=fid,outcome='Changed'), 'completed follow-up cannot be overwritten')
         owner.post('followup',page='followups',enquiry_id=ea,assigned_to=ac,due_date='2026-01-02',notes='Admission reminder')
-        check('Changes saved' in admin.post('admit',page='admissions',enquiry_id=ea,admission_date='2026-01-01'), 'admin converts enquiry to student')
+        check('Student admitted' in admin.post('admit',page='admissions',enquiry_id=ea,admission_date='2026-01-01'), 'admin converts enquiry to student')
         check(first('SELECT COUNT(*) FROM students WHERE enquiry_id=?',(ea,))==1, 'exactly one student created')
         check(first('SELECT fee_minor FROM students WHERE enquiry_id=?',(ea,))==8500025, 'admission snapshots the course fee')
         check(first('SELECT status FROM enquiries WHERE id=?',(ea,))=='Admitted', 'enquiry status updated atomically')

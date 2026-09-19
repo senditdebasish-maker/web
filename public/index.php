@@ -20,15 +20,26 @@ $page=is_string($_GET['page'] ?? null) ? $_GET['page'] : 'dashboard';
 $error=null;
 try {
     if ($_SERVER['REQUEST_METHOD']==='POST') {
-        $next=handleAction(); $_SESSION['flash']=($_POST['action']==='login' ? 'Welcome back. Your workspace is ready.' : 'Changes saved successfully.'); redirect($next);
+        $next=handleAction(); $_SESSION['flash'] ??=($_POST['action']==='login' ? 'Welcome back. Your workspace is ready.' : 'Changes saved successfully.'); redirect($next);
     }
     $user=currentUser();
+    if (defined('CRM_DOCUMENT_REQUEST')) {
+        if (!$user) { http_response_code(401); exit('Please sign in to download documents.'); }
+        $document=record('documents',(int)($_GET['id'] ?? 0));
+        if ($document['kind']==='payment') requireRole(['owner','admin']);
+        $pdf=renderDocument($document);
+        ob_clean();
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: attachment; filename="'.documentFilename($document).'"');
+        header('Content-Length: '.strlen($pdf));
+        echo $pdf; exit;
+    }
     if (!$user) $page='login';
     elseif ($page==='login') redirect('dashboard');
-    $allowed=['dashboard','institutes','courses','staff','enquiries','followups','admissions','students','settings','audit'];
+    $allowed=['dashboard','institutes','courses','staff','enquiries','followups','admissions','students','settings','audit','payments','documents','notifications'];
     if ($user && !in_array($page,$allowed,true)) { http_response_code(404); $page='notfound'; }
-    if ($user && in_array($page,['staff','audit'],true)) requireRole(['owner','admin']);
-} catch (DomainException $ex) { $error=$ex->getMessage(); $user=currentUser(); if (!$user) $page='login'; }
-catch (Throwable $ex) { error_log((string)$ex); $error='The request could not be saved. Check for duplicate records or try again. If this continues, contact your administrator.'; $user=currentUser(); if (!$user) $page='login'; }
+    if ($user && in_array($page,['staff','audit','payments','notifications'],true)) requireRole(['owner','admin']);
+} catch (DomainException $ex) { if(defined('CRM_DOCUMENT_REQUEST')) { http_response_code(403); exit('Document not accessible.'); } $error=$ex->getMessage(); $user=currentUser(); if (!$user) $page='login'; }
+catch (Throwable $ex) { if(defined('CRM_DOCUMENT_REQUEST')) { http_response_code(503); exit('PDF unavailable. Ask your administrator to check Composer dependencies.'); } error_log((string)$ex); $error='The request could not be saved. Check for duplicate records or try again. If this continues, contact your administrator.'; $user=currentUser(); if (!$user) $page='login'; }
 $flash=$_SESSION['flash'] ?? null; unset($_SESSION['flash']);
 require dirname(__DIR__) . '/app/views.php';

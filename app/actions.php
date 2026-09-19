@@ -1,9 +1,14 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__.'/otp.php';
+require_once __DIR__.'/finance.php';
 function handleAction(): string {
     $action = input('action', 40);
     if (!hash_equals($_SESSION['csrf'], input('csrf', 128))) fail('Your form expired. Refresh the page and try again.');
+    if ($action==='request_otp') return requestOtp();
+    if ($action==='verify_otp') return verifyOtp();
     if ($action === 'login') {
+        if (otpEnabled()) fail('Password login is disabled. Request an email sign-in code.');
         $email = emailInput();
         $password = input('password', 72);
         $identity = hash('sha256', $email);
@@ -29,7 +34,7 @@ function handleAction(): string {
         query('UPDATE users SET password_hash = ? WHERE id = ?', [password_hash($password,PASSWORD_DEFAULT),$u['id']]);
         audit('password_changed','users',(int)$u['id']); session_regenerate_id(true); return 'settings';
     }
-    db()->beginTransaction();
+    writeTransaction();
     try {
         $page = match ($action) {
             'institute' => saveInstitute(),
@@ -40,6 +45,10 @@ function handleAction(): string {
             'followup' => saveFollowup(),
             'complete_followup' => completeFollowup(),
             'admit' => admitStudent(),
+            'payment' => recordPayment(),
+            'student_email' => studentEmail(),
+            'retry_notification' => retryNotification(),
+            'admission_letter' => generateAdmissionLetter(),
             default => throw new DomainException('Unknown action.')
         };
         db()->commit(); return $page;
@@ -65,7 +74,7 @@ function saveCourse(): string {
 function saveStaff(): string {
     $u=requireRole(['owner','admin']); $iid=(int)input('institute_id'); instituteAccess($iid);
     $role=choice('role',$u['role']==='owner' ? ['admin','counsellor'] : ['counsellor']);
-    $password=input('password',72); if (strlen($password)<12) fail('Staff passwords must have at least 12 characters.');
+    $password=otpEnabled() ? bin2hex(random_bytes(24)) : input('password',72); if (strlen($password)<12) fail('Staff passwords must have at least 12 characters.');
     query('INSERT INTO users (institute_id,name,email,password_hash,role) VALUES (?,?,?,?,?)',[$iid,input('name',120),emailInput(),password_hash($password,PASSWORD_DEFAULT),$role]);
     audit('created','users',(int)db()->lastInsertId()); return 'staff';
 }
@@ -108,5 +117,8 @@ function admitStudent(): string {
     $id=(int)db()->lastInsertId();
     query("UPDATE enquiries SET status='Admitted' WHERE id=?",[$eid]);
     query("UPDATE followups SET completed_at=?, outcome='Closed automatically on admission.' WHERE enquiry_id=? AND completed_at IS NULL",[date('Y-m-d H:i:s'),$eid]);
-    audit('admitted','students',$id); return 'students';
+    createDocument($id);
+    audit('admitted','students',$id);
+    $_SESSION['flash']='Student admitted. The admission PDF is ready in Documents; email is queued, or blocked until a student email is added.';
+    return 'students';
 }

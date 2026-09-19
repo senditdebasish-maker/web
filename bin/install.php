@@ -21,6 +21,8 @@ $tables = [
 'login_attempts' => "id $id, identity_hash VARCHAR(64) NOT NULL, attempted_at INTEGER NOT NULL"
 ];
 foreach ($tables as $table => $definition) db()->exec("CREATE TABLE IF NOT EXISTS $table ($definition)$suffix");
+require dirname(__DIR__) . '/app/migrations.php';
+migrateCommunications();
 if (one('SELECT id FROM users LIMIT 1')) exit("Already installed. No data was changed.\n");
 foreach (['CREATE INDEX idx_enquiry_scope ON enquiries (institute_id, status)', 'CREATE INDEX idx_followup_due ON followups (institute_id, due_date)', 'CREATE INDEX idx_login_identity ON login_attempts (identity_hash, attempted_at)', 'CREATE INDEX idx_student_scope ON students (institute_id)'] as $sql) db()->exec($sql);
 db()->beginTransaction();

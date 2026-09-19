@@ -15,9 +15,13 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: pdo_sqlite, pdo_mysql
+          extensions: pdo_sqlite, pdo_mysql, dom, mbstring, openssl
           coverage: none
+      - name: Install mail and PDF dependencies
+        run: composer install --no-dev --prefer-dist --no-interaction
       - name: Check PHP syntax
         run: find app bin public -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Run isolated HTTP integration checks
         run: python3 tests/smoke.py
+      - name: Run email, PDF and payment integration checks
+        run: python3 tests/communications.py

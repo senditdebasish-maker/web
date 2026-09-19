@@ -48,7 +48,7 @@ function instituteAccess(int $id): void {
     if (!$u || !one('SELECT id FROM institutes WHERE id = ?', [$id]) || ($u['role'] !== 'owner' && (int)$u['institute_id'] !== $id)) fail('Institute not accessible.');
 }
 function record(string $table, int $id): array {
-    if (!in_array($table, ['courses', 'enquiries', 'students', 'followups'], true)) fail('Invalid record type.');
+    if (!in_array($table, ['courses', 'enquiries', 'students', 'followups', 'payments', 'documents', 'notifications'], true)) fail('Invalid record type.');
     $r = one("SELECT * FROM $table WHERE id = ?", [$id]); if (!$r) fail('Record not found.'); instituteAccess((int)$r['institute_id']); return $r;
 }
 function courseAccess(int $id, int $institute): array {
@@ -59,3 +59,18 @@ function counsellorAccess(int $id, int $institute): void {
 }
 function csrf(): string { return '<input type="hidden" name="csrf" value="' . e($_SESSION['csrf']) . '">'; }
 function redirect(string $page): never { header('Location: ?page=' . urlencode($page)); exit; }
+
+function dependencies(): void {
+    $file=dirname(__DIR__).'/vendor/autoload.php';
+    if (!is_file($file)) throw new RuntimeException('Run composer install to enable email and PDF support.');
+    require_once $file;
+}
+function writeTransaction(): void {
+    // SQLite must acquire its write lock before reading balances/challenge counters.
+    if (db()->getAttribute(PDO::ATTR_DRIVER_NAME)==='sqlite') {
+        db()->beginTransaction();
+        db()->exec('UPDATE users SET active=active WHERE id=-1');
+    } else db()->beginTransaction();
+}
+function lockSuffix(): string { return db()->getAttribute(PDO::ATTR_DRIVER_NAME)==='mysql' ? ' FOR UPDATE' : ''; }
+function otpEnabled(): bool { global $config; return ($config['auth_mode'] ?? 'otp') === 'otp'; }
