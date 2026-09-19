@@ -4,9 +4,9 @@ A PHP/MySQL CRM for pharma, medical, and other educational institutes. Includes 
 
 > Functional development foundation, not a fully audited production ERP. Before using real student data, validate the application on your XAMPP/MySQL stack, configure HTTPS, protect secrets, and test backup/restore. No real Gmail delivery has been performed in the development environment.
 
-## Already installed? Upgrade to the student portal
+## Already installed? Upgrade without reinstalling
 
-**Do not rerun setup.php.** Back up your database and private files, replace application files from the updated ZIP while preserving `config.php` and `storage/`, then sign in as group owner and open **`public/upgrade.php`**. See **[Student portal upgrade guide](docs/STUDENT-PORTAL.md)** or open `UPGRADE.html` from the package.
+**Do not rerun setup.php.** Back up your database and private files, replace application files from the updated ZIP while preserving `config.php` and `storage/`, then sign in as group owner and open **`public/upgrade.php`**. See **[Operations upgrade guide](docs/OPERATIONS.md)** or open `UPGRADE.html` from the package.
 
 Then use **Students → Enable student access** and share **`public/student.php`**. Students use email OTP to see only their own admission, fee balance, payments, profile and PDF documents. Each student needs a unique personal email. No access is granted automatically. Changing the student's email or disabling access revokes their sessions; staff must re-enable a corrected address.
 
@@ -14,7 +14,7 @@ Then use **Students → Enable student access** and share **`public/student.php`
 
 **[Download the installer ZIP from GitHub](https://github.com/senditdebasish-maker/web/raw/refs/heads/arena/01a0b5d7-web/releases/northstar-setup.zip)** · [Open its GitHub file page](https://github.com/senditdebasish-maker/web/blob/arena/01a0b5d7-web/releases/northstar-setup.zip)
 
-The dependency-included installer is tracked at `releases/northstar-setup.zip` so downloading does not depend on a temporary Arena preview or a GitHub Release upload. It contains no configured credentials or student data. This ZIP now includes the student portal phase and UPGRADE.html. Rebuild it explicitly when updating the packaged application.
+The dependency-included installer is tracked at `releases/northstar-setup.zip` so downloading does not depend on a temporary Arena preview or a GitHub Release upload. It contains no configured credentials or student data. This ZIP now includes the academic operations and fee-schedule phase plus UPGRADE.html. Rebuild it explicitly when updating the packaged application.
 
 Use the **ready-to-install `northstar-setup.zip`** (libraries included), extract its `institute-crm` folder into XAMPP's `htdocs`, start Apache/MySQL, and open:
 
@@ -27,6 +27,18 @@ The wizard walks through **server checks → database → owner/first institute 
 A GitHub **source** download still needs `composer install --no-dev --prefer-dist` once, because dependencies are intentionally not committed. The wizard checks this and explains missing requirements. Existing configurations are protected: setup is not an unauthenticated settings editor. Student email delivery still needs the worker task described below; OTP emails send immediately.
 
 ## What's working
+
+### Latest operations release
+
+- Teacher directory, course batches, capacity-controlled student allocation and historical transfers.
+- Daily attendance with frozen rosters, finalized registers, correction reasons and revision history.
+- Fee installment plans, earliest-due payment coverage, overdue reports and scoped CSV downloads.
+- Students can view their own batch history, published attendance and fee schedules.
+- Owner deployment checks and stronger staff-session revocation.
+
+**[Operations guide and production go-live checklist](docs/OPERATIONS.md)**. These additions are not a claim that the entire CRM is production-certified. Teacher logins, exams/results, refunds/reversals, automated backups/monitoring and independent security/load validation remain outstanding.
+
+### Core CRM and communications
 
 - Multiple institutes, courses, staff, institute filters, dashboard, search and pagination.
 - Owner, institute-admin and counsellor authorization, with server-side institute isolation.
@@ -158,14 +170,14 @@ Payments cannot exceed the course balance or be backdated before admission. Amou
 
 ### Email states
 
-| State | Meaning |
-| --- | --- |
-| Pending | Waiting for the worker or its scheduled retry |
-| Sending | Claimed by a worker with a five-minute lease |
-| Sent | Accepted by SMTP; inbox delivery is not guaranteed |
-| Blocked | Student email is missing; add it in Students |
-| Failed | Five attempts failed; check setup and requeue as admin |
-| Spooled | Local `.eml` test file only; **no real email sent** |
+| State   | Meaning                                                |
+| ------- | ------------------------------------------------------ |
+| Pending | Waiting for the worker or its scheduled retry          |
+| Sending | Claimed by a worker with a five-minute lease           |
+| Sent    | Accepted by SMTP; inbox delivery is not guaranteed     |
+| Blocked | Student email is missing; add it in Students           |
+| Failed  | Five attempts failed; check setup and requeue as admin |
+| Spooled | Local `.eml` test file only; **no real email sent**    |
 
 Failed delivery retries use increasing delays. Restarting a worker does not repeat completed items. A crash after SMTP accepts a message but before the database records success can cause a repeat after the lease expires: delivery is **at least once**, not exactly once. Stable message IDs and receipt numbers aid reconciliation but do not guarantee mail-provider deduplication. Review the inbox/provider before manually requeuing an uncertain delivery.
 
@@ -173,18 +185,18 @@ Updating a student email automatically releases **blocked** items only. Already 
 
 ## Roles
 
-| Capability | Owner | Institute admin | Counsellor |
-| --- | --- | --- | --- |
-| Institute records | All | Own | Own |
-| Create/edit institutes | Yes | No | No |
-| Courses | Manage | Manage own | View own |
-| Staff access | Manage all staff | Manage own counsellors | No |
-| Enquiries/follow-ups | Manage all | Manage own | Manage own |
-| Confirm admission | Yes | Own institute | No |
-| Record payments / financial PDFs | Yes | Own institute | No |
-| Admission PDF downloads | All | Own | Own |
-| Update student emails / retry mail | Yes | Own institute | No |
-| Activity log | All | Actions by own institute staff | No |
+| Capability                         | Owner            | Institute admin                | Counsellor |
+| ---------------------------------- | ---------------- | ------------------------------ | ---------- |
+| Institute records                  | All              | Own                            | Own        |
+| Create/edit institutes             | Yes              | No                             | No         |
+| Courses                            | Manage           | Manage own                     | View own   |
+| Staff access                       | Manage all staff | Manage own counsellors         | No         |
+| Enquiries/follow-ups               | Manage all       | Manage own                     | Manage own |
+| Confirm admission                  | Yes              | Own institute                  | No         |
+| Record payments / financial PDFs   | Yes              | Own institute                  | No         |
+| Admission PDF downloads            | All              | Own                            | Own        |
+| Update student emails / retry mail | Yes              | Own institute                  | No         |
+| Activity log                       | All              | Actions by own institute staff | No         |
 
 Staff belong to one institute; counsellors share their institute's enquiries. Assignment is not a per-counsellor privacy boundary. Owner accounts are installed using the CLI, not the staff form. New staff accounts in OTP mode do not need a password.
 
@@ -222,6 +234,7 @@ python3 tests/smoke.py
 python3 tests/communications.py
 python3 tests/setup.py
 python3 tests/portal.py
+python3 tests/operations.py
 ```
 
 If PHP isn't on PATH (PowerShell):
@@ -232,13 +245,14 @@ python tests/smoke.py
 python tests/communications.py
 python tests/setup.py
 python tests/portal.py
+python tests/operations.py
 ```
 
 All suites use disposable SQLite databases and local test servers, not your normal database. The communication suite captures mail privately and sends no real emails. Coverage includes OTP expiry/replay/attempt limits, CSRF, staff disabling, permission checks, transactional admission/queue creation, real PDF downloads/attachments, payment amounts/idempotency/balance validation, blocked recipients, worker retries and recovery.
 
-**Validation here:** 64 baseline checks + 71 communication checks + 52 browser-setup checks + 65 student-portal checks passed with PHP 8.5 WebAssembly/PDO SQLite and the pinned PDF/mail dependencies. Native Apache/XAMPP, MySQL/MariaDB, real Gmail SMTP and mailbox delivery still need validation on your server. The sandbox had no Composer network access; dependencies were checked out at the pinned upstream tags for testing. Run the standard Composer installation/audit on your target server before launch.
+**Validation here:** 64 baseline checks + 71 communication checks + 52 browser-setup checks + 65 student-portal checks + 89 operations checks passed with PHP 8.5 WebAssembly/PDO SQLite and the pinned PDF/mail dependencies. Native Apache/XAMPP, MySQL/MariaDB, real Gmail SMTP and mailbox delivery still need validation on your server. The sandbox had no Composer network access; dependencies were checked out at the pinned upstream tags for testing. Run the standard Composer installation/audit on your target server before launch.
 
-The optional GitHub Actions template in `docs/github-actions-tests.yml.example` includes all four suites. An administrator with workflow permission can copy it to `.github/workflows/tests.yml`.
+The optional GitHub Actions template in `docs/github-actions-tests.yml.example` includes all five suites. An administrator with workflow permission can copy it to `.github/workflows/tests.yml`.
 
 ## Deployment checklist
 
@@ -254,11 +268,11 @@ The optional GitHub Actions template in `docs/github-actions-tests.yml.example` 
 - Verify PDF output for your institute names and languages. DejaVu supports common Unicode characters, but complex-script shaping/additional fonts require validation before using Bengali or other regional scripts in official documents.
 - Email OTP is not phishing-resistant MFA; mailbox compromise can compromise CRM access. Use strong Google account security and consider passkeys/MFA for a later security milestone.
 
-Sessions expire after 30 minutes of inactivity. Disabling an account removes its access on subsequent requests. Password changes alone do not revoke existing sessions; in OTP mode, password reset does not recover an inaccessible mailbox. Server operators should handle account-email recovery through a verified administrative process.
+Sessions expire after 30 minutes of inactivity. Disabling an account removes its access on subsequent requests. Password changes now revoke other staff sessions; in OTP mode, password reset does not recover an inaccessible mailbox. Server operators should handle account-email recovery through a verified administrative process.
 
 ## Still planned
 
-Attendance, batches, timetables, exams/results, parent portals, uploads, installment plans, refunds/reversals, accounting/gateway integrations, SMS/WhatsApp, bulk imports/exports, device/session management and production load/security auditing. Follow-ups are in-app tasks; they do not send automatic reminders in this version.
+Teacher logins, subject/period timetables, exams/results, parent portals, uploads, automatic due reminders, refunds/reversals, accounting/gateway integrations, SMS/WhatsApp, bulk imports and broader exports, device/session management and production load/security auditing. Follow-ups are in-app tasks; they do not send automatic reminders in this version.
 
 ## Structure
 
@@ -282,6 +296,9 @@ public/upgrade.php          Owner-only additive upgrade
 public/student.php          Isolated student session and PDF endpoint
 app/portal.php              Portal provisioning, migrations and access checks
 app/student-views.php       Responsive read-only student workspace
+app/operations.php          Academic/fee workflows, migrations and session revocation
+app/operations-views.php    Teaching, attendance, fee and deployment screens
+public/export.php           Authorized POST-only CSV exports
 bin/build-release.php       Creates a dependency-included installation ZIP
 public/document.php         Authorized PDF download endpoint
 bin/install.php             First-time installation

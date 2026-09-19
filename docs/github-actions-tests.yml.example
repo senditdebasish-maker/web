@@ -29,3 +29,47 @@ jobs:
         run: python3 tests/setup.py
       - name: Run student portal isolation and upgrade checks
         run: python3 tests/portal.py
+      - name: Run operations, fee schedule and revocation checks
+        run: python3 tests/operations.py
+  native-database:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        database: ["mysql:8.4", "mariadb:10.11"]
+    services:
+      database:
+        image: ${{ matrix.database }}
+        env:
+          # These are disposable CI-only fixture credentials, never deployment secrets.
+          MYSQL_ROOT_PASSWORD: ci-only-disposable-root
+          MYSQL_DATABASE: northstar_test
+          MYSQL_USER: crm_ci
+          MYSQL_PASSWORD: ci-only-disposable
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      CRM_MYSQL_TEST_ALLOW: "1"
+      CRM_MYSQL_USER: crm_ci
+      CRM_MYSQL_PASSWORD: ci-only-disposable
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: pdo_mysql
+          coverage: none
+      - name: Write isolated native-test configuration
+        run: |
+          cat > "$RUNNER_TEMP/crm-mysql.php" <<'PHP'
+          <?php return [
+            'dsn'=>'mysql:host=127.0.0.1;port=3306;dbname=northstar_test;charset=utf8mb4',
+            'user'=>getenv('CRM_MYSQL_USER'), 'password'=>getenv('CRM_MYSQL_PASSWORD'),
+            'environment'=>'local', 'timezone'=>'Asia/Kolkata',
+          ];
+          PHP
+          echo "CRM_CONFIG_FILE=$RUNNER_TEMP/crm-mysql.php" >> "$GITHUB_ENV"
+      - name: Run native schema, operations and stale-balance gate
+        run: php tests/mysql-smoke.php

@@ -32,7 +32,9 @@ function audit(string $action, string $entity, int $id): void {
     query('INSERT INTO audit_log (user_id, action, entity, entity_id, created_at) VALUES (?, ?, ?, ?, ?)', [$_SESSION['uid'] ?? null, $action, $entity, $id, date('Y-m-d H:i:s')]);
 }
 function currentUser(): ?array {
-    return isset($_SESSION['uid']) ? one('SELECT * FROM users WHERE id = ? AND active = 1', [$_SESSION['uid']]) : null;
+    if(!isset($_SESSION['uid'],$_SESSION['staff_stamp'])) return null;
+    $u=one('SELECT * FROM users WHERE id=? AND active=1',[$_SESSION['uid']]);
+    return $u && hash_equals(staffStamp($u),$_SESSION['staff_stamp']) ? $u : null;
 }
 function requireRole(array $roles): array { $u = currentUser(); if (!$u || !in_array($u['role'], $roles, true)) fail('You do not have permission for this action.'); return $u; }
 function instituteAccess(int $id): void {
@@ -62,7 +64,22 @@ function writeTransaction(): void {
     if (db()->getAttribute(PDO::ATTR_DRIVER_NAME)==='sqlite') {
         db()->beginTransaction();
         db()->exec('UPDATE users SET active=active WHERE id=-1');
-    } else db()->beginTransaction();
+    } else {
+        // Do not retain a pre-lock REPEATABLE READ snapshot after waiting for another writer.
+        // Student/batch/challenge row locks remain the serialization points.
+        db()->exec('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');
+        db()->beginTransaction();
+    }
 }
 function lockSuffix(): string { return db()->getAttribute(PDO::ATTR_DRIVER_NAME)==='mysql' ? ' FOR UPDATE' : ''; }
 function otpEnabled(): bool { global $config; return ($config['auth_mode'] ?? 'otp') === 'otp'; }
+
+function staffStamp(array $user): string {
+    try { $version=(int)(one('SELECT version FROM staff_security WHERE id=?',[$user['id']])['version']??0); }
+    catch(PDOException $e) {
+        // Only a genuinely absent legacy table may fall back; permission/connection failures fail closed.
+        if ($e->getCode()!=='42S02' && !str_contains($e->getMessage(),'no such table: staff_security')) throw $e;
+        $version=0;
+    }
+    return hash('sha256',$user['id'].'|'.$user['password_hash'].'|'.$version.'|'.$user['role'].'|'.($user['institute_id']??''));
+}

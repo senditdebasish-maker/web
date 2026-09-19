@@ -31,3 +31,18 @@ document.querySelectorAll('form[method="post"]').forEach((form) => {
     }
   });
 });
+
+const addInstallment = document.querySelector("#add-installment");
+if (addInstallment)
+  addInstallment.addEventListener("click", () => {
+    const rows = document.querySelector("#installment-rows");
+    if (rows.children.length >= 36) {
+      addInstallment.disabled = true;
+      return;
+    }
+    const row = rows.firstElementChild.cloneNode(true);
+    row.querySelectorAll("input").forEach((input) => {
+      input.value = "";
+    });
+    rows.appendChild(row);
+  });

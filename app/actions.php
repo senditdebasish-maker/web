@@ -3,6 +3,7 @@ declare(strict_types=1);
 require_once __DIR__.'/portal.php';
 require_once __DIR__.'/otp.php';
 require_once __DIR__.'/finance.php';
+require_once __DIR__.'/operations.php';
 function handleAction(): string {
     $action = input('action', 40);
     if (!hash_equals($_SESSION['csrf'], input('csrf', 128))) fail('Your form expired. Refresh the page and try again.');
@@ -22,7 +23,7 @@ function handleAction(): string {
             foreach ([$identity,$ip] as $hash) query('INSERT INTO login_attempts (identity_hash,attempted_at) VALUES (?,?)', [$hash,time()]);
             fail('Email or password is incorrect.');
         }
-        session_regenerate_id(true); $_SESSION['uid'] = (int)$u['id']; $_SESSION['csrf'] = bin2hex(random_bytes(32));
+        session_regenerate_id(true); $_SESSION['uid'] = (int)$u['id']; $_SESSION['staff_stamp']=staffStamp($u); $_SESSION['csrf'] = bin2hex(random_bytes(32));
         query('DELETE FROM login_attempts WHERE identity_hash = ?', [$identity]);
         audit('login','users',(int)$u['id']); return 'dashboard';
     }
@@ -33,7 +34,7 @@ function handleAction(): string {
         $password = input('password',72); if (strlen($password)<12) fail('Use at least 12 characters for the new password.');
         if ($password !== input('confirm_password',72)) fail('Passwords do not match.');
         query('UPDATE users SET password_hash = ? WHERE id = ?', [password_hash($password,PASSWORD_DEFAULT),$u['id']]);
-        audit('password_changed','users',(int)$u['id']); session_regenerate_id(true); return 'settings';
+        audit('password_changed','users',(int)$u['id']); $_SESSION['staff_stamp']=staffStamp(one('SELECT * FROM users WHERE id=?',[$u['id']])); session_regenerate_id(true); return 'settings';
     }
     writeTransaction();
     try {
@@ -49,6 +50,13 @@ function handleAction(): string {
             'payment' => recordPayment(),
             'student_email' => studentEmail(),
             'portal_access' => managePortalAccess(),
+            'teacher' => saveTeacher(),
+            'batch' => saveBatch(),
+            'enrollment' => enrollStudent(),
+            'class_day' => openClassDay(),
+            'attendance' => saveAttendance(),
+            'fee_plan' => saveFeePlan(),
+            'revoke_sessions' => revokeStaffSessions(),
             'retry_notification' => retryNotification(),
             'admission_letter' => generateAdmissionLetter(),
             default => throw new DomainException('Unknown action.')
@@ -85,7 +93,9 @@ function toggleStaff(): string {
     if (!$target || $target['role']==='owner' || $id===(int)$u['id']) fail('This account cannot be changed here.');
     instituteAccess((int)$target['institute_id']);
     if ($u['role']==='admin' && $target['role']!=='counsellor') fail('Only the owner can change administrators.');
-    query('UPDATE users SET active=? WHERE id=?',[(int)!$target['active'],$id]); audit('access_changed','users',$id); return 'staff';
+    query('UPDATE users SET active=? WHERE id=?',[(int)!$target['active'],$id]);
+    if(operationsReady()) bumpStaffVersion($id);
+    query('UPDATE otp_challenges SET consumed=1 WHERE user_id=?',[$id]); audit('access_changed','users',$id); return 'staff';
 }
 function saveEnquiry(): string {
     $iid=(int)input('institute_id'); instituteAccess($iid); $id=(int)($_POST['id'] ?? 0);

@@ -25,12 +25,12 @@ function requestOtp(string $audience='staff'): string {
         $perIp=(int)query("SELECT COUNT(*) FROM auth_events WHERE kind='request' AND ip_hash=? AND attempted_at>?",[$ip,$now-900])->fetchColumn();
         if ($recent || $perEmail>=5 || $perIp>=20) fail('Please wait at least 60 seconds before resending. If you reached the limit, try again in 15 minutes.');
         query("INSERT INTO auth_events (identity_hash,ip_hash,kind,attempted_at) VALUES (?,?,'request',?)",[$identity,$ip,$now]);
-        $user=$student ? portalAccountByEmail($email) : one('SELECT id FROM users WHERE email=? AND active=1',[$email]);
+        $user=$student ? portalAccountByEmail($email) : one('SELECT * FROM users WHERE email=? AND active=1',[$email]);
         query("UPDATE $table SET consumed=1 WHERE email_hash=?",[$identity]);
         query("INSERT INTO $table (id,user_id,email_hash,code_hash,expires_at".($student?',access_version':'').') VALUES (?,?,?,?,?'.($student?',?':'').')',array_merge([$id,$user['id'] ?? null,$identity,hash_hmac('sha256',$code,$secret),$now+300],$student?[(int)($user['access_version'] ?? 0)]:[]));
         db()->commit();
     } catch (Throwable $e) { if(db()->inTransaction()) db()->rollBack(); throw $e; }
-    $_SESSION['otp']=['id'=>$id,'secret'=>$secret,'email'=>$email,'audience'=>$audience];
+    $_SESSION['otp']=['id'=>$id,'secret'=>$secret,'email'=>$email,'audience'=>$audience,'staff_stamp'=>!$student && $user?staffStamp($user):null];
     if ($user) {
         try {
             sendMail($email,$student?'Your Northstar student sign-in code':'Your Northstar sign-in code',"Your sign-in code is: $code\n\nThis code expires in 5 minutes and can be used once, in the same browser that requested it. Never share this code.\n\nIf you did not request it, ignore this email.");
@@ -65,6 +65,7 @@ function verifyOtp(string $audience='staff'): string {
         }
         $user=$valid ? ($student ? portalAccountById((int)$challenge['user_id']) : one('SELECT * FROM users WHERE id=? AND active=1',[$challenge['user_id']])) : null;
         if ($student && $user && (int)$user['access_version']!==(int)$challenge['access_version']) $user=null;
+        if (!$student && $user && (!isset($pending['staff_stamp']) || !hash_equals(staffStamp($user),$pending['staff_stamp']))) $user=null;
         if ($user) query("UPDATE $table SET consumed=1 WHERE id=?",[$challenge['id']]);
         db()->commit();
     } catch (Throwable $e) { if(db()->inTransaction()) db()->rollBack(); throw $e; }
@@ -74,7 +75,7 @@ function verifyOtp(string $audience='staff'): string {
     if ($student) {
         $_SESSION['portal_id']=(int)$user['id']; $_SESSION['portal_version']=(int)$user['access_version'];
         portalEvent((int)$user['student_id'],'login');
-    } else { $_SESSION['uid']=(int)$user['id']; audit('otp_login','users',(int)$user['id']); }
+    } else { $_SESSION['uid']=(int)$user['id']; $_SESSION['staff_stamp']=$pending['staff_stamp']; audit('otp_login','users',(int)$user['id']); }
     $_SESSION['flash']='Email verified. Welcome back.';
     return 'dashboard';
 }

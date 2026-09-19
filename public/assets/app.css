@@ -1552,14 +1552,91 @@ textarea {
   }
 }
 /* Email authentication and financial communications */
-.auth-method { background:#f0edfb; color:#7662ae; border:1px solid #e7e0f6; border-radius:8px; padding:13px 16px; font-size:12px; margin-bottom:20px; }
-.otp-input { font-size:25px; letter-spacing:10px; text-align:center; }
-.soft-rule { border:0; border-top:1px solid #ede7f2; margin:26px 0; }
-.sidebar nav { overflow-y:auto; min-height:0; }
-.sidebar-bottom { padding-top:10px; }
-.workspace-tip { display:none; }
-.badge.pending,.badge.sending { background:#fff6e6; color:#a7843e; }
-.badge.sent,.badge.spooled { background:#ecf6ef; color:#51806b; }
-.badge.failed,.badge.blocked { background:#fff0f0; color:#ab6868; }
-.row-details form + form { margin-top:15px; }
-.portal-access{padding:10px 0;border-bottom:1px solid #eee7f6;margin-bottom:10px}.portal-access .text-link{display:block;margin-top:7px}
+.auth-method {
+  background: #f0edfb;
+  color: #7662ae;
+  border: 1px solid #e7e0f6;
+  border-radius: 8px;
+  padding: 13px 16px;
+  font-size: 12px;
+  margin-bottom: 20px;
+}
+.otp-input {
+  font-size: 25px;
+  letter-spacing: 10px;
+  text-align: center;
+}
+.soft-rule {
+  border: 0;
+  border-top: 1px solid #ede7f2;
+  margin: 26px 0;
+}
+.sidebar nav {
+  overflow-y: auto;
+  min-height: 0;
+}
+.sidebar-bottom {
+  padding-top: 10px;
+}
+.workspace-tip {
+  display: none;
+}
+.badge.pending,
+.badge.sending {
+  background: #fff6e6;
+  color: #a7843e;
+}
+.badge.sent,
+.badge.spooled {
+  background: #ecf6ef;
+  color: #51806b;
+}
+.badge.failed,
+.badge.blocked {
+  background: #fff0f0;
+  color: #ab6868;
+}
+.row-details form + form {
+  margin-top: 15px;
+}
+.portal-access {
+  padding: 10px 0;
+  border-bottom: 1px solid #eee7f6;
+  margin-bottom: 10px;
+}
+.portal-access .text-link {
+  display: block;
+  margin-top: 7px;
+}
+.installment-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 15px;
+}
+.sidebar nav {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+.sidebar-bottom {
+  flex-shrink: 0;
+}
+.badge.overdue {
+  background: #fff0f0;
+  color: #a65f6c;
+}
+.badge.finalized,
+.badge.paid {
+  background: #edf8f2;
+  color: #548672;
+}
+.panel + .panel {
+  margin-top: 18px;
+}
+@media (max-width: 650px) {
+  .installment-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}

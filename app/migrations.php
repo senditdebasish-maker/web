@@ -21,6 +21,9 @@ function migrateCommunications(): void {
         }
     }
     migratePortal();
+    migrateOperations();
 }
 
 require_once __DIR__.'/portal.php';
+
+require_once __DIR__ . "/operations.php";

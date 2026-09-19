@@ -13,7 +13,7 @@ $zip=new ZipArchive();
 if ($zip->open($path,ZipArchive::CREATE|ZipArchive::OVERWRITE)!==true) { fwrite(STDERR,"Cannot create release ZIP.\n"); exit(1); }
 $files=['.htaccess','README.md','START-HERE.html','UPGRADE.html','config.example.php','composer.json','storage/.gitkeep','storage/.htaccess'];
 if (is_file($root.'/composer.lock')) $files[]='composer.lock';
-foreach (['app','bin','public','docs','vendor'] as $dir) {
+foreach (['app','bin','public','docs','tests','vendor'] as $dir) {
     $iterator=new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root.'/'.$dir,FilesystemIterator::SKIP_DOTS));
     foreach($iterator as $file) {
         if (!$file->isFile() || $file->isLink()) continue;

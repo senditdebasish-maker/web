@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Upgrade your existing CRM · Student portal</title>
+    <title>Upgrade your existing CRM · Operations</title>
     <style>
       body {
         font:
@@ -48,7 +48,7 @@
     </style>
   </head>
   <body>
-    <h1>Your next phase: student portal</h1>
+    <h1>Your next phase: academic operations and fee schedules</h1>
     <p>
       Already signed in to your institute CRM? Follow these upgrade steps.
       <strong>Do not run setup.php again.</strong>
@@ -74,7 +74,8 @@
         >. Avoid creating a second nested institute-crm folder.
       </li>
       <li>
-        Restart Apache, sign in at
+        Restart Apache (existing staff sessions will require a fresh sign-in),
+        then sign in at
         <a href="http://localhost/institute-crm/public/index.php"
           >your normal staff login</a
         >
@@ -84,9 +85,10 @@
         >.
       </li>
       <li>
-        Confirm your backup and click <strong>Run safe portal upgrade</strong>.
-        It adds tables, not a new database or owner account. Existing
-        admissions, fees and SMTP settings are preserved.
+        Confirm your backup and click <strong>Run safe CRM upgrade</strong>. It
+        adds academic, fee-schedule and portal tables, not a new database or
+        owner account. Existing admissions, fees and SMTP settings are
+        preserved.
       </li>
       <li>
         Open <strong>Students</strong>. Check that the student has their own
@@ -110,6 +112,13 @@
       download their own admission and receipt PDFs. They cannot change their
       records, make online payments, or see another student's information.
     </div>
+    <h2>New daily workflows</h2>
+    <p>
+      After upgrading, open Teachers, Batches, Attendance, Fee schedules and Fee
+      reports. Students can see their own finalized attendance and installment
+      schedules. Read <code>docs/OPERATIONS.md</code> for workflow rules and the
+      production checklist. Teacher entries are a directory, not login accounts.
+    </p>
     <h2>Access and email safety</h2>
     <p>
       No student is enabled automatically. Each portal account needs a unique
@@ -129,10 +138,10 @@
     </p>
     <p>
       For a fresh install, use <a href="START-HERE.html">START-HERE.html</a>.
-      For full details, read <code>docs/STUDENT-PORTAL.md</code>. The package is
-      tested with SQLite and private mail capture; validate MySQL, Gmail
-      delivery and supported browsers on your own server before real student
-      rollout.
+      For full details, read <code>docs/OPERATIONS.md</code> and
+      <code>docs/STUDENT-PORTAL.md</code>. The package is tested with SQLite and
+      private mail capture; validate MySQL, Gmail delivery and supported
+      browsers on your own server before real student rollout.
     </p>
   </body>
 </html>
