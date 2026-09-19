@@ -6,6 +6,10 @@ A PHP/MySQL CRM for pharma, medical, and other educational institutes. Includes 
 
 ## Easiest installation: open the setup page
 
+**[Download the installer ZIP from GitHub](https://github.com/senditdebasish-maker/web/raw/refs/heads/arena/01a0b5d7-web/releases/northstar-setup.zip)** · [Open its GitHub file page](https://github.com/senditdebasish-maker/web/blob/arena/01a0b5d7-web/releases/northstar-setup.zip)
+
+The dependency-included installer is tracked at `releases/northstar-setup.zip` so downloading does not depend on a temporary Arena preview or a GitHub Release upload. It contains no configured credentials or student data. This ZIP is the setup preview built at commit `ad31b06`; rebuild it explicitly when updating the packaged application.
+
 Use the **ready-to-install `northstar-setup.zip`** (libraries included), extract its `institute-crm` folder into XAMPP's `htdocs`, start Apache/MySQL, and open:
 
 **http://localhost/institute-crm/public/setup.php**

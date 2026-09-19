@@ -126,6 +126,6 @@ Then open `public/setup.php`, or build a ready-to-install ZIP:
 php bin/build-release.php
 ```
 
-This CLI-only command requires the PHP zip extension and writes `releases/northstar-setup.zip`. It includes an explicit application-file allowlist plus installed libraries and licenses. It excludes Git metadata, private configuration, database files, captured mail, sessions, setup keys, locks and recovery data. Release ZIPs and vendor libraries are not committed to Git.
+This CLI-only command requires the PHP zip extension and writes `releases/northstar-setup.zip`. It includes an explicit application-file allowlist plus installed libraries and licenses. It excludes Git metadata, private configuration, database files, captured mail, sessions, setup keys, locks and recovery data. Vendor libraries and arbitrary build outputs are not committed to Git. The single dependency-included `releases/northstar-setup.zip` is intentionally tracked to provide a reliable GitHub download; rebuild and review it explicitly when publishing an updated installer.
 
 The downloadable package built in this environment uses the pinned upstream dependency tags and an equivalent local autoloader, because Composer network access was unavailable. The setup/CRM suites were run with those libraries. For your own production releases, run normal Composer installation and `composer audit`, test on native PHP/MySQL, and verify real SMTP delivery before launch.
