@@ -20,4 +20,7 @@ function migrateCommunications(): void {
             if (!$exists) db()->exec("CREATE INDEX $name ON $table ($columns)");
         }
     }
+    migratePortal();
 }
+
+require_once __DIR__.'/portal.php';

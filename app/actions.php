@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__.'/portal.php';
 require_once __DIR__.'/otp.php';
 require_once __DIR__.'/finance.php';
 function handleAction(): string {
@@ -47,6 +48,7 @@ function handleAction(): string {
             'admit' => admitStudent(),
             'payment' => recordPayment(),
             'student_email' => studentEmail(),
+            'portal_access' => managePortalAccess(),
             'retry_notification' => retryNotification(),
             'admission_letter' => generateAdmissionLetter(),
             default => throw new DomainException('Unknown action.')

@@ -1562,3 +1562,4 @@ textarea {
 .badge.sent,.badge.spooled { background:#ecf6ef; color:#51806b; }
 .badge.failed,.badge.blocked { background:#fff0f0; color:#ab6868; }
 .row-details form + form { margin-top:15px; }
+.portal-access{padding:10px 0;border-bottom:1px solid #eee7f6;margin-bottom:10px}.portal-access .text-link{display:block;margin-top:7px}

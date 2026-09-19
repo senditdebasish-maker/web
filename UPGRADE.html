@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Upgrade your existing CRM · Student portal</title>
+    <style>
+      body {
+        font:
+          16px/1.9 system-ui,
+          sans-serif;
+        max-width: 780px;
+        margin: 40px auto;
+        padding: 25px;
+        background: #faf8fd;
+        color: #544363;
+      }
+      h1 {
+        color: #795bac;
+        line-height: 1.3;
+      }
+      h2 {
+        font-size: 21px;
+      }
+      code {
+        background: #eee7f7;
+        padding: 3px 6px;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+      li {
+        margin: 13px 0;
+      }
+      a {
+        color: #795bac;
+      }
+      .warning {
+        padding: 20px;
+        background: #fff1ee;
+        border: 1px solid #edd6cf;
+        border-radius: 10px;
+      }
+      .box {
+        padding: 20px;
+        background: #eee9f7;
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Your next phase: student portal</h1>
+    <p>
+      Already signed in to your institute CRM? Follow these upgrade steps.
+      <strong>Do not run setup.php again.</strong>
+    </p>
+    <div class="warning">
+      <strong>Back up first.</strong> Export your database in phpMyAdmin and
+      copy your existing <code>config.php</code> and
+      <code>storage/</code> folder to a safe, private location. Do not delete or
+      replace your whole installation folder. Do not upload backups to GitHub.
+    </div>
+    <ol>
+      <li>Pause use of the CRM and its notification worker while updating.</li>
+      <li>
+        Extract the new ZIP into a separate temporary folder. From that
+        extracted <code>institute-crm</code> folder, copy <code>app/</code>,
+        <code>public/</code>, <code>bin/</code>, <code>docs/</code>,
+        <code>vendor/</code>, <code>composer.json</code> and the help HTML files
+        into your existing project folder, replacing program files when asked.
+        Leave your existing
+        <strong
+          >config.php, storage folder, database and installer locks
+          untouched</strong
+        >. Avoid creating a second nested institute-crm folder.
+      </li>
+      <li>
+        Restart Apache, sign in at
+        <a href="http://localhost/institute-crm/public/index.php"
+          >your normal staff login</a
+        >
+        as the <strong>group owner</strong>, then open
+        <a href="http://localhost/institute-crm/public/upgrade.php"
+          >http://localhost/institute-crm/public/upgrade.php</a
+        >.
+      </li>
+      <li>
+        Confirm your backup and click <strong>Run safe portal upgrade</strong>.
+        It adds tables, not a new database or owner account. Existing
+        admissions, fees and SMTP settings are preserved.
+      </li>
+      <li>
+        Open <strong>Students</strong>. Check that the student has their own
+        correct email. Click <strong>Enable student access</strong>.
+      </li>
+      <li>
+        Share your public student-portal link. On your XAMPP computer it is
+        <a href="http://localhost/institute-crm/public/student.php"
+          >http://localhost/institute-crm/public/student.php</a
+        >. Remote students need your institute's live HTTPS URL; localhost on
+        their phone does not reach your computer.
+      </li>
+      <li>
+        Test with a student inbox you control. Check their documents and fee
+        balance, then resume the worker.
+      </li>
+    </ol>
+    <div class="box">
+      <strong>What students can do:</strong> sign in through email OTP; view
+      their own admission/profile, course fee, recorded payments and balance;
+      download their own admission and receipt PDFs. They cannot change their
+      records, make online payments, or see another student's information.
+    </div>
+    <h2>Access and email safety</h2>
+    <p>
+      No student is enabled automatically. Each portal account needs a unique
+      personal email; shared family emails and multiple portal enrollments under
+      one email are not supported yet. Disabling access revokes existing
+      sessions and pending codes. Changing the student's email disables access
+      until staff checks it and enables it again. Enabling access does not
+      automatically send an invitation—share the link securely.
+    </p>
+    <h2>If the upgrade reports an error</h2>
+    <p>
+      Check that Apache and the upgrade page use your existing configuration,
+      and that the database user has CREATE/INDEX permission. The additive
+      migration can be rerun after correcting permissions. Do not delete your
+      database or installer locks. If you must roll back program files, keep a
+      backup of the working application as well as its database.
+    </p>
+    <p>
+      For a fresh install, use <a href="START-HERE.html">START-HERE.html</a>.
+      For full details, read <code>docs/STUDENT-PORTAL.md</code>. The package is
+      tested with SQLite and private mail capture; validate MySQL, Gmail
+      delivery and supported browsers on your own server before real student
+      rollout.
+    </p>
+  </body>
+</html>

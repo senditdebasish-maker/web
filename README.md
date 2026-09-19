@@ -4,11 +4,17 @@ A PHP/MySQL CRM for pharma, medical, and other educational institutes. Includes 
 
 > Functional development foundation, not a fully audited production ERP. Before using real student data, validate the application on your XAMPP/MySQL stack, configure HTTPS, protect secrets, and test backup/restore. No real Gmail delivery has been performed in the development environment.
 
+## Already installed? Upgrade to the student portal
+
+**Do not rerun setup.php.** Back up your database and private files, replace application files from the updated ZIP while preserving `config.php` and `storage/`, then sign in as group owner and open **`public/upgrade.php`**. See **[Student portal upgrade guide](docs/STUDENT-PORTAL.md)** or open `UPGRADE.html` from the package.
+
+Then use **Students → Enable student access** and share **`public/student.php`**. Students use email OTP to see only their own admission, fee balance, payments, profile and PDF documents. Each student needs a unique personal email. No access is granted automatically. Changing the student's email or disabling access revokes their sessions; staff must re-enable a corrected address.
+
 ## Easiest installation: open the setup page
 
 **[Download the installer ZIP from GitHub](https://github.com/senditdebasish-maker/web/raw/refs/heads/arena/01a0b5d7-web/releases/northstar-setup.zip)** · [Open its GitHub file page](https://github.com/senditdebasish-maker/web/blob/arena/01a0b5d7-web/releases/northstar-setup.zip)
 
-The dependency-included installer is tracked at `releases/northstar-setup.zip` so downloading does not depend on a temporary Arena preview or a GitHub Release upload. It contains no configured credentials or student data. This ZIP is the setup preview built at commit `ad31b06`; rebuild it explicitly when updating the packaged application.
+The dependency-included installer is tracked at `releases/northstar-setup.zip` so downloading does not depend on a temporary Arena preview or a GitHub Release upload. It contains no configured credentials or student data. This ZIP now includes the student portal phase and UPGRADE.html. Rebuild it explicitly when updating the packaged application.
 
 Use the **ready-to-install `northstar-setup.zip`** (libraries included), extract its `institute-crm` folder into XAMPP's `htdocs`, start Apache/MySQL, and open:
 
@@ -34,6 +40,8 @@ A GitHub **source** download still needs `composer install --no-dev --prefer-dis
 - **Documents:** authenticated PDF downloads; counsellors cannot download financial PDFs.
 - **Email notifications:** pending/sending/sent/blocked/failed/spooled states, five-attempt automatic retry, admin requeue.
 - Student email maintenance and generation of admission letters for pre-existing students.
+- **Student portal:** separate email OTP, read-only admission/profile, own fee summary/payment history and secure own-document downloads.
+- **Owner-only browser upgrade:** additive database update for existing installations.
 - Activity log, CSRF protection, escaped HTML, prepared SQL, login throttling, session idle timeout.
 
 **Not Google Sign-In:** the CRM uses email OTP delivered through Gmail SMTP, not Google's OAuth “Sign in with Google” button. Staff must already have an active CRM account. Recipients can use Gmail or any other valid email provider.
@@ -213,6 +221,7 @@ Install dependencies, PHP with `pdo_sqlite`, and Python 3:
 python3 tests/smoke.py
 python3 tests/communications.py
 python3 tests/setup.py
+python3 tests/portal.py
 ```
 
 If PHP isn't on PATH (PowerShell):
@@ -222,13 +231,14 @@ $env:PHP_BIN = 'C:/xampp/php/php.exe'
 python tests/smoke.py
 python tests/communications.py
 python tests/setup.py
+python tests/portal.py
 ```
 
 All suites use disposable SQLite databases and local test servers, not your normal database. The communication suite captures mail privately and sends no real emails. Coverage includes OTP expiry/replay/attempt limits, CSRF, staff disabling, permission checks, transactional admission/queue creation, real PDF downloads/attachments, payment amounts/idempotency/balance validation, blocked recipients, worker retries and recovery.
 
-**Validation here:** 64 baseline checks + 71 communication checks + 52 browser-setup checks passed with PHP 8.5 WebAssembly/PDO SQLite and the pinned PDF/mail dependencies. Native Apache/XAMPP, MySQL/MariaDB, real Gmail SMTP and mailbox delivery still need validation on your server. The sandbox had no Composer network access; dependencies were checked out at the pinned upstream tags for testing. Run the standard Composer installation/audit on your target server before launch.
+**Validation here:** 64 baseline checks + 71 communication checks + 52 browser-setup checks + 65 student-portal checks passed with PHP 8.5 WebAssembly/PDO SQLite and the pinned PDF/mail dependencies. Native Apache/XAMPP, MySQL/MariaDB, real Gmail SMTP and mailbox delivery still need validation on your server. The sandbox had no Composer network access; dependencies were checked out at the pinned upstream tags for testing. Run the standard Composer installation/audit on your target server before launch.
 
-The optional GitHub Actions template in `docs/github-actions-tests.yml.example` includes all three suites. An administrator with workflow permission can copy it to `.github/workflows/tests.yml`.
+The optional GitHub Actions template in `docs/github-actions-tests.yml.example` includes all four suites. An administrator with workflow permission can copy it to `.github/workflows/tests.yml`.
 
 ## Deployment checklist
 
@@ -248,7 +258,7 @@ Sessions expire after 30 minutes of inactivity. Disabling an account removes its
 
 ## Still planned
 
-Attendance, batches, timetables, exams/results, student/parent portals, uploads, installment plans, refunds/reversals, accounting/gateway integrations, SMS/WhatsApp, bulk imports/exports, device/session management and production load/security auditing. Follow-ups are in-app tasks; they do not send automatic reminders in this version.
+Attendance, batches, timetables, exams/results, parent portals, uploads, installment plans, refunds/reversals, accounting/gateway integrations, SMS/WhatsApp, bulk imports/exports, device/session management and production load/security auditing. Follow-ups are in-app tasks; they do not send automatic reminders in this version.
 
 ## Structure
 
@@ -268,6 +278,10 @@ app/views.php               CRM screens and OTP login
 app/communication-views.php Payments, document and notification screens
 public/index.php            HTTP entry point, session and security policy
 public/setup.php            Guided setup page
+public/upgrade.php          Owner-only additive upgrade
+public/student.php          Isolated student session and PDF endpoint
+app/portal.php              Portal provisioning, migrations and access checks
+app/student-views.php       Responsive read-only student workspace
 bin/build-release.php       Creates a dependency-included installation ZIP
 public/document.php         Authorized PDF download endpoint
 bin/install.php             First-time installation

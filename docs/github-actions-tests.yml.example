@@ -27,3 +27,5 @@ jobs:
         run: python3 tests/communications.py
       - name: Run protected browser setup checks
         run: python3 tests/setup.py
+      - name: Run student portal isolation and upgrade checks
+        run: python3 tests/portal.py

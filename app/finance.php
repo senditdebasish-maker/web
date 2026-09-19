@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/documents.php';
+require_once __DIR__.'/portal.php';
 function recordPayment(): string {
     $user=requireRole(['owner','admin']);
     $studentId=(int)input('student_id');
@@ -34,14 +35,18 @@ function recordPayment(): string {
     return 'payments';
 }
 function studentEmail(): string {
-    requireRole(['owner','admin']); $id=(int)input('student_id'); record('students',$id);
+    requireRole(['owner','admin']); $id=(int)input('student_id'); $student=record('students',$id);
+    $student=one('SELECT * FROM students WHERE id=?'.lockSuffix(),[$id]);
     $email=emailInput();
+    if (strtolower($student['email'])!==$email && portalReady()) {
+        query('UPDATE portal_accounts SET active=0,access_version=access_version+1 WHERE student_id=?',[$id]);
+    }
     query('UPDATE students SET email=? WHERE id=?',[$email,$id]);
     // Only previously blocked, never-sent notifications are released automatically.
     $documents=rows('SELECT id FROM documents WHERE student_id=?',[$id]);
     foreach($documents as $doc) query("UPDATE notifications SET recipient=?,status='pending',last_error='',next_attempt_at=0 WHERE document_id=? AND status='blocked'",[$email,$doc['id']]);
     audit('email_updated','students',$id);
-    $_SESSION['flash']='Student email saved. Notifications previously blocked by a missing email are now queued. Existing recipients on other notifications were not changed.';
+    $_SESSION['flash']='Student email saved. Notifications previously blocked by a missing email are now queued. Existing recipients on other notifications were not changed. If the email changed, re-enable student portal access after checking the new address.';
     return 'students';
 }
 function retryNotification(): string {
