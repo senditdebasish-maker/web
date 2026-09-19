@@ -1,5 +1,7 @@
 # Gmail SMTP setup for OTP and student PDF emails
 
+For a **new installation**, open `public/setup.php` and use the [browser wizard](BROWSER-SETUP.md) instead of editing PHP. It configures PHPMailer and verifies the owner inbox before creating an account. The manual instructions below remain useful for existing installations.
+
 ## What you need
 
 - A Gmail or Google Workspace sender account controlled by your institute.

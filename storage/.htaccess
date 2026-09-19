@@ -1,0 +1,2 @@
+# Defense in depth if the repository, instead of public/, is mistakenly exposed.
+Require all denied

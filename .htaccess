@@ -2,7 +2,7 @@
 Options -Indexes
 <IfModule mod_rewrite.c>
 RewriteEngine On
-RewriteRule ^(?:app|bin|storage|tests|vendor|docs|\.git)(?:/|$) - [F,L,NC]
+RewriteRule ^(?:app|bin|storage|tests|vendor|docs|releases|\.git)(?:/|$) - [F,L,NC]
 RewriteRule ^(?:config(?:\.example)?\.php|README\.md|composer\.(?:json|lock)|.*\.sqlite.*)$ - [F,L,NC]
 RewriteRule ^$ public/ [R=302,L]
 </IfModule>

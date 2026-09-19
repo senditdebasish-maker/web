@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Start here · Northstar CRM</title>
+    <style>
+      body {
+        font:
+          16px/1.8 system-ui,
+          sans-serif;
+        max-width: 760px;
+        margin: 50px auto;
+        padding: 25px;
+        color: #40354e;
+        background: #faf8fd;
+      }
+      h1 {
+        line-height: 1.2;
+        color: #7459a7;
+      }
+      h2 {
+        font-size: 21px;
+      }
+      code {
+        font-size: 14px;
+        background: #eee8f5;
+        padding: 3px 6px;
+        border-radius: 4px;
+      }
+      li {
+        margin: 12px 0;
+      }
+      .note {
+        padding: 20px;
+        background: #f0ebf8;
+        border-radius: 9px;
+      }
+      a {
+        color: #7459a7;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Welcome to your institute CRM.</h1>
+    <p>
+      The ready-to-install ZIP includes PHPMailer and PDF libraries. You do not
+      need to edit PHP files or install Composer when using this package.
+    </p>
+    <h2>Start on Windows with XAMPP</h2>
+    <ol>
+      <li>
+        Extract the <strong>institute-crm</strong> folder into
+        <code>C:\xampp\htdocs\</code>.
+      </li>
+      <li>
+        Open XAMPP Control Panel. Start <strong>Apache</strong> and
+        <strong>MySQL</strong>. Use PHP 8.2 or newer.
+      </li>
+      <li>
+        Open
+        <a href="http://localhost/institute-crm/public/setup.php"
+          >http://localhost/institute-crm/public/setup.php</a
+        >
+        in your browser. Do not open a PHP file directly from File Explorer.
+      </li>
+      <li>
+        Open <code>C:\xampp\htdocs\institute-crm\storage\setup-key.txt</code> in
+        Notepad. The setup page creates this private file on its first visit.
+        Copy the key into the setup page.
+      </li>
+      <li>
+        Follow the wizard: server checks → database → owner/institute →
+        PHPMailer/Gmail → verify inbox → install.
+      </li>
+    </ol>
+    <div class="note">
+      <strong>Standard local XAMPP database settings:</strong><br />Host:
+      <code>127.0.0.1</code> · Port: <code>3306</code><br />Username:
+      <code>root</code> · Password: blank by default<br />Database:
+      <code>institute_crm</code><br />Choose “Create this database if it does
+      not exist”. Use a new, empty database; existing data is never erased.
+    </div>
+    <h2>Gmail settings</h2>
+    <p>
+      SMTP host: <code>smtp.gmail.com</code> · Port: <code>587</code> ·
+      Encryption: <code>STARTTLS</code>. Use your Gmail address for username and
+      sender. Enable Google two-step verification and create an
+      <strong>App Password</strong>. Enter that App Password only in the setup
+      form—not your normal Gmail password and never in a chat.
+    </p>
+    <p>
+      Setup sends a code to your owner email. Enter it to verify the connection
+      before installation. Login codes are then sent immediately through
+      PHPMailer.
+    </p>
+    <h2>Student PDF emails</h2>
+    <p>
+      Admission/payment emails use a queue. After setup, schedule
+      <code>php bin/send-notifications.php --limit=25</code> every minute using
+      Windows Task Scheduler or your hosting control panel. See
+      <code>docs/BROWSER-SETUP.md</code> and <code>docs/GMAIL-SETUP.md</code>.
+    </p>
+    <h2>Moving to live hosting</h2>
+    <p>
+      Use HTTPS, serve only <code>public/</code>, protect private files, and use
+      a dedicated database account. Choose Live server mode in the wizard for a
+      fresh deployment. Existing installations must follow the upgrade
+      instructions, not rerun setup.
+    </p>
+    <p>
+      Setup locks permanently after completion. The private setup key is
+      removed. Neither this package nor the preview includes working Gmail
+      credentials. Real SMTP/MySQL delivery must be tested on your server before
+      using student data.
+    </p>
+    <h2>If you downloaded GitHub source instead</h2>
+    <p>
+      GitHub source does not include <code>vendor/</code>. Run
+      <code>composer install --no-dev --prefer-dist</code> once, or use the
+      ready-to-install ZIP. The wizard detects missing libraries and extensions
+      and explains what to fix.
+    </p>
+  </body>
+</html>

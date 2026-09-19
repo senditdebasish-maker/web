@@ -25,3 +25,5 @@ jobs:
         run: python3 tests/smoke.py
       - name: Run email, PDF and payment integration checks
         run: python3 tests/communications.py
+      - name: Run protected browser setup checks
+        run: python3 tests/setup.py

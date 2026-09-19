@@ -4,6 +4,18 @@ A PHP/MySQL CRM for pharma, medical, and other educational institutes. Includes 
 
 > Functional development foundation, not a fully audited production ERP. Before using real student data, validate the application on your XAMPP/MySQL stack, configure HTTPS, protect secrets, and test backup/restore. No real Gmail delivery has been performed in the development environment.
 
+## Easiest installation: open the setup page
+
+Use the **ready-to-install `northstar-setup.zip`** (libraries included), extract its `institute-crm` folder into XAMPP's `htdocs`, start Apache/MySQL, and open:
+
+**http://localhost/institute-crm/public/setup.php**
+
+The wizard walks through **server checks → database → owner/first institute → PHPMailer/Gmail → inbox verification → install**. No PHP configuration editing or Composer commands are needed when using the packaged ZIP. On first visit, copy the private key from `storage/setup-key.txt` to prove server ownership. Setup locks after completion.
+
+**[Step-by-step browser setup guide](docs/BROWSER-SETUP.md)** · Open `START-HERE.html` from the extracted package for simple local instructions.
+
+A GitHub **source** download still needs `composer install --no-dev --prefer-dist` once, because dependencies are intentionally not committed. The wizard checks this and explains missing requirements. Existing configurations are protected: setup is not an unauthenticated settings editor. Student email delivery still needs the worker task described below; OTP emails send immediately.
+
 ## What's working
 
 - Multiple institutes, courses, staff, institute filters, dashboard, search and pagination.
@@ -35,7 +47,7 @@ A PHP/MySQL CRM for pharma, medical, and other educational institutes. Includes 
 
 An explicit server configuration of `'auth_mode' => 'password'` enables the old password-only login for controlled migration/recovery. It is **not** a second login option in OTP mode; the old password endpoint is rejected when OTP is enabled. Remove the fallback before launch if you require OTP-only access.
 
-## New installation on Windows / XAMPP
+## Alternative: manual/CLI installation on Windows / XAMPP
 
 ### 1. Prerequisites
 
@@ -196,6 +208,7 @@ Install dependencies, PHP with `pdo_sqlite`, and Python 3:
 ```sh
 python3 tests/smoke.py
 python3 tests/communications.py
+python3 tests/setup.py
 ```
 
 If PHP isn't on PATH (PowerShell):
@@ -204,13 +217,14 @@ If PHP isn't on PATH (PowerShell):
 $env:PHP_BIN = 'C:/xampp/php/php.exe'
 python tests/smoke.py
 python tests/communications.py
+python tests/setup.py
 ```
 
-Both suites use disposable SQLite databases and local test servers, not your normal database. The communication suite captures mail privately and sends no real emails. Coverage includes OTP expiry/replay/attempt limits, CSRF, staff disabling, permission checks, transactional admission/queue creation, real PDF downloads/attachments, payment amounts/idempotency/balance validation, blocked recipients, worker retries and recovery.
+All suites use disposable SQLite databases and local test servers, not your normal database. The communication suite captures mail privately and sends no real emails. Coverage includes OTP expiry/replay/attempt limits, CSRF, staff disabling, permission checks, transactional admission/queue creation, real PDF downloads/attachments, payment amounts/idempotency/balance validation, blocked recipients, worker retries and recovery.
 
-**Validation here:** 64 baseline checks + 71 communication checks passed with PHP 8.5 WebAssembly/PDO SQLite and the pinned PDF/mail dependencies. Native Apache/XAMPP, MySQL/MariaDB, real Gmail SMTP and mailbox delivery still need validation on your server. The sandbox had no Composer network access; dependencies were checked out at the pinned upstream tags for testing. Run the standard Composer installation/audit on your target server before launch.
+**Validation here:** 64 baseline checks + 71 communication checks + 52 browser-setup checks passed with PHP 8.5 WebAssembly/PDO SQLite and the pinned PDF/mail dependencies. Native Apache/XAMPP, MySQL/MariaDB, real Gmail SMTP and mailbox delivery still need validation on your server. The sandbox had no Composer network access; dependencies were checked out at the pinned upstream tags for testing. Run the standard Composer installation/audit on your target server before launch.
 
-The optional GitHub Actions template in `docs/github-actions-tests.yml.example` includes both suites. An administrator with workflow permission can copy it to `.github/workflows/tests.yml`.
+The optional GitHub Actions template in `docs/github-actions-tests.yml.example` includes all three suites. An administrator with workflow permission can copy it to `.github/workflows/tests.yml`.
 
 ## Deployment checklist
 
@@ -235,7 +249,10 @@ Attendance, batches, timetables, exams/results, student/parent portals, uploads,
 ## Structure
 
 ```text
-app/bootstrap.php           PDO, validation, authorization and transactions
+app/bootstrap.php           Config loading; redirects unconfigured web requests to setup
+app/core.php                PDO, validation, authorization and transactions
+app/schema.php              Shared CLI/browser schema initialization
+app/setup.php               Protected browser installer logic
 app/actions.php             Core CRM form actions
 app/otp.php                 Email-code request and verification
 app/mail.php                Gmail SMTP / private local test mail transport
@@ -246,6 +263,8 @@ app/migrations.php          Additive email/payment schema changes
 app/views.php               CRM screens and OTP login
 app/communication-views.php Payments, document and notification screens
 public/index.php            HTTP entry point, session and security policy
+public/setup.php            Guided setup page
+bin/build-release.php       Creates a dependency-included installation ZIP
 public/document.php         Authorized PDF download endpoint
 bin/install.php             First-time installation
 bin/migrate.php             Upgrade existing databases
