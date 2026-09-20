@@ -34,8 +34,17 @@ function scoped(string $alias=''): array { global $scope; return $scope ? [($ali
 function url(array $overrides=[]): string { return '?'.http_build_query(array_merge($_GET,$overrides)); }
 ?>
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Northstar · Institute CRM</title><link rel="stylesheet" href="assets/app.css"><script src="assets/app.js" defer></script></head><body>
-<?php if(!$user): ?>
-<div class="login-layout"><section class="login-brand"><a class="brand" href="?"><span class="brand-mark">N</span> northstar<span class="brand-dot">.</span></a><div><div class="eyebrow">THE INSTITUTE WORKSPACE</div><h1>Great education.<br>Thoughtfully<br>organized.</h1><p>Your institutes, your team, and every student's next chapter. Together in one place.</p><div class="login-orbit">✦ <span>Built around your students.</span></div></div><small>Institute management, made a little simpler.</small></section><main class="login-form"><div class="eyebrow">WELCOME BACK</div><h2>Your workspace awaits</h2><p class="muted">Sign in to manage your institute community.</p>
+<?php if(!$user):
+$landingCourses=[];
+try { if(function_exists('publicCourses') && applicationsReady()) $landingCourses=array_slice(publicCourses(0),0,6); } catch(Throwable $ignored) { $landingCourses=[]; }
+?>
+<div class="landing"><header class="landing-top"><a class="brand" href="?"><span class="brand-mark">N</span> northstar<span class="brand-dot">.</span></a><nav class="landing-actions" aria-label="Portal sign in"><a class="button secondary" href="student.php">🎓 Student Login</a><a class="button" href="#staff-login">🛠 Admin Login</a></nav></header>
+<section class="landing-hero"><div><div class="eyebrow">ADMISSIONS OPEN</div><h1>Find your course.<br>Apply in minutes.</h1><p>Browse open courses, verify your email, and track your application — all from this one page.</p><div class="landing-cta"><a class="button" href="apply.php">Browse courses &amp; apply <span>→</span></a><a class="button secondary" href="apply.php?page=help">How admission works</a></div></div><div class="landing-hero-art" aria-hidden="true">✦</div></section>
+<section class="landing-courses" aria-label="Open courses"><div class="eyebrow">OPEN FOR APPLICATIONS</div><h2>Courses accepting applications</h2>
+<?php if(!$landingCourses): ?><p class="muted">No courses are currently open. Please check back soon or contact the institute office.</p><?php else: ?><div class="landing-grid"><?php foreach($landingCourses as $lc): ?><article class="landing-card"><div class="eyebrow"><?=e($lc['institute_name'])?></div><h3><?=e($lc['name'])?></h3><p><?=e($lc['duration'])?> · <?=e($lc['city'])?></p><p>Fee: <strong>₹<?=number_format((int)$lc['fee_minor']/100,2)?></strong></p><a class="text-link" href="apply.php?page=course&course=<?=(int)$lc['id']?>">Details &amp; apply →</a></article><?php endforeach; ?></div><?php endif; ?>
+<p class="landing-more"><a href="apply.php">See all open courses →</a></p></section>
+<section class="landing-steps"><div><strong>1 · Browse</strong><p>Pick a course and read its eligibility and fee.</p></div><div><strong>2 · Verify</strong><p>Confirm your email with a one-time code.</p></div><div><strong>3 · Track</strong><p>Follow your application to the office decision.</p></div></section>
+<main class="login-form landing-login" id="staff-login"><div class="eyebrow">WELCOME BACK</div><h2>Your workspace awaits</h2><p class="muted">Sign in to manage your institute community.</p>
 <?php if($error): ?><div class="alert error" role="alert"><?=e($error)?></div><?php endif; ?>
 <?php if($flash): ?><div class="alert success" role="status"><?=e($flash)?></div><?php endif; ?>
 <?php if(otpEnabled()): ?>
@@ -51,7 +60,7 @@ function url(array $overrides=[]): string { return '?'.http_build_query(array_me
 <?php formStart('request_otp'); field('Staff email address','email',$_SESSION['otp']['email'] ?? '','email'); formEnd(isset($_SESSION['otp'])?'Send a new code':'Send sign-in code'); ?>
 <p class="login-note">No password needed. Codes are sent only to existing, active staff accounts. Wait 60 seconds before resending.</p>
 <?php else: formStart('login'); field('Email address','email','','email'); field('Password','password','','password'); formEnd('Sign in to workspace'); endif; ?>
-<p class="login-note">Need an account? Contact your institute administrator.<br>First time setting up? Follow the README installation guide.<br><a href="student.php">Student? Open your student portal →</a><br><a href="apply.php">New applicant? Browse courses &amp; apply →</a></p></main></div>
+<p class="login-note">Need an account? Contact your institute administrator.<br>First time setting up? Follow the README installation guide.<br><a href="student.php">Student? Open your student portal →</a><br><a href="apply.php">New applicant? Browse courses &amp; apply →</a></p></main><footer class="landing-foot"><span><b>northstar.</b> A space for better beginnings.</span><span><a href="apply.php">Apply</a> · <a href="student.php">Student portal</a> · <a href="apply.php?page=help">Help</a></span></footer></div>
 <?php else:
 try {
 $admin=in_array($user['role'],['owner','admin'],true);
