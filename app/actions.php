@@ -54,6 +54,7 @@ function handleAction(): string {
             'payment' => recordPayment(),
             'student_email' => studentEmail(),
             'portal_access' => managePortalAccess(),
+            'student_user_toggle' => toggleStudentUser(),
             'eligibility_policy' => saveEligibilityPolicy(),
             'certificate_scan' => scanCertificate(),
             'certificate_review' => reviewCertificate(),

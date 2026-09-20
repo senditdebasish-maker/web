@@ -13,7 +13,7 @@ ini_set('session.use_strict_mode','1'); session_name('northstar_student');
 session_set_cookie_params(['httponly'=>true,'secure'=>$config['secure_cookies'] ?? false,'samesite'=>'Lax','path'=>'/']); session_start();
 if (isset($_SESSION['last_seen']) && time()-$_SESSION['last_seen']>1800) { $_SESSION=[]; session_regenerate_id(true); }
 $_SESSION['last_seen']=time(); $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
-$error=null; $student=null; $ready=portalReady();
+$error=null; $student=null; $portalUser=null; $ready=portalReady();
 $page=is_string($_GET['page'] ?? null)?$_GET['page']:'dashboard';
 try {
     if (!$ready) { http_response_code(503); $page='unavailable'; }
@@ -21,8 +21,11 @@ try {
         if ($_SERVER['REQUEST_METHOD']==='POST') {
             if (!hash_equals($_SESSION['csrf'],input('csrf',128))) fail('Your form expired. Refresh and try again.');
             $action=input('action',40);
+            if (in_array($action,['register_request','register_verify'],true) && portalStudent()) { header('Location: student.php');exit; }
             if ($action==='request_otp') $next=requestOtp('student');
             elseif ($action==='verify_otp') $next=verifyOtp('student');
+            elseif ($action==='register_request') $next=requestStudentUserCode();
+            elseif ($action==='register_verify') $next=verifyStudentUserCode();
             elseif (in_array($action,['support_create','support_reply'],true)) $next=studentSupportAction($action);
             elseif ($action==='online_order') {
                 $s=portalStudent();if(!$s)fail('Please sign in to pay online.');
@@ -45,6 +48,8 @@ try {
             header('Location: student.php?page='.$next);exit;
         }
         $student=portalStudent();
+        $portalUser=currentStudentUser();
+        if($portalUser && !$student){ linkStudentUser($portalUser); $student=portalStudent(); }
         if (isset($_GET['document'])) {
             if (!$student) { http_response_code(401); exit('Please sign in to your student portal.'); }
             $document=one('SELECT * FROM documents WHERE id=? AND student_id=? AND institute_id=?',[(int)$_GET['document'],$student['id'],$student['institute_id']]);
@@ -52,12 +57,13 @@ try {
             $pdf=renderDocument($document); portalEvent((int)$student['id'],'document_download',(int)$document['id']);
             ob_clean();header('Content-Type: application/pdf');header('Content-Disposition: attachment; filename="'.documentFilename($document).'"');header('Content-Length: '.strlen($pdf));echo $pdf;exit;
         }
-        if (!$student) $page='login';
-        elseif ($page==='login') { header('Location: student.php');exit; }
+        if (!$student && !$portalUser) $page=$page==='register'?'register':'login';
+        elseif ($portalUser && !$student) $page='account';
+        elseif ($page==='login'||$page==='register') { header('Location: student.php');exit; }
         elseif (!in_array($page,['dashboard','payments','documents','profile','academics','results','announcements','support'],true)) { http_response_code(404);$page='notfound'; }
         if($student && $page==='support' && isset($_GET['ticket']) && servicesReady()) ticketForStudent($student,(int)$_GET['ticket']);
     }
-} catch(DomainException $e) { $error=$e->getMessage();if($page==='support' && isset($_GET['ticket'])){unset($_GET['ticket']);if($_SERVER['REQUEST_METHOD']==='GET')http_response_code(403);}$student=$ready?portalStudent():null;if(!$student)$page='login'; }
+} catch(DomainException $e) { $error=$e->getMessage();if($page==='support' && isset($_GET['ticket'])){unset($_GET['ticket']);if($_SERVER['REQUEST_METHOD']==='GET')http_response_code(403);}$student=$ready?portalStudent():null;$portalUser=$ready?currentStudentUser():null;if(!$student)$page=$portalUser?'account':($page==='register'?'register':'login'); }
 catch(Throwable $e) { http_response_code(503);$error='Your portal is temporarily unavailable. Please contact your institute.';$page='unavailable';error_log('Northstar student portal operation failed.'); }
 $flash=$_SESSION['flash'] ?? null;unset($_SESSION['flash']);
 require dirname(__DIR__).'/app/student-views.php';

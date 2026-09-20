@@ -37,6 +37,7 @@ jobs:
         run: python3 tests/applications.py
       - name: Run admissions automation checks
         run: python3 tests/automation.py
+        run: python3 tests/student-accounts.py
   native-database:
     runs-on: ubuntu-latest
     strategy:
