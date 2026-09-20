@@ -1,0 +1,291 @@
+/* Northstar shared theme: design tokens, dark mode, readability, backgrounds.
+   Loaded last on every portal so these refinements win. No markup depends on it. */
+:root {
+  --t-bg: #f1f3f9;
+  --t-bg2: #e6e9f2;
+  --t-card: #ffffff;
+  --t-ink: #222839;
+  --t-muted: #5b6474;
+  --t-line: #e2e7f0;
+  --t-brand: #4f46c8;
+  --t-brand-ink: #ffffff;
+  --t-teal: #0d6e5f;
+  --t-gold: #b8912a;
+  --t-shadow: 0 12px 32px #1c21400d;
+  color-scheme: light;
+}
+/* System preference applies only until the visitor picks a theme (JS sets data-theme). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --t-bg: #0e1118;
+    --t-bg2: #141926;
+    --t-card: #1a1f2c;
+    --t-ink: #e9ebf2;
+    --t-muted: #a9b2c3;
+    --t-line: #2b3344;
+    --t-brand: #9d94f0;
+    --t-brand-ink: #14101f;
+    --t-teal: #4cc2a8;
+    --t-gold: #d9b545;
+    --t-shadow: 0 12px 32px #00000055;
+    --ink: #e9ebf2;
+    --muted: #a9b2c3;
+    --line: #2b3344;
+    --bg: #0e1118;
+    --purple: #9d94f0;
+    --purple-dark: #8a81e8;
+    --green: #4cc2a8;
+    color-scheme: dark;
+  }
+}
+html[data-theme="light"] {
+  --t-bg: #f1f3f9;
+  --t-bg2: #e6e9f2;
+  --t-card: #ffffff;
+  --t-ink: #222839;
+  --t-muted: #5b6474;
+  --t-line: #e2e7f0;
+  --t-brand: #4f46c8;
+  --t-brand-ink: #ffffff;
+  --t-teal: #0d6e5f;
+  --t-gold: #b8912a;
+  --t-shadow: 0 12px 32px #1c21400d;
+  color-scheme: light;
+}
+html[data-theme="dark"] {
+  --t-bg: #0e1118;
+  --t-bg2: #141926;
+  --t-card: #1a1f2c;
+  --t-ink: #e9ebf2;
+  --t-muted: #a9b2c3;
+  --t-line: #2b3344;
+  --t-brand: #9d94f0;
+  --t-brand-ink: #14101f;
+  --t-teal: #4cc2a8;
+  --t-gold: #d9b545;
+  --t-shadow: 0 12px 32px #00000055;
+  --ink: #e9ebf2;
+  --muted: #a9b2c3;
+  --line: #2b3344;
+  --bg: #0e1118;
+  --purple: #9d94f0;
+  --purple-dark: #8a81e8;
+  --green: #4cc2a8;
+  color-scheme: dark;
+}
+/* ---- readable type + pleasant background on every portal ---- */
+body {
+  font-family:
+    "Inter",
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  letter-spacing: 0.15px;
+  color: var(--t-ink);
+  background:
+    radial-gradient(1100px 380px at 88% -8%, #5b4fd612, transparent 60%),
+    radial-gradient(900px 360px at -8% 4%, #0d6e5f10, transparent 55%),
+    linear-gradient(180deg, var(--t-bg), var(--t-bg2));
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+small,
+.sp-small,
+.login-note,
+.inline-note,
+.footnote {
+  font-size: 12px;
+}
+.sp-small {
+  font-size: 12px !important;
+  color: var(--t-muted);
+}
+.muted {
+  color: var(--t-muted);
+}
+/* ---- dark-mode toggle ---- */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--t-line);
+  background: var(--t-card);
+  color: var(--t-ink);
+  font-size: 17px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  box-shadow: var(--t-shadow);
+  flex-shrink: 0;
+}
+.theme-toggle:hover {
+  transform: translateY(-1px);
+}
+.theme-toggle:focus-visible {
+  outline: 3px solid #b8a7fa;
+  outline-offset: 2px;
+}
+/* ---- staff workspace dark surfaces (hardcoded colors in app.css) ---- */
+html[data-theme="dark"] .sidebar,
+html[data-theme="dark"] .topbar,
+html[data-theme="dark"] .stat,
+html[data-theme="dark"] .panel,
+html[data-theme="dark"] .button.secondary,
+html[data-theme="dark"] .art-card {
+  background: var(--t-card);
+  border-color: var(--t-line);
+}
+html[data-theme="dark"] .button.secondary {
+  color: var(--t-muted);
+}
+html[data-theme="dark"] .button.secondary:hover {
+  background: #232a3b;
+}
+html[data-theme="dark"] .button {
+  color: var(--t-brand-ink);
+}
+html[data-theme="dark"] th {
+  background: #171d2a;
+  color: var(--t-muted);
+}
+html[data-theme="dark"] td {
+  color: var(--t-muted);
+  border-bottom-color: var(--t-line);
+}
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+  background: #141926;
+  border-color: var(--t-line);
+  color: var(--t-ink);
+}
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+  color: #6d7688;
+}
+html[data-theme="dark"] .welcome-banner,
+html[data-theme="dark"] .workspace-tip {
+  background: linear-gradient(130deg, #1c2334, #171d2c);
+  border-color: var(--t-line);
+}
+html[data-theme="dark"] .nav-link.active {
+  background: #262c40;
+}
+html[data-theme="dark"] .alert.success {
+  background: #14261e;
+  border-color: #1f3a2d;
+  color: #7fce9f;
+}
+html[data-theme="dark"] .alert.error {
+  background: #2a1a1d;
+  border-color: #4a2b30;
+  color: #e89aa2;
+}
+html[data-theme="dark"] .text-link {
+  color: #b9aee0;
+}
+html[data-theme="dark"] .empty,
+html[data-theme="dark"] .app-footer,
+html[data-theme="dark"] .art-card span,
+html[data-theme="dark"] .search-label > span,
+html[data-theme="dark"] .inline-note,
+html[data-theme="dark"] .footnote {
+  color: var(--t-muted);
+}
+html[data-theme="dark"] .art-card b {
+  color: var(--t-ink);
+}
+html[data-theme="dark"] .top-avatar {
+  border-color: var(--t-line);
+}
+html[data-theme="dark"] .filter-button {
+  background: #232a3b;
+  color: #b9aee0;
+}
+html[data-theme="dark"] .orbit {
+  border-color: #3a4260;
+}
+/* ---- student + applicant portal dark surfaces (hardcoded colors) ---- */
+html[data-theme="dark"] .sp-top,
+html[data-theme="dark"] .sp-card,
+html[data-theme="dark"] .sp-login-card {
+  background: var(--t-card);
+  border-color: var(--t-line);
+}
+html[data-theme="dark"] .sp-welcome {
+  background: linear-gradient(130deg, #1d2434, #181e2c);
+  border-color: var(--t-line);
+}
+html[data-theme="dark"] .sp-alert {
+  background: #14261e;
+  border-color: #1f3a2d;
+  color: #9fd8b4;
+}
+html[data-theme="dark"] .sp-alert.error {
+  background: #2a1a1d;
+  border-color: #4a2b30;
+  color: #e89aa2;
+}
+html[data-theme="dark"] .sp-content th {
+  background: #171d2a;
+  color: var(--t-muted);
+}
+html[data-theme="dark"] .sp-content td,
+html[data-theme="dark"] .sp-login-card td {
+  color: var(--t-muted);
+  border-bottom-color: var(--t-line);
+}
+html[data-theme="dark"] .sp-content input,
+html[data-theme="dark"] .sp-content select,
+html[data-theme="dark"] .sp-content textarea,
+html[data-theme="dark"] .sp-login-card input,
+html[data-theme="dark"] .sp-login-card select,
+html[data-theme="dark"] .sp-login-card textarea {
+  background: #141926;
+  border-color: var(--t-line);
+  color: var(--t-ink);
+}
+html[data-theme="dark"] .sp-content input::placeholder,
+html[data-theme="dark"] .sp-login-card input::placeholder {
+  color: #6d7688;
+}
+html[data-theme="dark"] .sp-nav a,
+html[data-theme="dark"] .sp-text-button,
+html[data-theme="dark"] .sp-login-card label,
+html[data-theme="dark"] .sp-card dt,
+html[data-theme="dark"] .sp-pagination {
+  color: var(--t-muted);
+}
+html[data-theme="dark"] .sp-login-intro h1,
+html[data-theme="dark"] .sp-card h2 {
+  color: var(--t-ink);
+}
+html[data-theme="dark"] .sp-button {
+  color: var(--t-brand-ink);
+}
+html[data-theme="dark"] .sp-brand > span:first-child {
+  color: var(--t-brand-ink);
+}
+html[data-theme="dark"] .sp-status {
+  background: #14261e;
+  color: #7fce9f;
+}
+html[data-theme="dark"] .sp-eyebrow {
+  color: #8f86c9;
+}
