@@ -12,6 +12,12 @@ try{
     if(!applicationsReady()){http_response_code(503);$page='unavailable';}
     else{
         $actor=currentApplicant();
+        if(isset($_GET['certificate'])){
+            if(!$actor||!automationReady()){http_response_code(401);exit('Please sign in to access your uploads.');}
+            $c=one('SELECT c.* FROM certificates c JOIN admission_applications a ON a.id=c.application_id WHERE c.id=? AND a.applicant_id=?',[(int)$_GET['certificate'],$actor['id']]);
+            if(!$c){http_response_code(404);exit('Upload not found.');}
+            ob_clean();serveCertificateFile($c);
+        }
         if($_SERVER['REQUEST_METHOD']==='POST'){
             if(!hash_equals($_SESSION['csrf'],input('csrf',128)))fail('Your form expired. Refresh and try again.');
             $action=input('action',40);$next='login';
@@ -19,6 +25,7 @@ try{
             elseif($action==='verify_code'){verifyApplicantCode();$selected=(int)($_SESSION['apply_course']??0);$next=$selected && publicCourses(0,$selected)?'apply&course='.$selected:'dashboard';unset($_SESSION['apply_course']);}
             elseif($action==='logout'){$_SESSION=[];session_regenerate_id(true);$next='courses';}
             elseif(in_array($action,['submit_application','revise_application','withdraw_application'],true)){$id=applicantMutation($action);$next='application&id='.$id;}
+            elseif($action==='upload_certificate'){$id=uploadCertificate();$next='application&id='.$id;}
             else fail('Applicants cannot perform this action.');
             header('Location: apply.php?page='.$next);exit;
         }

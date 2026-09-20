@@ -24,6 +24,7 @@ function migrateCommunications(): void {
     migrateOperations();
     migrateServices();
     migrateApplications();
+    migrateAutomation();
 }
 
 require_once __DIR__.'/portal.php';
@@ -33,3 +34,4 @@ require_once __DIR__ . "/operations.php";
 require_once __DIR__.'/services.php';
 
 require_once __DIR__.'/applications.php';
+require_once __DIR__.'/automation.php';

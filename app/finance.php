@@ -3,6 +3,7 @@ declare(strict_types=1);
 require_once __DIR__.'/documents.php';
 require_once __DIR__.'/portal.php';
 require_once __DIR__.'/applications.php';
+require_once __DIR__.'/online-payments.php';
 function recordPayment(): string {
     $user=requireRole(['owner','admin']);
     $studentId=(int)input('student_id');
@@ -17,6 +18,7 @@ function recordPayment(): string {
         return 'payments';
     }
     if (!isset($_SESSION['payment_nonce']) || !hash_equals($_SESSION['payment_nonce'],$key)) fail('Payment form expired. Reload the Payments page.');
+    if(onlineHold($studentId))fail('An online payment is pending or needs reconciliation. Resolve it before recording another payment.');
     $amount=input('amount',12);
     if (!preg_match('/^(\d{1,7})(?:\.(\d{1,2}))?$/D',$amount,$m)) fail('Enter a positive amount with up to two decimal places.');
     $minor=(int)$m[1]*100+(int)str_pad($m[2] ?? '',2,'0');

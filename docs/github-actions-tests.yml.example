@@ -15,7 +15,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: pdo_sqlite, pdo_mysql, dom, mbstring, openssl
+          extensions: pdo_sqlite, pdo_mysql, dom, mbstring, openssl, fileinfo, curl
           coverage: none
       - name: Install mail and PDF dependencies
         run: composer install --no-dev --prefer-dist --no-interaction
@@ -35,6 +35,8 @@ jobs:
         run: python3 tests/services.py
       - name: Run public application and admission checks
         run: python3 tests/applications.py
+      - name: Run admissions automation checks
+        run: python3 tests/automation.py
   native-database:
     runs-on: ubuntu-latest
     strategy:

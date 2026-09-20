@@ -4,14 +4,13 @@ A PHP/MySQL CRM for pharma, medical, and other educational institutes. Includes 
 
 > Functional development foundation, not a fully audited production ERP. Before using real student data, validate the application on your XAMPP/MySQL stack, configure HTTPS, protect secrets, and test backup/restore. No real Gmail delivery has been performed in the development environment.
 
-## New: public student applications
+## New: admissions automation (opt-in)
 
-**Students can now apply online:** browse published courses → verify email → submit an application → track review/corrections → receive staff-approved admission → sign in to the enrolled-student portal.
+Public applications now support **status email alerts, certificate uploads, owner-authorized automatic eligibility approval and Razorpay fee collection**. All automation stays disabled until explicitly configured.
 
-- Public admissions: **`public/apply.php`** (XAMPP: **http://localhost/institute-crm/public/apply.php**).
-- Staff: **Online applications → Manage public course listings**. All listings are closed by default; provide eligibility/privacy information and explicitly open each course.
-- Approval creates the student, admission PDF/email queue and enabled student portal access together. It does not collect money or automatically approve eligibility.
-- **[Full online admissions guide](docs/ONLINE-ADMISSIONS.md)** covers student pages, staff review, access/privacy controls and limitations.
+- Apply/track: **`public/apply.php`** · Enrolled pay: **`public/student.php?page=payments`** · Staff: **Online applications** (queue/listings/eligibility/mail) + **Payments → Online payment orders**.
+- Approval (manual or automatic) creates student + admission PDF/queue + portal access together. Payments credit only after exact captured verification; test mode never credits.
+- **[Automation guide](docs/AUTOMATION.md)** (setup, scanning, policies, test/live gateway, webhooks, MySQL/Gmail verification) · **[Admissions guide](docs/ONLINE-ADMISSIONS.md)**.
 
 ## Student services and recovery tooling
 
@@ -32,7 +31,7 @@ Then use **Students → Enable student access** and share **`public/student.php`
 
 **[Download the installer ZIP from GitHub](https://github.com/senditdebasish-maker/web/raw/refs/heads/arena/01a0b5d7-web/releases/northstar-setup.zip)** · [Open its GitHub file page](https://github.com/senditdebasish-maker/web/blob/arena/01a0b5d7-web/releases/northstar-setup.zip)
 
-The dependency-included installer is tracked at `releases/northstar-setup.zip` so downloading does not depend on a temporary Arena preview or a GitHub Release upload. It contains no configured credentials or student data. This ZIP includes public online applications, academic operations, student services, recovery tooling, tests and UPGRADE.html. Rebuild it explicitly when updating the packaged application.
+The dependency-included installer is tracked at `releases/northstar-setup.zip` so downloading does not depend on a temporary Arena preview or a GitHub Release upload. It contains no configured credentials or student data. This ZIP includes public applications, admissions automation, academic operations, student services, recovery tooling, tests and UPGRADE.html. Rebuild it explicitly when updating the packaged application.
 
 Use the **ready-to-install `northstar-setup.zip`** (libraries included), extract its `institute-crm` folder into XAMPP's `htdocs`, start Apache/MySQL, and open:
 
@@ -94,7 +93,7 @@ An explicit server configuration of `'auth_mode' => 'password'` enables the old 
 ### 1. Prerequisites
 
 - XAMPP with **PHP 8.2+**, MySQL/MariaDB and Apache.
-- PHP extensions: `pdo_mysql`, `dom`, `mbstring`, `openssl`, `ctype`, `filter`, `hash`, `iconv`. `pdo_sqlite` is needed for automated tests/local SQLite demos. `curl` and `zip` are recommended for Composer.
+- PHP extensions: `pdo_mysql`, `dom`, `mbstring`, `openssl`, `ctype`, `filter`, `hash`, `iconv`, `fileinfo`, `curl`. `pdo_sqlite` is needed for automated tests/local SQLite demos. `zip` is needed for release packaging.
 - **Composer 2** installed with `C:\xampp\php\php.exe` as its PHP executable.
 - No Node.js or frontend build tools are needed to run the application.
 

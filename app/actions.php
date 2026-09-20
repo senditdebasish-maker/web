@@ -6,6 +6,7 @@ require_once __DIR__.'/finance.php';
 require_once __DIR__.'/operations.php';
 require_once __DIR__.'/services.php';
 require_once __DIR__.'/applications.php';
+require_once __DIR__.'/online-payments.php';
 function handleAction(): string {
     $action = input('action', 40);
     if (!hash_equals($_SESSION['csrf'], input('csrf', 128))) fail('Your form expired. Refresh the page and try again.');
@@ -38,6 +39,7 @@ function handleAction(): string {
         query('UPDATE users SET password_hash = ? WHERE id = ?', [password_hash($password,PASSWORD_DEFAULT),$u['id']]);
         audit('password_changed','users',(int)$u['id']); $_SESSION['staff_stamp']=staffStamp(one('SELECT * FROM users WHERE id=?',[$u['id']])); session_regenerate_id(true); return 'settings';
     }
+    if(in_array($action,['reconcile_order'],true)){try{return staffReconcileOrder();}catch(Throwable $e){if(db()->inTransaction())db()->rollBack();throw $e;}}
     writeTransaction();
     try {
         $page = match ($action) {
@@ -52,6 +54,10 @@ function handleAction(): string {
             'payment' => recordPayment(),
             'student_email' => studentEmail(),
             'portal_access' => managePortalAccess(),
+            'eligibility_policy' => saveEligibilityPolicy(),
+            'certificate_scan' => scanCertificate(),
+            'certificate_review' => reviewCertificate(),
+            'application_mail_retry' => retryApplicationMail(),
             'admission_listing' => saveAdmissionListing(),
             'application_review' => reviewApplication(),
             'application_admit' => reviewApplication(true),
@@ -70,6 +76,8 @@ function handleAction(): string {
             'revoke_sessions' => revokeStaffSessions(),
             'retry_notification' => retryNotification(),
             'admission_letter' => generateAdmissionLetter(),
+            'reconcile_order' => staffReconcileOrder(),
+            'close_online_order' => closeOnlineOrder(),
             default => throw new DomainException('Unknown action.')
         };
         db()->commit(); return $page;

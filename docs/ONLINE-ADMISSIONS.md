@@ -26,7 +26,7 @@ Opening a listing publishes its current course name, fee, duration and the insti
 2. Choose Apply and verify a **personal email** with a six-digit code. Verification returns the applicant to the selected course if it is still open. Returning applicants use the same sign-in page.
 3. Enter legal name, contact phone, city, highest completed qualification, completion year and an optional note. Accept the application declaration and institute privacy notice.
 4. Submit and receive a private **APP-… reference**. A submission is not a seat guarantee, admission confirmation or payment receipt. The reference is not an access password: viewing requires the verified applicant session.
-5. Visit **My applications** to track **Submitted → Under review / Changes requested → Admitted / Rejected**. Only the office can approve admission. Review messages are visible here; there are no automatic application-status emails or staff new-application alerts.
+5. Visit **My applications** to track **Submitted → Under review / Changes requested → Admitted / Rejected**. Review messages are visible here; status updates are also queued for email (see `AUTOMATION.md`), but this page is authoritative. Staff must still check the queue; there are no staff push alerts.
 6. When corrections are requested, edit contact/qualification details and resubmit. Email, course, institute and quoted fee cannot be changed in this workflow. Every revision remains in the audit history.
 7. Applicants may withdraw a nonterminal application with a reason. Withdrawn/rejected applications cannot be edited or reopened. A new application is permitted if the account is not already active/admitted and the daily limit permits it.
 8. After approval, use **Open my student portal**, sign in with a separate student OTP, and access the enrolled-student features. The applicant login alone never grants staff or enrolled-student access.
@@ -41,7 +41,7 @@ The application detail page serves as an acknowledgement and is printable throug
 - The application snapshots course/institute labels, duration, quoted fee, submitted details and the accepted privacy notice/version. Later catalogue price changes do not change that application's fee quote.
 - Existing student emails are directed to the student portal or office, not automatically converted into duplicate student records.
 - Text limits are byte limits (multibyte names use more than one byte). Qualification completion years run from 1950 through the current year. Phone validation is basic formatting, **not verification of phone ownership**.
-- No government IDs, medical records, card details, document uploads, application-fee collection or online payments are requested. The office must verify original eligibility documents and any legally required guardian consent outside this workflow.
+- Do not put government ID numbers, medical records, card details, passwords or OTPs in notes. Certificate uploads (when enabled) happen after submission from your application page; see `AUTOMATION.md`. No payment is collected here; enrolled students pay separately after admission. The office must verify originals and any legally required guardian consent.
 
 ## Staff review and approval
 
@@ -77,8 +77,12 @@ These controls are **not** CAPTCHA, distributed bot protection, DDoS protection,
 - Schedule and monitor the admission/PDF notification worker. Staff must separately check the application queue regularly.
 - Include applicant accounts, applications, accepted notices and application events in encrypted backup/restore and retention procedures. Document privacy/consent/guardian handling; this checkbox does not establish legal compliance.
 
+## Automation modules
+
+Status emails, certificate uploads, owner-authorized automatic eligibility checks and Razorpay fee collection are documented in **[AUTOMATION.md](AUTOMATION.md)**. All are disabled by default and require explicit configuration. Approval (manual or automatic) never collects money at decision time.
+
 ## Tests and known limits
 
 `python3 tests/applications.py` runs isolated HTTP checks for migrations, default-private listings, offer changes, OTP expiry/replay/attempt limits, CSRF, audience separation, private tracking, review/correction/withdrawal, institute roles, fee tampering, atomic approval rollback, actual admission PDF access, account suspension and linked-email recovery. Run all existing suites too.
 
-Workspace evidence is PHP WebAssembly + SQLite + private email capture. Native MySQL/MariaDB, actual Gmail delivery and live-browser rendering still need server validation. The optional native smoke gate includes public listings and online approval but has not run here. Application-stage uploads, online payments, automated notifications for each application status, self-service email recovery, multiple active enrolments, waitlists/seat reservation, eligibility automation and legal guardian-consent verification are not implemented.
+Workspace evidence is PHP WebAssembly + SQLite + private email capture. Native MySQL/MariaDB, actual Gmail delivery and live-browser rendering still need server validation (see `AUTOMATION.md` deployment checklist). The native gate now covers listings, approval, mail queue, policy save, online hold and webhook HMAC but has not run here. Self-service email recovery, multiple active enrolments, waitlists/seat reservation and legal guardian-consent verification are not implemented.

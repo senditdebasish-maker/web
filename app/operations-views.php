@@ -64,6 +64,8 @@ $checks=[
  ['Database',db()->getAttribute(PDO::ATTR_DRIVER_NAME),'Use a dedicated least-privilege account. MySQL/MariaDB must be tested on your hosting stack.'],
  ['Failed email notifications',(string)query("SELECT COUNT(*) FROM notifications WHERE status='failed'")->fetchColumn(),'Check SMTP and dependencies, then requeue failed items in Email notifications.'],
  ['Pending email notifications',(string)query("SELECT COUNT(*) FROM notifications WHERE status IN ('pending','sending')")->fetchColumn(),'Schedule the worker every minute. Queue counts alone do not prove it is running.'],
+ ['Failed applicant alerts',function_exists('automationReady')&&automationReady()?(string)query("SELECT COUNT(*) FROM application_mail WHERE status='failed'")->fetchColumn():'Upgrade required','Requeue verified recipients in Online applications → Email alerts.'],
+ ['Online orders needing reconciliation',function_exists('automationReady')&&automationReady()?(string)query("SELECT COUNT(*) FROM online_orders WHERE state IN ('Uncertain','Review')")->fetchColumn():'Upgrade required','Verify in Razorpay dashboard, then reconcile in Payments.'],
  ['Backups & restore','External setup required','CLI backup helper available; scheduling, encryption, off-server copies and isolated restore verification remain operator responsibilities. See docs/RECOVERY.md.'],
  ['Monitoring & security audit','External review required','These checks are informational, not a production certification or vulnerability scan.']
 ];

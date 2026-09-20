@@ -38,7 +38,7 @@ function setupAuthorized(): bool {
     return isset($_SESSION['setup_authorized']) && hash_equals(hash('sha256',setupKey()),$_SESSION['setup_authorized']);
 }
 function setupChecks(): array {
-    $extensions=['pdo','session','openssl','dom','mbstring','ctype','filter','hash','iconv'];
+    $extensions=['pdo','session','openssl','dom','mbstring','ctype','filter','hash','iconv','fileinfo','curl'];
     $checks=['PHP 8.2 or newer'=>PHP_VERSION_ID>=80200];
     foreach($extensions as $ext) $checks['PHP extension: '.$ext]=extension_loaded($ext);
     $checks['MySQL or SQLite database driver']=extension_loaded('pdo_mysql') || extension_loaded('pdo_sqlite');
@@ -66,7 +66,7 @@ function setupMailFingerprint(array $d): string {
 function setupConfiguration(array $d): array {
     return ['dsn'=>$d['dsn'],'user'=>$d['db_user'],'password'=>$d['db_password'],'timezone'=>$d['timezone'],
         'environment'=>$d['environment'],'secure_cookies'=>$d['environment']==='production' || setupHttps(),
-        'auth_mode'=>'otp','mail'=>$d['mail']];
+        'auth_mode'=>'otp','mail'=>$d['mail'],'certificates'=>['enabled'=>false,'directory'=>'','scanner'=>'manual','clamav_host'=>'127.0.0.1','clamav_port'=>3310],'razorpay'=>['accounts'=>[]]];
 }
 function setupDatabase(array $d,bool $create): PDO {
     $opts=[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>false,PDO::ATTR_TIMEOUT=>5];

@@ -63,6 +63,15 @@ try {
     $_POST=['application_id'=>(string)$application,'version'=>'1','message'=>'Native approval','approval'=>'yes'];writeTransaction();reviewApplication(true);db()->commit();
     verify(query('SELECT status FROM admission_applications WHERE id=?',[$application])->fetchColumn()==='Admitted','native online application approval commits');
     verify((int)query("SELECT COUNT(*) FROM portal_accounts WHERE email='online@example.test' AND active=1")->fetchColumn()===1,'native approved applicant gains exactly one student portal account');
+    verify(automationReady(),'native automation tables are ready');
+    verify((int)query('SELECT COUNT(*) FROM application_mail WHERE application_id=?',[$application])->fetchColumn()>=1,'native approval queues applicant status email');
+    mutate('saveEligibilityPolicy',['course_id'=>(string)$cid,'version'=>'0','enabled'=>'0','qualification_code'=>'NATIVE-TEST','minimum_percentage'=>'60','minimum_age'=>'17','maximum_age'=>'30','cutoff_on'=>$today,'description'=>'Native test policy','confirm'=>'yes']);
+    verify((int)query('SELECT enabled FROM eligibility_policies WHERE id=?',[$cid])->fetchColumn()===0,'native eligibility policy stays disabled by default');
+    query("INSERT INTO online_orders (student_id,institute_id,actor_id,amount_minor,mode,key_id,receipt,state,created_epoch) VALUES (?,?,?,1000,'test','rzp_test_native',?, 'Pending',UNIX_TIMESTAMP())",[$sid,$iid,$uid,'ns_native'.bin2hex(random_bytes(8))]);
+    $_SESSION['payment_nonce']=bin2hex(random_bytes(24));$_POST=['student_id'=>(string)$sid,'request_key'=>$_SESSION['payment_nonce'],'amount'=>'10','paid_on'=>$today,'method'=>'Cash','reference'=>''];
+    try{writeTransaction();recordPayment();db()->commit();throw new RuntimeException('Manual payment bypassed online hold.');}catch(DomainException $e){if(db()->inTransaction())db()->rollBack();verify(str_contains($e->getMessage(),'pending or needs reconciliation'),'native manual payment blocked during online hold');}
+    verify(verifyWebhookSignature('test-body',hash_hmac('sha256','test-body','native-secret'),'native-secret'),'native webhook signature verification works');
+    verify(!verifyWebhookSignature('test-body','invalid','native-secret'),'native webhook rejects invalid signature');
     echo "Native smoke gate passed. Fictional fixture data remains in the dedicated TEST database. This is not a full concurrency, load or security audit.\n";
 } catch(Throwable $e) {
     if(isset($config) && isset($e) && function_exists('db')){try{if(db()->inTransaction())db()->rollBack();}catch(Throwable $ignored){}}

@@ -76,7 +76,7 @@ function verifyApplicantCode(): void {
 }
 function ownApplication(int $id,array $actor): array {$r=one('SELECT * FROM admission_applications WHERE id=? AND applicant_id=?',[$id,$actor['id']]);if(!$r)fail('Application not accessible.');return $r;}
 function staffApplication(int $id): array {applicationStaff();$r=one('SELECT * FROM admission_applications WHERE id=?',[$id]);if(!$r)fail('Application not found.');instituteAccess((int)$r['institute_id']);return $r;}
-function applicationEvent(int $id,string $actor,?int $uid,string $message,array $snapshot): void {query('INSERT INTO application_events (application_id,actor,staff_id,message,snapshot_json,created_at) VALUES (?,?,?,?,?,?)',[$id,$actor,$uid,$message,json_encode($snapshot,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE),date('Y-m-d H:i:s')]);}
+function applicationEvent(int $id,string $actor,?int $uid,string $message,array $snapshot): void {query('INSERT INTO application_events (application_id,actor,staff_id,message,snapshot_json,created_at) VALUES (?,?,?,?,?,?)',[$id,$actor,$uid,$message,json_encode($snapshot,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE),date('Y-m-d H:i:s')]);if(function_exists('queueApplicationMail'))queueApplicationMail((int)db()->lastInsertId(),$id);}
 function applicationFields(): array {
     $year=input('completion_year',4);if(!ctype_digit($year)||(int)$year<1950||(int)$year>(int)date('Y'))fail('Enter a valid completed qualification year.');
     $phone=input('phone',30);if(!preg_match('/^[+0-9 ()\-]{7,30}$/D',$phone))fail('Enter a valid contact phone number.');
@@ -108,7 +108,7 @@ function applicantMutation(string $action): int {
             else{if($r['status']!=='Changes requested')fail('The office must request corrections before you edit a submitted application.');$data=array_replace(json_decode($r['data_json'],true,512,JSON_THROW_ON_ERROR),applicationFields());$status='Submitted';$message='Corrected application resubmitted.';}
             query('UPDATE admission_applications SET status=?,data_json=?,version=version+1,updated_at=? WHERE id=?',[$status,json_encode($data,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE),date('Y-m-d H:i:s'),$id]);applicationEvent($id,'Applicant',null,$message,['before'=>json_decode($r['data_json'],true),'after'=>$data,'status'=>$status]);
         }
-        db()->commit();$_SESSION['flash']='Application saved. Check this page for office updates; no status email is sent.';return $id;
+        db()->commit();$_SESSION['flash']='Application saved. Updates are queued for email; check this page for the authoritative status.';return $id;
     }catch(Throwable $e){if(db()->inTransaction())db()->rollBack();throw $e;}
 }
 function reviewApplication(bool $admit=false): string {
@@ -124,11 +124,7 @@ function reviewApplication(bool $admit=false): string {
         if(input('approval',3,false)!=='yes')fail('Confirm eligibility, quoted fee and student portal access before admission.');
         courseAccess((int)$r['course_id'],(int)$r['institute_id']);
         if(one('SELECT id FROM students WHERE LOWER(email)=?',[$account['email']])||one('SELECT id FROM portal_accounts WHERE email=?',[$account['email']]))fail('An existing student or reserved portal email requires office review. Do not create a duplicate admission.');
-        $data=json_decode($r['data_json'],true,512,JSON_THROW_ON_ERROR);$now=date('Y-m-d H:i:s');
-        query("INSERT INTO enquiries (institute_id,course_id,assigned_to,name,phone,email,source,status,notes,created_at) VALUES (?,?,?,?,?,?,'Website','Admitted',?,?)",[$r['institute_id'],$r['course_id'],$u['id'],$data['name'],$data['phone'],$account['email'],'Online application '.$r['reference'],$now]);$eid=(int)db()->lastInsertId();
-        query('INSERT INTO students (institute_id,enquiry_id,course_id,name,phone,email,admission_date,fee_minor,created_at) VALUES (?,?,?,?,?,?,?,?,?)',[$r['institute_id'],$eid,$r['course_id'],$data['name'],$data['phone'],$account['email'],date('Y-m-d'),$r['fee_minor'],$now]);$studentId=(int)db()->lastInsertId();
-        createDocument($studentId);
-        query('INSERT INTO portal_accounts (student_id,email,created_at) VALUES (?,?,?)',[$studentId,$account['email'],$now]);audit('admitted','students',$studentId);$status='Admitted';
+        $studentId=createApprovedApplicantStudent($r,$account,(int)$u['id']);$status='Admitted';
     }else $status=choice('status',['Under review','Changes requested','Rejected']);
     query('UPDATE admission_applications SET status=?,student_id=?,version=version+1,updated_at=? WHERE id=?',[$status,$studentId,date('Y-m-d H:i:s'),$r['id']]);
     applicationEvent((int)$r['id'],'Office',(int)$u['id'],$message,['before_status'=>$r['status'],'after_status'=>$status,'student_id'=>$studentId]);audit('application_reviewed','admission_applications',(int)$r['id']);return 'applications';
@@ -137,3 +133,14 @@ function toggleApplicant(): string {
     requireRole(['owner']);$r=staffApplication((int)input('application_id'));$a=one('SELECT * FROM applicant_accounts WHERE id=?'.lockSuffix(),[$r['applicant_id']]);
     query('UPDATE applicant_accounts SET active=?,version=version+1 WHERE id=?',[$a['active']?0:1,$a['id']]);query('UPDATE applicant_codes SET consumed=1 WHERE email_hash=?',[hash('sha256','applicant:'.$a['email'])]);audit('applicant_access_changed','applicant_accounts',(int)$a['id']);return 'applications';
 }
+
+function createApprovedApplicantStudent(array $r,array $account,int $actorId): int {
+        $data=json_decode($r['data_json'],true,512,JSON_THROW_ON_ERROR);$now=date('Y-m-d H:i:s');
+        query("INSERT INTO enquiries (institute_id,course_id,assigned_to,name,phone,email,source,status,notes,created_at) VALUES (?,?,?,?,?,?,'Website','Admitted',?,?)",[$r['institute_id'],$r['course_id'],$actorId,$data['name'],$data['phone'],$account['email'],'Online application '.$r['reference'],$now]);$eid=(int)db()->lastInsertId();
+        query('INSERT INTO students (institute_id,enquiry_id,course_id,name,phone,email,admission_date,fee_minor,created_at) VALUES (?,?,?,?,?,?,?,?,?)',[$r['institute_id'],$eid,$r['course_id'],$data['name'],$data['phone'],$account['email'],date('Y-m-d'),$r['fee_minor'],$now]);$studentId=(int)db()->lastInsertId();
+        createDocument($studentId);
+        query('INSERT INTO portal_accounts (student_id,email,created_at) VALUES (?,?,?)',[$studentId,$account['email'],$now]);audit('admitted','students',$studentId);
+    return $studentId;
+}
+
+require_once __DIR__.'/automation.php';
