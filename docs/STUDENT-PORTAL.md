@@ -1,5 +1,7 @@
 # Student portal phase
 
+New students can now apply through **`public/apply.php`**. Staff approval creates the enrolled-student account and admission letter. See [Online admissions](ONLINE-ADMISSIONS.md); applicant and student sessions remain separate.
+
 ## Upgrade an already-installed CRM (do not reinstall)
 
 1. Export the MySQL/MariaDB database in phpMyAdmin. Privately back up `config.php`, `storage/`, and the working application files. Test that the backup is usable.
@@ -60,6 +62,7 @@ python3 tests/setup.py
 python3 tests/portal.py
 python3 tests/operations.py
 python3 tests/services.py
+python3 tests/applications.py
 ```
 
 Portal coverage includes upgrading a pre-portal database, no automatic provisioning, scoped staff controls, OTP expiry/attempts/session binding/audience separation, own-only reads/PDFs, URL tampering, financial mutation denial, logout, duplicate emails, revocation on disable/re-enable/email change, and staff/student cookie separation.

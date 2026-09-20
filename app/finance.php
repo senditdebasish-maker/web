@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require_once __DIR__.'/documents.php';
 require_once __DIR__.'/portal.php';
+require_once __DIR__.'/applications.php';
 function recordPayment(): string {
     $user=requireRole(['owner','admin']);
     $studentId=(int)input('student_id');
@@ -41,12 +42,21 @@ function studentEmail(): string {
     if (strtolower($student['email'])!==$email && portalReady()) {
         query('UPDATE portal_accounts SET active=0,access_version=access_version+1 WHERE student_id=?',[$id]);
     }
+    if(strtolower($student['email'])!==$email && applicationsReady()) {
+        $application=one('SELECT applicant_id FROM admission_applications WHERE student_id=?',[$id]);
+        if($application){
+            $applicant=one('SELECT * FROM applicant_accounts WHERE id=?'.lockSuffix(),[$application['applicant_id']]);
+            query('UPDATE applicant_accounts SET active=0,version=version+1 WHERE id=?',[$applicant['id']]);
+            query('UPDATE applicant_codes SET consumed=1 WHERE email_hash=?',[hash('sha256','applicant:'.$applicant['email'])]);
+            audit('applicant_email_recovery_required','applicant_accounts',(int)$applicant['id']);
+        }
+    }
     query('UPDATE students SET email=? WHERE id=?',[$email,$id]);
     // Only previously blocked, never-sent notifications are released automatically.
     $documents=rows('SELECT id FROM documents WHERE student_id=?',[$id]);
     foreach($documents as $doc) query("UPDATE notifications SET recipient=?,status='pending',last_error='',next_attempt_at=0 WHERE document_id=? AND status='blocked'",[$email,$doc['id']]);
     audit('email_updated','students',$id);
-    $_SESSION['flash']='Student email saved. Notifications previously blocked by a missing email are now queued. Existing recipients on other notifications were not changed. If the email changed, re-enable student portal access after checking the new address.';
+    $_SESSION['flash']='Student email saved. Notifications previously blocked by a missing email are now queued. Existing recipients on other notifications were not changed. If the email changed, re-enable student portal access after checking the new address. A linked online applicant account is suspended for owner-led email recovery.';
     return 'students';
 }
 function retryNotification(): string {

@@ -36,9 +36,9 @@ try {
     }
     if (!$user) $page='login';
     elseif ($page==='login') redirect('dashboard');
-    $allowed=['dashboard','institutes','courses','staff','enquiries','followups','admissions','students','settings','audit','payments','documents','notifications','teachers','batches','attendance','fee-plans','fee-reports','health','exams','announcements','support'];
+    $allowed=['dashboard','institutes','courses','staff','enquiries','followups','admissions','students','settings','audit','payments','documents','notifications','teachers','batches','attendance','fee-plans','fee-reports','health','exams','announcements','support','applications'];
     if ($user && !in_array($page,$allowed,true)) { http_response_code(404); $page='notfound'; }
-    if ($user && in_array($page,['staff','audit','payments','notifications','teachers','batches','attendance','fee-plans','fee-reports','health','exams','announcements','support'],true)) requireRole(['owner','admin']);
+    if ($user && in_array($page,['staff','audit','payments','notifications','teachers','batches','attendance','fee-plans','fee-reports','health','exams','announcements','support','applications'],true)) requireRole(['owner','admin']);
 } catch (DomainException $ex) { if(defined('CRM_DOCUMENT_REQUEST')) { http_response_code(403); exit('Document not accessible.'); } $error=$ex->getMessage(); $user=currentUser(); if (!$user) $page='login'; }
 catch (Throwable $ex) { if(defined('CRM_DOCUMENT_REQUEST')) { http_response_code(503); exit('PDF unavailable. Ask your administrator to check Composer dependencies.'); } error_log((string)$ex); $error='The request could not be saved. Check for duplicate records or try again. If this continues, contact your administrator.'; $user=null; try { $user=currentUser(); } catch(Throwable $ignored) {} if (!$user) $page='login'; }
 $flash=$_SESSION['flash'] ?? null; unset($_SESSION['flash']);

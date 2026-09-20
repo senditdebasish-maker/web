@@ -4,7 +4,16 @@ A PHP/MySQL CRM for pharma, medical, and other educational institutes. Includes 
 
 > Functional development foundation, not a fully audited production ERP. Before using real student data, validate the application on your XAMPP/MySQL stack, configure HTTPS, protect secrets, and test backup/restore. No real Gmail delivery has been performed in the development environment.
 
-## Latest release: student services and recovery tooling
+## New: public student applications
+
+**Students can now apply online:** browse published courses → verify email → submit an application → track review/corrections → receive staff-approved admission → sign in to the enrolled-student portal.
+
+- Public admissions: **`public/apply.php`** (XAMPP: **http://localhost/institute-crm/public/apply.php**).
+- Staff: **Online applications → Manage public course listings**. All listings are closed by default; provide eligibility/privacy information and explicitly open each course.
+- Approval creates the student, admission PDF/email queue and enabled student portal access together. It does not collect money or automatically approve eligibility.
+- **[Full online admissions guide](docs/ONLINE-ADMISSIONS.md)** covers student pages, staff review, access/privacy controls and limitations.
+
+## Student services and recovery tooling
 
 - **Exams & results:** frozen rosters, exact decimal marks, draft/publish/withdraw workflow and full revision history.
 - **Announcements:** institute/current-batch targeting, scheduled visibility and audited edits.
@@ -23,7 +32,7 @@ Then use **Students → Enable student access** and share **`public/student.php`
 
 **[Download the installer ZIP from GitHub](https://github.com/senditdebasish-maker/web/raw/refs/heads/arena/01a0b5d7-web/releases/northstar-setup.zip)** · [Open its GitHub file page](https://github.com/senditdebasish-maker/web/blob/arena/01a0b5d7-web/releases/northstar-setup.zip)
 
-The dependency-included installer is tracked at `releases/northstar-setup.zip` so downloading does not depend on a temporary Arena preview or a GitHub Release upload. It contains no configured credentials or student data. This ZIP includes academic operations, student services, recovery tooling, tests and UPGRADE.html. Rebuild it explicitly when updating the packaged application.
+The dependency-included installer is tracked at `releases/northstar-setup.zip` so downloading does not depend on a temporary Arena preview or a GitHub Release upload. It contains no configured credentials or student data. This ZIP includes public online applications, academic operations, student services, recovery tooling, tests and UPGRADE.html. Rebuild it explicitly when updating the packaged application.
 
 Use the **ready-to-install `northstar-setup.zip`** (libraries included), extract its `institute-crm` folder into XAMPP's `htdocs`, start Apache/MySQL, and open:
 
@@ -245,6 +254,7 @@ python3 tests/setup.py
 python3 tests/portal.py
 python3 tests/operations.py
 python3 tests/services.py
+python3 tests/applications.py
 ```
 
 If PHP isn't on PATH (PowerShell):
@@ -257,13 +267,14 @@ python tests/setup.py
 python tests/portal.py
 python tests/operations.py
 python tests/services.py
+python tests/applications.py
 ```
 
 All suites use disposable SQLite databases and local test servers, not your normal database. The communication suite captures mail privately and sends no real emails. Coverage includes OTP expiry/replay/attempt limits, CSRF, staff disabling, permission checks, transactional admission/queue creation, real PDF downloads/attachments, payment amounts/idempotency/balance validation, blocked recipients, worker retries and recovery.
 
-**Validation here:** 64 baseline checks + 71 communication checks + 52 browser-setup checks + 65 student-portal checks + 89 operations checks + 82 student-services/recovery checks passed with PHP 8.5 WebAssembly/PDO SQLite and the pinned PDF/mail dependencies. Native Apache/XAMPP, MySQL/MariaDB, real Gmail SMTP and mailbox delivery still need validation on your server. The sandbox had no Composer network access; dependencies were checked out at the pinned upstream tags for testing. Run the standard Composer installation/audit on your target server before launch.
+**Validation here:** 64 baseline checks + 71 communication checks + 52 browser-setup checks + 65 student-portal checks + 89 operations checks + 82 student-services/recovery checks + 97 online-admissions checks passed with PHP 8.5 WebAssembly/PDO SQLite and the pinned PDF/mail dependencies. Native Apache/XAMPP, MySQL/MariaDB, real Gmail SMTP and mailbox delivery still need validation on your server. The sandbox had no Composer network access; dependencies were checked out at the pinned upstream tags for testing. Run the standard Composer installation/audit on your target server before launch.
 
-The optional GitHub Actions template in `docs/github-actions-tests.yml.example` includes all six suites. An administrator with workflow permission can copy it to `.github/workflows/tests.yml`.
+The optional GitHub Actions template in `docs/github-actions-tests.yml.example` includes all seven suites. An administrator with workflow permission can copy it to `.github/workflows/tests.yml`.
 
 ## Deployment checklist
 
@@ -310,6 +321,10 @@ app/student-views.php       Responsive student workspace and own-record views
 app/operations.php          Academic/fee workflows, migrations and session revocation
 app/operations-views.php    Teaching, attendance, fee and deployment screens
 public/export.php           Authorized POST-only CSV exports
+app/applications.php       Public listings, applicant OTP and reviewed admission workflow
+app/applicant-views.php     Public course catalogue and private application workspace
+app/application-staff-views.php Staff listing controls and review queue
+public/apply.php            Isolated public/applicant entry point
 app/services.php           Exams, notices, support and worker heartbeat
 app/services-views.php      Staff assessment, notice and help-desk screens
 app/student-services.php    Own published results, notices and support

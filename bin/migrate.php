@@ -4,4 +4,4 @@ if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require dirname(__DIR__).'/app/bootstrap.php';
 require dirname(__DIR__).'/app/migrations.php';
 migrateCommunications();
-echo "Email OTP, payments, documents, notifications, student portal, operations and student services tables are ready. Existing data was preserved.\n";
+echo "Email OTP, payments, documents, notifications, student portal, operations, student services and public admission tables are ready. Existing data was preserved.\n";

@@ -55,6 +55,14 @@ try {
     verify($payload['payment']['total_paid_minor']===100000 && $payload['payment']['balance_minor']===0,'native receipt snapshot includes all committed payments');
     verify(studentInstallments($sid)[0]['status']==='Paid','native installment allocation matches paid balance');
     verify((int)feeReportRows($iid)[0]['paid_minor']===100000,'native report subqueries match ledger');
+    mutate('saveAdmissionListing',['course_id'=>(string)$cid,'version'=>'0','description'=>'Native public course','eligibility'=>'Office verifies originals','privacy_notice'=>'Fictional native-test privacy notice','opens_on'=>$today,'closes_on'=>$today,'accepting'=>'1']);
+    verify(count(publicCourses())===1,'native public course listing is explicitly published');
+    query('INSERT INTO applicant_accounts (email,created_at) VALUES (?,?)',['online@example.test',$now]);$applicant=(int)db()->lastInsertId();
+    $data=['name'=>'Native Applicant','phone'=>'9000000000','city'=>'Test City','qualification'=>'Test qualification','completion_year'=>date('Y'),'note'=>'','course_name'=>'Test Course','institute_name'=>'Test Institute','duration'=>'One year'];
+    query('INSERT INTO admission_applications (applicant_id,institute_id,course_id,reference,request_key,fee_minor,data_json,consent_notice,consent_version,submitted_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)',[$applicant,$iid,$cid,'APP-NATIVE',bin2hex(random_bytes(24)),100000,json_encode($data),'Native test notice','admission-application-v1',$now,$now]);$application=(int)db()->lastInsertId();
+    $_POST=['application_id'=>(string)$application,'version'=>'1','message'=>'Native approval','approval'=>'yes'];writeTransaction();reviewApplication(true);db()->commit();
+    verify(query('SELECT status FROM admission_applications WHERE id=?',[$application])->fetchColumn()==='Admitted','native online application approval commits');
+    verify((int)query("SELECT COUNT(*) FROM portal_accounts WHERE email='online@example.test' AND active=1")->fetchColumn()===1,'native approved applicant gains exactly one student portal account');
     echo "Native smoke gate passed. Fictional fixture data remains in the dedicated TEST database. This is not a full concurrency, load or security audit.\n";
 } catch(Throwable $e) {
     if(isset($config) && isset($e) && function_exists('db')){try{if(db()->inTransaction())db()->rollBack();}catch(Throwable $ignored){}}
