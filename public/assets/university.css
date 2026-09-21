@@ -2,7 +2,7 @@
    badges, sidebar, footer). Theme-aware via --t-* tokens (theme.css).
    Class names are shared with the portals — do not rename. */
 .u-topbar {
-  background: #0b2145;
+  background: #12294d;
   color: #cfd9ec;
   font-size: 12.5px;
   padding: 7px 22px;
@@ -17,7 +17,7 @@
 }
 /* ---- navy header ---- */
 .u-header {
-  background: linear-gradient(180deg, #14315f 0%, #0f2a52 100%);
+  background: linear-gradient(180deg, #14315f 0%, #1A365D 100%);
   border-top: 3px solid #c9a227;
   border-bottom: 1px solid #c9a22755;
   position: sticky;
@@ -34,6 +34,7 @@
   display: inline-flex;
   align-items: center;
   gap: 12px;
+  text-transform: uppercase;
   font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.3px;
@@ -61,7 +62,7 @@
   border-radius: 4px 4px 26px 26px;
   font-size: 26px;
   font-weight: 800;
-  color: #0f2a52;
+  color: #1A365D;
   overflow: hidden;
 }
 .u-brand-mark svg {
@@ -89,7 +90,7 @@
   background: #ffffff10;
 }
 .u-nav a[aria-current="page"] {
-  color: #0b2145;
+  color: #12294d;
   background: #e9cf7a;
 }
 .u-header-btns {
@@ -118,6 +119,7 @@
   display: inline-flex;
   align-items: center;
   padding: 9px 0;
+  text-transform: uppercase;
   animation: u-tick 45s linear infinite;
 }
 .u-ticker:hover .u-ticker-track {
@@ -128,7 +130,7 @@
   position: relative;
 }
 .u-ticker-track span::after {
-  content: "◆";
+  content: "|";
   position: absolute;
   right: -7px;
   color: #c9a227;
@@ -165,9 +167,9 @@
     box-shadow 0.15s;
 }
 .u-btn.solid {
-  background: linear-gradient(135deg, #b23a2e, #d05240);
+  background: linear-gradient(135deg, #C53030, #9B2C2C);
   color: #fff;
-  box-shadow: 0 8px 18px #b23a2e44;
+  box-shadow: 0 8px 18px #C5303044;
   text-transform: uppercase;
   font-size: 13px;
   letter-spacing: 0.8px;
@@ -196,12 +198,12 @@
 .u-section .u-btn.ghost:hover,
 .u-side-card .u-btn.ghost:hover,
 .u-login .u-btn.ghost:hover {
-  border-color: #0f2a52;
-  color: #0f2a52;
+  border-color: #1A365D;
+  color: #1A365D;
 }
 .u-btn.light {
   background: #e9cf7a;
-  color: #0b2145;
+  color: #12294d;
 }
 .u-btn.big {
   padding: 14px 26px;
@@ -219,16 +221,16 @@
 }
 .u-section h1,
 .u-login h1 {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
   font-size: 34px;
   letter-spacing: -0.5px;
   color: var(--t-ink, #1e2a32);
   margin: 6px 0 12px;
 }
 .u-section h2 {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
   font-size: 25px;
-  color: #0f2a52;
+  color: #1A365D;
   margin: 4px 0 14px;
 }
 html[data-theme="dark"] .u-section h2 {
@@ -239,7 +241,7 @@ html[data-theme="dark"] .u-section h2 {
   font-weight: 800;
   letter-spacing: 2.2px;
   text-transform: uppercase;
-  color: #8c2b2b;
+  color: #C53030;
 }
 html[data-theme="dark"] .u-eyebrow {
   color: #e9cf7a;
@@ -252,7 +254,7 @@ html[data-theme="dark"] .u-eyebrow {
   font-weight: 700;
 }
 .u-more a {
-  color: #0f2a52;
+  color: #1A365D;
 }
 html[data-theme="dark"] .u-more a {
   color: #e9cf7a;
@@ -261,9 +263,9 @@ html[data-theme="dark"] .u-more a {
 .u-hero {
   position: relative;
   background:
-    linear-gradient(100deg, #0b2145ee 0%, #0b2145b8 42%, #0b214522 75%),
+    linear-gradient(100deg, #12294dee 0%, #12294db8 42%, #12294d22 75%),
     url("campus-hero.jpg") center 38% / cover no-repeat,
-    #0b2145;
+    #12294d;
   color: #fff;
 }
 .u-hero-inner {
@@ -276,7 +278,7 @@ html[data-theme="dark"] .u-more a {
   color: #e9cf7a;
 }
 .u-hero h1 {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
   font-size: clamp(38px, 5.6vw, 62px);
   line-height: 1.04;
   letter-spacing: -1px;
@@ -323,7 +325,7 @@ html[data-theme="dark"] .u-more a {
   height: 54px;
   border-radius: 50%;
   background: linear-gradient(135deg, #c9a227, #e9cf7a);
-  color: #0b2145;
+  color: #12294d;
   font-size: 26px;
   display: inline-flex;
   align-items: center;
@@ -332,7 +334,7 @@ html[data-theme="dark"] .u-more a {
 .u-badge-card strong {
   display: block;
   font-size: 19px;
-  color: #8c2b2b;
+  color: #C53030;
   letter-spacing: 0.2px;
 }
 .u-badge-card small {
@@ -344,7 +346,7 @@ html[data-theme="dark"] .u-more a {
 }
 /* ---- stats band ---- */
 .u-stats-band {
-  background: linear-gradient(180deg, #14315f, #0f2a52);
+  background: linear-gradient(180deg, #14315f, #1A365D);
   border-top: 3px solid #c9a227;
   border-bottom: 3px solid #c9a227;
   margin-top: 30px;
@@ -362,7 +364,7 @@ html[data-theme="dark"] .u-more a {
   display: block;
   font-size: 32px;
   color: #e9cf7a;
-  font-family: Georgia, serif;
+  font-family: 'Playfair Display', Georgia, serif;
 }
 .u-stats-band span {
   font-size: 12.5px;
@@ -377,7 +379,7 @@ html[data-theme="dark"] .u-more a {
   margin: 0 auto;
   padding: 30px 26px 10px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 330px;
+  grid-template-columns: 2fr 1fr;
   gap: 26px;
   align-items: start;
 }
@@ -401,7 +403,7 @@ html[data-theme="dark"] .u-more a {
   font-weight: 800;
   letter-spacing: 1.6px;
   text-transform: uppercase;
-  color: #0f2a52;
+  color: #1A365D;
   border-left: 4px solid #c9a227;
   padding-left: 10px;
   margin: 0 0 14px;
@@ -429,7 +431,7 @@ html[data-theme="dark"] .u-side-title {
   font-size: 14px;
 }
 .u-side-card li a:hover {
-  background: #0f2a52;
+  background: #1A365D;
   color: #fff;
 }
 .u-side-card li small {
@@ -443,7 +445,7 @@ html[data-theme="dark"] .u-side-title {
 /* ---- vice-chancellor card ---- */
 .u-vc {
   background: linear-gradient(180deg, #fdf6ec, var(--t-card, #fff));
-  border-top: 4px solid #8c2b2b;
+  border-top: 4px solid #C53030;
 }
 .u-vc-head {
   display: flex;
@@ -456,9 +458,9 @@ html[data-theme="dark"] .u-side-title {
   width: 62px;
   height: 62px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #8c2b2b, #b0522e);
+  background: linear-gradient(135deg, #C53030, #9B2C2C);
   color: #fff;
-  font-family: Georgia, serif;
+  font-family: 'Playfair Display', Georgia, serif;
   font-size: 24px;
   font-weight: 700;
   display: inline-flex;
@@ -468,7 +470,7 @@ html[data-theme="dark"] .u-side-title {
 }
 .u-vc blockquote {
   margin: 0;
-  font-family: Georgia, serif;
+  font-family: 'Playfair Display', Georgia, serif;
   font-style: italic;
   font-size: 14.5px;
   line-height: 1.55;
@@ -483,7 +485,7 @@ html[data-theme="dark"] .u-side-title {
   font-weight: 800;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: #8c2b2b;
+  color: #C53030;
 }
 /* ---- recruiter tiles ---- */
 .u-recruiters {
@@ -526,7 +528,7 @@ html[data-theme="dark"] .u-side-title {
 .u-card h3 {
   margin: 6px 0 8px;
   font-size: 18px;
-  color: #0f2a52;
+  color: #1A365D;
 }
 html[data-theme="dark"] .u-card h3 {
   color: var(--t-ink, #e9ebf2);
@@ -542,7 +544,7 @@ html[data-theme="dark"] .u-card h3 {
 .u-fee {
   font-size: 20px;
   font-weight: 800;
-  color: #0f2a52;
+  color: #1A365D;
 }
 html[data-theme="dark"] .u-fee {
   color: #e9cf7a;
@@ -550,7 +552,7 @@ html[data-theme="dark"] .u-fee {
 .u-apply-by {
   font-size: 13.5px;
   font-weight: 700;
-  color: #8c2b2b;
+  color: #C53030;
 }
 .u-phone {
   font-weight: 700;
@@ -574,7 +576,7 @@ html[data-theme="dark"] .u-fee {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: #0f2a52;
+  background: #1A365D;
   color: #e9cf7a;
   font-weight: 800;
   margin-bottom: 8px;
@@ -605,8 +607,8 @@ html[data-theme="dark"] .u-fee {
 .u-facts strong {
   display: block;
   font-size: 28px;
-  font-family: Georgia, serif;
-  color: #0f2a52;
+  font-family: 'Playfair Display', Georgia, serif;
+  color: #1A365D;
 }
 html[data-theme="dark"] .u-facts strong {
   color: #e9cf7a;
@@ -632,7 +634,7 @@ html[data-theme="dark"] .u-facts strong {
   align-items: center;
   background: var(--t-card, #fff);
   border: 1px solid var(--t-line, #e2e7f0);
-  border-left: 5px solid #0f2a52;
+  border-left: 5px solid #1A365D;
   border-radius: 12px;
   padding: 14px 18px;
 }
@@ -646,7 +648,7 @@ html[data-theme="dark"] .u-facts strong {
 }
 .u-notices a {
   font-weight: 800;
-  color: #0f2a52;
+  color: #1A365D;
   white-space: nowrap;
 }
 html[data-theme="dark"] .u-notices a {
@@ -660,11 +662,11 @@ html[data-theme="dark"] .u-notices a {
   text-transform: uppercase;
   padding: 6px 12px;
   border-radius: 999px;
-  background: #0f2a52;
+  background: #1A365D;
   color: #fff;
 }
 .u-pill.soon {
-  background: #8c2b2b;
+  background: #C53030;
 }
 .u-table-wrap {
   overflow-x: auto;
@@ -685,7 +687,7 @@ html[data-theme="dark"] .u-notices a {
   border-bottom: 1px solid var(--t-line, #e2e7f0);
 }
 .u-table-wrap thead th {
-  background: #0f2a52;
+  background: #1A365D;
   color: #fff;
   font-size: 12px;
   letter-spacing: 1.2px;
@@ -701,7 +703,7 @@ html[data-theme="dark"] .u-notices a {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #0f2a52, #2c4f86);
+  background: linear-gradient(135deg, #1A365D, #2c4f86);
   color: #e9cf7a;
   font-size: 22px;
   font-weight: 800;
@@ -716,7 +718,7 @@ html[data-theme="dark"] .u-notices a {
   padding: 40px 26px 50px;
 }
 .u-login .u-card {
-  border-top: 5px solid #0f2a52;
+  border-top: 5px solid #1A365D;
 }
 .u-login label {
   display: grid;
@@ -740,8 +742,8 @@ html[data-theme="dark"] .u-notices a {
   margin: 12px 0;
 }
 .u-alert.error {
-  background: #8c2b2b14;
-  border-color: #8c2b2b55;
+  background: #C5303014;
+  border-color: #C5303055;
 }
 .u-login-links {
   display: grid;
@@ -750,7 +752,7 @@ html[data-theme="dark"] .u-notices a {
   font-weight: 650;
 }
 .u-login-links a {
-  color: #0f2a52;
+  color: #1A365D;
 }
 html[data-theme="dark"] .u-login-links a {
   color: #e9cf7a;
@@ -764,7 +766,7 @@ html[data-theme="dark"] .u-login-links a {
   align-items: center;
   gap: 18px;
   flex-wrap: wrap;
-  background: linear-gradient(120deg, #8c2b2b, #b0522e);
+  background: linear-gradient(120deg, #C53030, #9B2C2C);
   border-radius: 16px;
   color: #fff;
 }
@@ -782,7 +784,7 @@ html[data-theme="dark"] .u-login-links a {
 }
 /* ---- navy footer ---- */
 .u-footer {
-  background: linear-gradient(180deg, #0f2a52, #0b2145);
+  background: linear-gradient(180deg, #1A365D, #12294d);
   border-top: 3px solid #c9a227;
   color: #dbe3f2;
 }
@@ -887,6 +889,167 @@ html[data-theme="dark"] .u-login-links a {
 }
 
 
+
+/* ---- replica components: language toggle, VC feature, mini badges,
+        program showcase cards, recruiters, social icons ---- */
+.u-lang {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #e8edf7;
+  white-space: nowrap;
+}
+.u-lang a {
+  color: #e8edf7;
+  padding: 4px 2px;
+}
+.u-lang a:hover {
+  color: #e9cf7a;
+}
+.u-lang a[aria-current="true"] {
+  color: #e9cf7a;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.u-vc-full {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  margin-top: 16px;
+  background: var(--t-card, #fff);
+  border: 1px solid var(--t-line, #e2e7f0);
+  border-top: 4px solid #C53030;
+  border-radius: 14px;
+  box-shadow: var(--t-shadow, 0 12px 32px #1c21400d);
+  padding: 24px;
+}
+.u-vc-portrait {
+  flex: 0 0 auto;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #C53030, #9B2C2C);
+  color: #fff;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 46px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid #e9cf7a;
+}
+.u-vc-full blockquote {
+  margin: 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--t-ink, #1e2a32);
+}
+.u-vc-full cite {
+  display: block;
+  margin-top: 10px;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #C53030;
+}
+.u-mini-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.u-mini-badges span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: var(--t-card, #fff);
+  border: 1px solid var(--t-line, #e2e7f0);
+  box-shadow: var(--t-shadow, 0 12px 32px #1c21400d);
+  color: var(--t-ink, #1e2a32);
+}
+.u-prog-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.u-prog-card {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 108px;
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 10px 12px;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 800;
+  line-height: 1.3;
+  isolation: isolate;
+}
+.u-prog-card::before {
+  content: "🎓";
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 30px;
+  opacity: 0.5;
+  z-index: -1;
+}
+.u-prog-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 20%, #000000b8 100%);
+  z-index: -2;
+}
+.u-prog-1 { background: linear-gradient(135deg, #1A365D, #2C5282); }
+.u-prog-2 { background: linear-gradient(135deg, #9B2C2C, #C53030); }
+.u-prog-3 { background: linear-gradient(135deg, #744210, #B7791F); }
+.u-prog-4 { background: linear-gradient(135deg, #44337A, #6B46C1); }
+.u-prog-card:hover {
+  color: #e9cf7a;
+}
+.u-flag {
+  width: 26px;
+  height: 18px;
+  border-radius: 2px;
+  vertical-align: -3px;
+}
+.u-flag-tile {
+  grid-column: 1 / -1;
+  justify-content: center;
+}
+.u-social {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+.u-social span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #C53030;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+}
+@media (max-width: 760px) {
+  .u-vc-full {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
 /* Shared portal chrome: the office, student and admissions pages use the same
    university theme (same tokens, same header/nav/footer/buttons). Loaded before
    theme.css so dark-mode refinements there keep winning. */

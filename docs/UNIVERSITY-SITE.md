@@ -35,15 +35,20 @@ The homepage follows a classic university layout: navy crest header, scrolling
 announcement ticker (built live from CRM admission dates and closing dates), a
 campus hero banner (`public/assets/campus-hero.jpg` — replace this file with a
 photo of your own campus to rebrand instantly), accreditation badges, a stats
-band, featured programs, notices, and a sidebar with the Vice-Chancellor's
-message, program links, recruiters and contact card.
+band, a Vice-Chancellor feature, featured programs, notices, and a sidebar with
+mini badges, the Vice-Chancellor's card, a program showcase grid, recruiters and
+a contact card. The header carries a working **EN | हिन्दी** toggle: the site
+chrome (navigation, buttons, ticker, headings, footer) is genuinely bilingual via
+a sessionless `?lang=` + cookie switch, while CRM records stay in their
+entered language.
 
 Almost everything is live CRM data. The only starter template pieces are the
-accreditation badges, the recruiter tiles and the welcome message — edit
-`siteAccreditations()`, `siteRecruiters()` and `siteVcMessage()` in
-`app/site-chrome.php` to put your institute's real approvals, recruiters and
-message. A future Website Settings page in the office workspace will make these
-editable without touching code.
+hero headline, the accreditation badges, the showcase program names, the
+recruiter tiles and the welcome message — edit `siteAccreditations()`,
+`siteShowcasePrograms()`, `siteRecruiters()` and `siteVcMessage()` in
+`app/site-chrome.php` to put your institute's real approvals, programs,
+recruiters and message. A future Website Settings page in the office workspace
+will make these editable without touching code.
 
 ## One theme, no dead ends
 

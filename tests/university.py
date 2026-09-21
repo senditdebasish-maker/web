@@ -106,7 +106,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
                 time.sleep(.1)
         uni = Browser(base)
         owner = Browser(base, 'public/index.php')
-        check('Northstar Pharmacy Institute' in uni.get() and '45 Park Street' in uni.html,
+        check('Northstar University' in uni.get() and '45 Park Street' in uni.html,
               'homepage brand and address come from the CRM')
         check('Diploma in Pharmacy' in uni.html and 'Apply Now' in uni.html,
               'homepage lists the open CRM program')
@@ -116,6 +116,18 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
               'homepage ticker announces live admission dates')
         check('Vice-Chancellor' in uni.html and 'Top recruiters' in uni.html and 'NAAC A++' in uni.html,
               'homepage shows the message, badges and recruiters showcase')
+        check('TRADITION MEETS INNOVATION: EST. 1887' in uni.html and 'Nurturing global leaders.' in uni.html
+              and 'ADMISSIONS 2024-25 OPEN FOR UNDERGRADUATE PROGRAMS' in uni.html and 'SCHOLARSHIPS 2024-25' in uni.html
+              and 'SEMESTER RESULTS DECLARED' in uni.html, 'homepage matches the replica hero and ticker texts')
+        check('ENGINEERING &amp; TECHNOLOGY' in uni.html and 'MEDICINE &amp; HEALTH SCIENCES' in uni.html
+              and 'MANAGEMENT STUDIES' in uni.html and 'ARTS &amp; HUMANITIES' in uni.html
+              and 'International Companies' in uni.html and 'DHL' in uni.html
+              and 'Quick Links' in uni.html and 'Follow Us' in uni.html and 'u-vc-full' in uni.html,
+              'homepage shows the program grid, recruiters, VC feature and footer')
+        uni_hi = Browser(base)
+        check('<html lang="hi">' in uni_hi.get('index.php?lang=hi') and 'अभी आवेदन करें' in uni_hi.html
+              and 'कुलपति का संदेश' in uni_hi.html and 'छात्रवृत्ति 2024-25' in uni_hi.html,
+              'EN | हिन्दी toggle renders a real Hindi homepage')
         check('OUR CAMPUSES' in uni.get('index.php?page=about') and 'Howrah' in uni.html,
               'about page lists CRM campuses')
         check('1 program open' in uni.get('index.php?page=courses') and 'Apply by' in uni.html,

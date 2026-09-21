@@ -6,6 +6,15 @@ declare(strict_types=1);
 if (!function_exists('e')) {
     function e(mixed $s): string { return htmlspecialchars((string)($s ?? ''), ENT_QUOTES, 'UTF-8'); }
 }
+// Bilingual site chrome. Pages using Hindi set $siteLang='hi' and an English→Hindi $HI map
+// before rendering; every other caller (office, student, admissions) stays English by default.
+if (!function_exists('tr')) {
+    function tr(string $en): string {
+        global $siteLang, $HI;
+        if (($siteLang ?? 'en') !== 'hi') return $en;
+        return (is_array($HI ?? null) && isset($HI[$en])) ? $HI[$en] : $en;
+    }
+}
 // Web path of the project folder, e.g. '' on a domain root or '/institute-crm' under XAMPP htdocs.
 function siteWebRoot(): string {
     $dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/index.php'));
@@ -20,19 +29,28 @@ function sitePublicUrl(string $path): string { return siteWebRoot() . '/public/'
 function siteToggle(): string {
     return '<button class="theme-toggle" data-theme-toggle type="button" aria-label="Toggle dark mode" title="Toggle dark mode"><span aria-hidden="true">🌙</span></button>';
 }
+// EN | हिन्दी switch for the university site. Sessionless: ?lang= persists via a cookie.
+function siteLangToggle(string $page): string {
+    global $siteLang;
+    $cur = $siteLang ?? 'en';
+    $base = siteHomeUrl() . '?page=' . urlencode($page) . '&lang=';
+    $en = '<a href="' . e($base . 'en') . '"' . ($cur !== 'hi' ? ' aria-current="true"' : '') . '>EN</a>';
+    $hi = '<a href="' . e($base . 'hi') . '"' . ($cur === 'hi' ? ' aria-current="true"' : '') . '>हिन्दी</a>';
+    return '<span class="u-lang">' . $en . ' | ' . $hi . '</span>';
+}
 function siteNav(string $active = ''): string {
     $home = siteHomeUrl();
     $links = ['' => 'Home', 'about' => 'About', 'courses' => 'Programs', 'admissions' => 'Admissions', 'notices' => 'Notices', 'faculty' => 'Faculty', 'contact' => 'Contact'];
     $h = '<nav class="u-nav" aria-label="University">';
     foreach ($links as $slug => $label) {
         $key = $slug === '' ? 'home' : $slug;
-        $h .= '<a href="' . e($slug === '' ? $home : $home . '?page=' . $slug) . '"' . ($active === $key ? ' aria-current="page"' : '') . '>' . $label . '</a>';
+        $h .= '<a href="' . e($slug === '' ? $home : $home . '?page=' . $slug) . '"' . ($active === $key ? ' aria-current="page"' : '') . '>' . e(tr($label)) . '</a>';
     }
     return $h . '</nav>';
 }
 // University crest (inline SVG shield: lamp of learning + open book). Decorative by design.
 function siteCrest(): string {
-    return '<svg viewBox="0 0 40 48" role="img" aria-label="University crest"><path d="M20 1 37 8v14c0 10-7.5 18-17 25C10.5 40 3 32 3 22V8Z" fill="#0f2a52" stroke="#c9a227" stroke-width="2"/><path d="M20 5.5 33.5 10.5V22c0 8-6 14.5-13.5 20-7.5-5.5-13.5-12-13.5-20V10.5Z" fill="none" stroke="#e9cf7a" stroke-width="1"/><path d="M14 30c2-1.6 4-2.4 6-2.4s4 .8 6 2.4c-2 1.6-4 2.4-6 2.4s-4-.8-6-2.4Z" fill="#e9cf7a"/><path d="M20 27.6v-9m-3.4 1.6 3.4-4 3.4 4" stroke="#e9cf7a" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="20" cy="13" r="2.2" fill="#e9cf7a"/><path d="M12 35.5c2.5-1.4 5.2-2 8-2s5.5.6 8 2" stroke="#e9cf7a" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>';
+    return '<svg viewBox="0 0 40 48" role="img" aria-label="University crest"><path d="M20 1 37 8v14c0 10-7.5 18-17 25C10.5 40 3 32 3 22V8Z" fill="#1A365D" stroke="#c9a227" stroke-width="2"/><path d="M20 5.5 33.5 10.5V22c0 8-6 14.5-13.5 20-7.5-5.5-13.5-12-13.5-20V10.5Z" fill="none" stroke="#e9cf7a" stroke-width="1"/><path d="M14 30c2-1.6 4-2.4 6-2.4s4 .8 6 2.4c-2 1.6-4 2.4-6 2.4s-4-.8-6-2.4Z" fill="#e9cf7a"/><path d="M20 27.6v-9m-3.4 1.6 3.4-4 3.4 4" stroke="#e9cf7a" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="20" cy="13" r="2.2" fill="#e9cf7a"/><path d="M12 35.5c2.5-1.4 5.2-2 8-2s5.5.6 8 2" stroke="#e9cf7a" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>';
 }
 function siteHeader(string $brand, string $kind, string $active, string $buttons, array $ticker = []): string {
     return '<header class="u-header"><a class="u-brand" href="' . e(siteHomeUrl()) . '" title="Back to the university website"><span class="u-brand-mark">' . siteCrest() . '</span><span>' . e($brand) . '<em>' . e($kind) . '</em></span></a>' . siteNav($active) . '<div class="u-header-btns">' . siteToggle() . $buttons . '</div></header>' . siteTicker($ticker);
@@ -63,15 +81,25 @@ function siteBrand(): array {
         return $fallback;
     }
 }
+// Small Indian flag placeholder (inline SVG tricolor).
+function siteFlag(): string {
+    return '<svg class="u-flag" viewBox="0 0 30 20" role="img" aria-label="Indian flag"><rect width="30" height="20" fill="#fff" stroke="#c9a227"/><rect width="30" height="6.7" fill="#FF9933"/><rect y="13.3" width="30" height="6.7" fill="#138808"/><circle cx="15" cy="10" r="2.4" fill="none" stroke="#06038D" stroke-width="1"/></svg>';
+}
+// Social icons (decorative placeholders until the institute shares its real profile URLs).
+function siteSocial(): string {
+    $icons = [['Facebook', 'f'], ['Instagram', 'ig'], ['Twitter', 't'], ['YouTube', '▶']];
+    $h = '<div class="u-social">';
+    foreach ($icons as [$label, $glyph]) $h .= '<span title="' . e($label) . '" aria-label="' . e($label) . '">' . e($glyph) . '</span>';
+    return $h . '</div>';
+}
 function siteFooter(string $brand, string $kind, string $city = '', string $address = '', string $phone = ''): string {
     $home = siteHomeUrl();
     $h = '<footer class="u-footer"><div class="u-footer-grid"><div><strong>' . e($brand) . '</strong><p>' . e($kind) . ($city !== '' ? ' · ' . e($city) : '') . '</p>';
-    if (trim($address) !== '') $h .= '<p>' . e($address) . '</p>';
-    if ($phone !== '') $h .= '<p>☎ ' . e($phone) . '</p>';
-    $h .= '</div><div><h4>University</h4><nav aria-label="University"><a href="' . e($home . '?page=about') . '">About us</a><a href="' . e($home . '?page=courses') . '">Programs</a><a href="' . e($home . '?page=admissions') . '">Admissions</a><a href="' . e($home . '?page=notices') . '">Notices</a><a href="' . e($home . '?page=faculty') . '">Faculty</a></nav></div>';
-    $h .= '<div><h4>Portals</h4><nav aria-label="Portals"><a href="' . e(sitePublicUrl('apply.php')) . '">Apply online</a><a href="' . e(sitePublicUrl('student.php?page=register')) . '">Create account</a><a href="' . e($home . '?page=login') . '">Sign in</a><a href="' . e(sitePublicUrl('index.php')) . '">Office login</a></nav></div>';
-    $h .= '<div><h4>Reach us</h4><p>' . ($address !== '' ? e($address) . '<br>' : '') . ($city !== '' ? e($city) : '') . '</p>' . ($phone !== '' ? '<p>☎ ' . e($phone) . '</p>' : '') . '<p><a href="' . e($home . '?page=contact') . '">All campuses →</a></p></div></div>';
-    $h .= '<div class="u-footer-bottom"><span>© ' . date('Y') . ' ' . e($brand) . '. All rights reserved.</span><span>Admissions open · Apply online</span></div></footer>';
+    $h .= '<h4>' . e(tr('Follow Us')) . '</h4>' . siteSocial() . '</div>';
+    $h .= '<div><h4>' . e(tr('Quick Links')) . '</h4><nav aria-label="University"><a href="' . e($home . '?page=about') . '">' . e(tr('About us')) . '</a><a href="' . e($home . '?page=courses') . '">' . e(tr('Programs')) . '</a><a href="' . e($home . '?page=admissions') . '">' . e(tr('Admissions')) . '</a><a href="' . e($home . '?page=notices') . '">' . e(tr('Notices')) . '</a><a href="' . e($home . '?page=faculty') . '">' . e(tr('Faculty')) . '</a></nav></div>';
+    $h .= '<div><h4>' . e(tr('Portals')) . '</h4><nav aria-label="Portals"><a href="' . e(sitePublicUrl('apply.php')) . '">' . e(tr('Apply online')) . '</a><a href="' . e(sitePublicUrl('student.php?page=register')) . '">' . e(tr('Create account')) . '</a><a href="' . e($home . '?page=login') . '">' . e(tr('Sign in')) . '</a><a href="' . e(sitePublicUrl('index.php')) . '">' . e(tr('Office login')) . '</a></nav></div>';
+    $h .= '<div><h4>' . e(tr('Address')) . '</h4><p>' . ($address !== '' ? e($address) . '<br>' : '') . ($city !== '' ? e($city) : '') . '</p>' . ($phone !== '' ? '<p>☎ ' . e($phone) . '</p>' : '') . '<p><a href="' . e($home . '?page=contact') . '">' . e(tr('All campuses')) . ' →</a></p></div></div>';
+    $h .= '<div class="u-footer-bottom"><span>© ' . date('Y') . ' ' . e($brand) . '. ' . e(tr('All rights reserved.')) . '</span><span>' . e(tr('Admissions open · Apply online')) . '</span></div></footer>';
     return $h;
 }
 // ---- Homepage showcase content (STARTER TEMPLATE — replace with your real approvals,
@@ -79,8 +107,11 @@ function siteFooter(string $brand, string $kind, string $city = '', string $addr
 function siteAccreditations(): array {
     return [['🏵', 'NAAC A++', 'ACCREDITED'], ['🎖', 'NIRF RANKED #5', 'RANKED #5'], ['🏛', 'UGC', 'APPROVED']];
 }
+function siteShowcasePrograms(): array {
+    return ['ENGINEERING & TECHNOLOGY', 'MEDICINE & HEALTH SCIENCES', 'MANAGEMENT STUDIES', 'ARTS & HUMANITIES'];
+}
 function siteRecruiters(): array {
-    return [['🏥', 'Hospitals'], ['💊', 'Pharma companies'], ['🔬', 'Diagnostic labs'], ['🧪', 'Research labs'], ['🩺', 'Clinics'], ['📋', 'Clinical trials']];
+    return [['🌐', 'International Companies'], ['🚚', 'DHL'], ['🏅', 'NIRF']];
 }
 function siteVcMessage(string $brand): string {
     return 'Warm welcome to ' . $brand . '. Our classrooms, laboratories and clinics exist for one purpose — your growth. With caring faculty, verified admissions and a modern student portal, we walk beside you from your first application to your graduation day and beyond.';
