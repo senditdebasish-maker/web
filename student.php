@@ -19,6 +19,7 @@ try {
     if (!$ready) { http_response_code(503); $page='unavailable'; }
     else {
         if ($_SERVER['REQUEST_METHOD']==='POST') {
+            requireCookies();
             if (!hash_equals($_SESSION['csrf'],input('csrf',128))) fail('Your form expired. Refresh and try again.');
             $action=input('action',40);
             if (in_array($action,['register_request','register_verify'],true) && portalStudent()) { header('Location: student.php');exit; }

@@ -26,6 +26,12 @@ function sessionCookieParams(): array {
     return ['httponly' => true, 'secure' => $https, 'samesite' => $https ? 'None' : 'Lax', 'path' => '/'];
 }
 function fail(string $message): never { throw new DomainException($message); }
+// Friendly diagnosis when the browser sends no cookies at all (embedded previews
+// with blocked third-party cookies). Normal expired sessions still carry a cookie
+// and keep their original messages.
+function requireCookies(): void {
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && $_COOKIE === []) fail('Your browser blocked the login cookie, so this page cannot remember you between steps. Open this page in a new browser tab — not inside another website — and try again.');
+}
 function input(string $key, int $max = 200, bool $required = true): string {
     $v = $_POST[$key] ?? '';
     if (!is_string($v)) fail('Invalid field: ' . $key);

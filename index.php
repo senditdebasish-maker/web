@@ -122,6 +122,7 @@ if ($page === 'login' || $siteAction !== '') {
     if ($siteAction !== '') $page = 'login';
     try {
         if (!$ready) throw new DomainException(tr('The portal is not set up yet. Please contact the institute office.'));
+        if ($siteAction !== '') requireCookies();
         switch ($siteAction) {
             case '':
                 siteSession('northstar_site');

@@ -35,48 +35,31 @@ function scoped(string $alias=''): array { global $scope; return $scope ? [($ali
 function url(array $overrides=[]): string { return '?'.http_build_query(array_merge($_GET,$overrides)); }
 function loginPrefill(): string { $v=is_string($_GET['email'] ?? null)?trim(substr($_GET['email'],0,200)):''; return filter_var($v,FILTER_VALIDATE_EMAIL)?$v:''; }
 ?>
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Northstar · Institute CRM</title><link rel="stylesheet" href="assets/app.css"><?php if(!$user): ?><link rel="stylesheet" href="assets/home.css"><?php endif; ?><link rel="stylesheet" href="assets/university.css"><link rel="stylesheet" href="assets/theme.css"><script src="assets/app.js" defer></script><script src="assets/theme.js" defer></script></head><body>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Northstar · Institute CRM</title><?php if($user): ?><link rel="stylesheet" href="assets/app.css"><?php endif; ?><link rel="stylesheet" href="assets/university.css"><link rel="stylesheet" href="assets/theme.css"><?php if($user): ?><script src="assets/app.js" defer></script><?php endif; ?><script src="assets/theme.js" defer></script></head><body>
 <?php if(!$user):
-$homeCourses=[];
-try { if(function_exists('publicCourses') && applicationsReady()) $homeCourses=array_slice(publicCourses(0),0,6); } catch(Throwable $ignored) { $homeCourses=[]; }
-$homeInstitutes=[];
-foreach($homeCourses as $hc){ $k=(int)$hc['institute_id']; if(!isset($homeInstitutes[$k])) $homeInstitutes[$k]=['name'=>$hc['institute_name'],'kind'=>$hc['kind'],'city'=>$hc['city'],'phone'=>$hc['phone']]; }
-$homeCities=array_values(array_unique(array_column($homeInstitutes,'city')));
+[$obBrand,$obKind,$obCity,$obAddr,$obPhone]=siteBrand();
 ?>
-<div class="home">
-<div class="u-topbar"><span>Admissions open · D.Pharm &amp; allied medical programs</span><span><a href="student.php">Student Login</a> · <a href="#office-login">Office Login</a> · <?=siteBackLink()?></span></div>
-<?php $siteBrand=siteBrand(); $siteTicker=[]; foreach($homeCourses as $hc){ $siteTicker[]='Admissions open: '.$hc['name'].' — apply by '.$hc['closes_on']; } ?>
-<?=siteHeader($siteBrand[0],$siteBrand[1],'home','<a class="u-btn ghost" href="student.php">🎓 Student Login</a><a class="u-btn solid" href="#office-login">💼 Office Login</a>',$siteTicker)?>
-<section class="home-hero"><div class="home-hero-text"><div class="home-eyebrow">DIPLOMA IN PHARMACY (D.PHARM) &middot; ADMISSIONS OPEN</div><h1>Your pharmacy career starts here.</h1><p>Explore D.Pharm and allied medical programs, create your free student account, and apply online &mdash; then track your application to the office decision.</p><div class="home-cta"><a class="home-btn solid big" href="apply.php">Apply for Admission <span>&rarr;</span></a><a class="home-btn ghost big" href="#courses">Explore Courses</a><a class="home-btn ghost big" href="student.php?page=register">Create Student Account</a></div><div class="home-badges"><span>✓ Online Applications</span><span>✓ Verified Admissions</span><span>✓ Secure Student Portal</span></div><div class="home-stats"><div><strong><?=count($homeInstitutes)?></strong><span>Institutes</span></div><div><strong><?=count($homeCourses)?></strong><span>Courses open</span></div><div><strong><?=count($homeCities)?></strong><span>Cities</span></div></div></div><div class="home-hero-card" aria-hidden="true"><div class="home-hero-cross">+</div><p>D.Pharm<br><span>Pharmacy &amp; Medical<br>Programs</span></p></div></section>
-<section class="home-section" id="courses"><div class="home-eyebrow">OPEN FOR APPLICATIONS</div><h2>Courses accepting applications</h2>
-<?php if(!$homeCourses): ?><p class="home-muted">Admissions are opening soon. Please check back shortly or contact the institute office.</p><?php else: ?><div class="home-grid"><?php foreach($homeCourses as $hc): ?><article class="home-card"><div class="home-eyebrow"><?=e($hc['institute_name'])?></div><h3><?=e($hc['name'])?></h3><p class="home-meta"><?=e($hc['duration'])?> &middot; <?=e($hc['city'])?></p><p class="home-fee">Course fee: <strong>&#8377;<?=number_format((int)$hc['fee_minor']/100,2)?></strong></p><p class="home-snippet"><?=e(mb_substr($hc['eligibility'],0,140))?>&hellip;</p><p class="home-apply-by">Apply by <?=e($hc['closes_on'])?></p><a class="home-btn solid" href="apply.php?page=course&course=<?=(int)$hc['id']?>">Details &amp; Apply &rarr;</a></article><?php endforeach; ?></div><?php endif; ?>
-<p class="home-more"><a href="apply.php">See all open courses &rarr;</a></p></section>
-<section class="home-section home-alt" id="institutes"><div class="home-eyebrow">OUR INSTITUTIONS</div><h2>Campuses you can apply to</h2>
-<?php if(!$homeInstitutes): ?><p class="home-muted">Institute details will appear here once admissions open.</p><?php else: ?><div class="home-grid"><?php foreach($homeInstitutes as $hi): ?><article class="home-card"><h3><?=e($hi['name'])?></h3><p class="home-meta"><?=e($hi['kind'])?> &middot; <?=e($hi['city'])?></p><p class="home-phone">&#9742; <?=e($hi['phone'])?></p><a class="home-link" href="apply.php">View open courses &rarr;</a></article><?php endforeach; ?></div><?php endif; ?></section>
-<section class="home-section"><div class="home-eyebrow">ADMISSION PROCESS</div><h2>Four simple steps</h2><div class="home-steps"><div><span>1</span><strong>Create your account</strong><p>Register with your email and verify the code.</p></div><div><span>2</span><strong>Apply online</strong><p>Fill one simple form for your chosen course.</p></div><div><span>3</span><strong>Office verification</strong><p>The office checks eligibility and documents.</p></div><div><span>4</span><strong>Track &amp; join</strong><p>Follow your status, then open your student portal.</p></div></div></section>
-<section class="home-section home-alt"><div class="home-eyebrow">ELIGIBILITY</div><h2>Who can apply for D.Pharm?</h2><p>Applicants typically need <strong>10+2 with Physics, Chemistry and Biology/Mathematics</strong>. Final eligibility, seat availability and document verification are confirmed by the institute office before admission. Read each course&apos;s eligibility note before applying.</p></section>
-<section class="home-section" id="contact"><div class="home-eyebrow">CONTACT</div><h2>Talk to the office</h2><?php if(!$homeInstitutes): ?><p class="home-muted">Contact details will appear here once admissions open.</p><?php else: ?><div class="home-grid"><?php foreach($homeInstitutes as $hi): ?><article class="home-card"><h3><?=e($hi['name'])?></h3><p class="home-meta"><?=e($hi['city'])?></p><p class="home-phone">&#9742; <?=e($hi['phone'])?></p></article><?php endforeach; ?></div><?php endif; ?><p class="home-muted">For admission help, use the phone number on your course page. Never share passwords or OTP codes with anyone.</p></section>
-<main class="login-form home-office" id="office-login">
-<div class="eyebrow">WELCOME BACK</div><h2>Your workspace awaits</h2><p class="muted">Sign in to manage your institute community.</p>
-<?php if($error): ?><div class="alert error" role="alert"><?=e($error)?></div><?php endif; ?>
-<?php if($flash): ?><div class="alert success" role="status"><?=e($flash)?></div><?php endif; ?>
+<?=siteHeader($obBrand,$obKind,'','<a class="u-btn ghost" href="student.php">Student sign-in</a><a class="u-btn ghost" href="apply.php">Admissions</a>'.siteToggle().siteBackLink())?>
+<main class="u-auth-wrap"><div class="u-card"><div class="u-eyebrow">WELCOME BACK</div><h1>Your workspace awaits</h1><p class="u-muted">Sign in to manage your institute community.</p>
+<?php if($error): ?><div class="u-alert error" role="alert"><?=e($error)?></div><?php endif; ?>
+<?php if($flash): ?><div class="u-alert" role="status"><?=e($flash)?></div><?php endif; ?>
 <?php if(otpEnabled()): ?>
-<div class="auth-method">✉ &nbsp; Secure email-code sign in</div>
-<?php if(($config['environment'] ?? '')==='local' && ($config['mail']['transport'] ?? '')==='log'): ?><p class="inline-note">Local test mode: no real emails are sent. The server operator can read the code in the private <code>storage/mail/</code> capture files.</p><?php endif; ?>
+<p><strong>&#9993; &nbsp; Secure email-code sign in</strong></p>
+<?php if(($config['environment'] ?? '')==='local' && ($config['mail']['transport'] ?? '')==='log'): ?><p class="u-small">Local test mode: no real emails are sent. The server operator can read the code in the private <code>storage/mail/</code> capture files.</p><?php endif; ?>
 <?php if(isset($_SESSION['otp'])): ?>
-<p class="inline-note">Enter the six-digit code for <strong><?=e($_SESSION['otp']['email'])?></strong>. Use this browser; the code expires in 5 minutes.</p>
-<?php formStart('verify_otp'); ?>
-<label>One-time code<input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="000000" required class="otp-input"></label>
-<?php formEnd('Verify & sign in'); ?>
-<hr class="soft-rule">
+<p class="u-small">Enter the six-digit code for <strong><?=e($_SESSION['otp']['email'])?></strong>. Use this browser; the code expires in 5 minutes.</p>
+<form method="post" class="u-form"><?=csrf()?><input type="hidden" name="action" value="verify_otp"><label>One-time code<input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="000000" required class="u-code"></label><button class="u-btn solid" type="submit">Verify &amp; sign in →</button></form>
+<hr class="u-rule">
 <?php endif; ?>
-<?php formStart('request_otp'); field('Staff email address','email',$_SESSION['otp']['email'] ?? loginPrefill(),'email'); formEnd(isset($_SESSION['otp'])?'Send a new code':'Send sign-in code'); ?>
-<p class="login-note">No password needed. Codes are sent only to existing, active staff accounts. Wait 60 seconds before resending.</p>
-<?php else: formStart('login'); field('Email address','email',loginPrefill(),'email'); field('Password','password','','password'); formEnd('Sign in to workspace'); endif; ?>
-<p class="login-note">Need an account? Contact your institute administrator.<br>First time setting up? Follow the README installation guide.<br><a href="student.php">Student? Open your student portal →</a><br><a href="apply.php">New applicant? Browse courses &amp; apply →</a></p>
-</main>
-<?=siteFooter($siteBrand[0],$siteBrand[1],$siteBrand[2],$siteBrand[3],$siteBrand[4])?>
-</div>
+<form method="post" class="u-form"><?=csrf()?><input type="hidden" name="action" value="request_otp"><?php field('Staff email address','email',$_SESSION['otp']['email'] ?? loginPrefill(),'email'); ?><button class="u-btn solid" type="submit"><?=isset($_SESSION['otp'])?'Send a new code':'Send sign-in code'?> →</button></form>
+<p class="u-small">No password needed. Codes are sent only to existing, active staff accounts. Wait 60 seconds before resending.</p>
+<?php else: ?>
+<form method="post" class="u-form"><?=csrf()?><input type="hidden" name="action" value="login"><?php field('Email address','email',loginPrefill(),'email'); field('Password','password','','password'); ?><button class="u-btn solid" type="submit">Sign in to workspace →</button></form>
+<?php endif; ?>
+<p class="u-small">Need an account? Contact your institute administrator. First time setting up? Follow the README installation guide.</p>
+<div class="u-auth-links"><a href="student.php">Student? Open your student portal →</a><a href="apply.php">New applicant? Browse courses &amp; apply →</a></div>
+</div></main>
+<?=siteFooter($obBrand,$obKind,$obCity,$obAddr,$obPhone)?>
 <?php else:
 try {
 $admin=in_array($user['role'],['owner','admin'],true);

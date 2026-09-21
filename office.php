@@ -20,6 +20,7 @@ $page=is_string($_GET['page'] ?? null) ? $_GET['page'] : 'dashboard';
 $error=null;
 try {
     if ($_SERVER['REQUEST_METHOD']==='POST') {
+        requireCookies();
         $next=handleAction(); $_SESSION['flash'] ??=($_POST['action']==='login' ? 'Welcome back. Your workspace is ready.' : 'Changes saved successfully.'); redirect($next);
     }
     $user=currentUser();

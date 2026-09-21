@@ -19,6 +19,7 @@ try{
             ob_clean();serveCertificateFile($c);
         }
         if($_SERVER['REQUEST_METHOD']==='POST'){
+            requireCookies();
             if(!hash_equals($_SESSION['csrf'],input('csrf',128)))fail('Your form expired. Refresh and try again.');
             $action=input('action',40);$next='login';
             if($action==='request_code')requestApplicantCode();
