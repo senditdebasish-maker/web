@@ -81,6 +81,8 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
           'fresh install includes institute address column')
     check('Park Street' in scalar('SELECT address FROM institutes WHERE id=1'),
           'demo institutes carry campus addresses')
+    check((ROOT / 'public' / 'assets' / 'campus-hero.jpg').is_file(),
+          'homepage hero image is packaged with the site')
     iid = scalar('SELECT id FROM institutes ORDER BY id LIMIT 1')
     cid = scalar('SELECT id FROM courses WHERE institute_id=?', (iid,))
     sid = scalar('SELECT id FROM students ORDER BY id LIMIT 1')
@@ -110,6 +112,10 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
               'homepage lists the open CRM program')
         check('data-theme-toggle' in uni.html and 'theme.js' in uni.html,
               'homepage offers the dark-mode toggle')
+        check('u-ticker' in uni.html and 'Admission helpline' in uni.html,
+              'homepage ticker announces live admission dates')
+        check('Vice-Chancellor' in uni.html and 'Top recruiters' in uni.html and 'NAAC A++' in uni.html,
+              'homepage shows the message, badges and recruiters showcase')
         check('OUR CAMPUSES' in uni.get('index.php?page=about') and 'Howrah' in uni.html,
               'about page lists CRM campuses')
         check('1 program open' in uni.get('index.php?page=courses') and 'Apply by' in uni.html,

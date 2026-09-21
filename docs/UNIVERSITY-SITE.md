@@ -29,6 +29,22 @@ the site brand; every institute appears under About and Contact. The `address` c
 is added automatically by `public/upgrade.php` / `bin/migrate.php`; fresh installs
 include it.
 
+## Homepage design and starter showcase content
+
+The homepage follows a classic university layout: navy crest header, scrolling
+announcement ticker (built live from CRM admission dates and closing dates), a
+campus hero banner (`public/assets/campus-hero.jpg` — replace this file with a
+photo of your own campus to rebrand instantly), accreditation badges, a stats
+band, featured programs, notices, and a sidebar with the Vice-Chancellor's
+message, program links, recruiters and contact card.
+
+Almost everything is live CRM data. The only starter template pieces are the
+accreditation badges, the recruiter tiles and the welcome message — edit
+`siteAccreditations()`, `siteRecruiters()` and `siteVcMessage()` in
+`app/site-chrome.php` to put your institute's real approvals, recruiters and
+message. A future Website Settings page in the office workspace will make these
+editable without touching code.
+
 ## One theme, no dead ends
 
 The root site and every portal page share one theme (`app/site-chrome.php` +

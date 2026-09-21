@@ -30,8 +30,21 @@ function siteNav(string $active = ''): string {
     }
     return $h . '</nav>';
 }
-function siteHeader(string $brand, string $kind, string $active, string $buttons): string {
-    return '<header class="u-header"><a class="u-brand" href="' . e(siteHomeUrl()) . '" title="Back to the university website"><span class="u-brand-mark">+</span><span>' . e($brand) . '<em>' . e($kind) . '</em></span></a>' . siteNav($active) . '<div class="u-header-btns">' . siteToggle() . $buttons . '</div></header>';
+// University crest (inline SVG shield: lamp of learning + open book). Decorative by design.
+function siteCrest(): string {
+    return '<svg viewBox="0 0 40 48" role="img" aria-label="University crest"><path d="M20 1 37 8v14c0 10-7.5 18-17 25C10.5 40 3 32 3 22V8Z" fill="#0f2a52" stroke="#c9a227" stroke-width="2"/><path d="M20 5.5 33.5 10.5V22c0 8-6 14.5-13.5 20-7.5-5.5-13.5-12-13.5-20V10.5Z" fill="none" stroke="#e9cf7a" stroke-width="1"/><path d="M14 30c2-1.6 4-2.4 6-2.4s4 .8 6 2.4c-2 1.6-4 2.4-6 2.4s-4-.8-6-2.4Z" fill="#e9cf7a"/><path d="M20 27.6v-9m-3.4 1.6 3.4-4 3.4 4" stroke="#e9cf7a" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="20" cy="13" r="2.2" fill="#e9cf7a"/><path d="M12 35.5c2.5-1.4 5.2-2 8-2s5.5.6 8 2" stroke="#e9cf7a" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>';
+}
+function siteHeader(string $brand, string $kind, string $active, string $buttons, array $ticker = []): string {
+    return '<header class="u-header"><a class="u-brand" href="' . e(siteHomeUrl()) . '" title="Back to the university website"><span class="u-brand-mark">' . siteCrest() . '</span><span>' . e($brand) . '<em>' . e($kind) . '</em></span></a>' . siteNav($active) . '<div class="u-header-btns">' . siteToggle() . $buttons . '</div></header>' . siteTicker($ticker);
+}
+// Scrolling announcement strip under the header. Items repeat twice for a seamless loop.
+function siteTicker(array $items): string {
+    $items = array_values(array_filter(array_map('trim', array_map('strval', $items)), fn($s) => $s !== ''));
+    if (!$items) return '';
+    $loop = array_merge($items, $items);
+    $h = '<div class="u-ticker" role="marquee" aria-label="Announcements"><div class="u-ticker-track">';
+    foreach ($loop as $item) $h .= '<span>' . e($item) . '</span>';
+    return $h . '</div></div>';
 }
 function siteBackLink(string $class = ''): string {
     return '<a' . ($class !== '' ? ' class="' . e($class) . '"' : '') . ' href="' . e(siteHomeUrl()) . '">← Back to website</a>';
@@ -52,10 +65,23 @@ function siteBrand(): array {
 }
 function siteFooter(string $brand, string $kind, string $city = '', string $address = '', string $phone = ''): string {
     $home = siteHomeUrl();
-    $h = '<footer class="u-footer"><div><strong>' . e($brand) . '</strong><p>' . e($kind) . ($city !== '' ? ' · ' . e($city) : '') . '</p>';
+    $h = '<footer class="u-footer"><div class="u-footer-grid"><div><strong>' . e($brand) . '</strong><p>' . e($kind) . ($city !== '' ? ' · ' . e($city) : '') . '</p>';
     if (trim($address) !== '') $h .= '<p>' . e($address) . '</p>';
     if ($phone !== '') $h .= '<p>☎ ' . e($phone) . '</p>';
-    $h .= '</div><nav aria-label="University"><a href="' . e($home . '?page=about') . '">About</a><a href="' . e($home . '?page=courses') . '">Programs</a><a href="' . e($home . '?page=admissions') . '">Admissions</a><a href="' . e($home . '?page=notices') . '">Notices</a><a href="' . e($home . '?page=contact') . '">Contact</a></nav>';
-    $h .= '<nav aria-label="Portals"><a href="' . e(sitePublicUrl('apply.php')) . '">Apply</a><a href="' . e(sitePublicUrl('student.php?page=register')) . '">Create account</a><a href="' . e($home . '?page=login') . '">Sign in</a><a href="' . e(sitePublicUrl('index.php')) . '">Office</a></nav></footer>';
+    $h .= '</div><div><h4>University</h4><nav aria-label="University"><a href="' . e($home . '?page=about') . '">About us</a><a href="' . e($home . '?page=courses') . '">Programs</a><a href="' . e($home . '?page=admissions') . '">Admissions</a><a href="' . e($home . '?page=notices') . '">Notices</a><a href="' . e($home . '?page=faculty') . '">Faculty</a></nav></div>';
+    $h .= '<div><h4>Portals</h4><nav aria-label="Portals"><a href="' . e(sitePublicUrl('apply.php')) . '">Apply online</a><a href="' . e(sitePublicUrl('student.php?page=register')) . '">Create account</a><a href="' . e($home . '?page=login') . '">Sign in</a><a href="' . e(sitePublicUrl('index.php')) . '">Office login</a></nav></div>';
+    $h .= '<div><h4>Reach us</h4><p>' . ($address !== '' ? e($address) . '<br>' : '') . ($city !== '' ? e($city) : '') . '</p>' . ($phone !== '' ? '<p>☎ ' . e($phone) . '</p>' : '') . '<p><a href="' . e($home . '?page=contact') . '">All campuses →</a></p></div></div>';
+    $h .= '<div class="u-footer-bottom"><span>© ' . date('Y') . ' ' . e($brand) . '. All rights reserved.</span><span>Admissions open · Apply online</span></div></footer>';
     return $h;
+}
+// ---- Homepage showcase content (STARTER TEMPLATE — replace with your real approvals,
+// recruiters and welcome message; everything else on the site is live CRM data). ----
+function siteAccreditations(): array {
+    return [['🏵', 'NAAC A++', 'ACCREDITED'], ['🎖', 'NIRF RANKED #5', 'RANKED #5'], ['🏛', 'UGC', 'APPROVED']];
+}
+function siteRecruiters(): array {
+    return [['🏥', 'Hospitals'], ['💊', 'Pharma companies'], ['🔬', 'Diagnostic labs'], ['🧪', 'Research labs'], ['🩺', 'Clinics'], ['📋', 'Clinical trials']];
+}
+function siteVcMessage(string $brand): string {
+    return 'Warm welcome to ' . $brand . '. Our classrooms, laboratories and clinics exist for one purpose — your growth. With caring faculty, verified admissions and a modern student portal, we walk beside you from your first application to your graduation day and beyond.';
 }
