@@ -14,6 +14,7 @@ if ($ready) {
     require $root . '/app/bootstrap.php';
     require_once $root . '/app/applications.php';
 }
+require_once $root . '/app/site-chrome.php';
 $institutes = [];
 $programs = [];
 $teachers = [];
@@ -99,9 +100,7 @@ function uDocHead(string $title, string $brand): void {
 ?>
 <?php uDocHead(['home' => 'Admissions open', 'about' => 'About us', 'courses' => 'Programs & courses', 'admissions' => 'Admissions', 'notices' => 'Notices & dates', 'faculty' => 'Faculty', 'contact' => 'Contact', 'login' => 'Sign in', 'notfound' => 'Page not found'][$page], $brand); ?>
 <div class="u-topbar"><span>Admissions open · D.Pharm &amp; allied medical programs</span><span><a href="public/student.php">Student Login</a> · <a href="public/index.php">Office Login</a></span></div>
-<header class="u-header"><a class="u-brand" href="?"><span class="u-brand-mark">+</span><span><?= e($brand) ?><em><?= e($brandKind) ?></em></span></a>
-<nav class="u-nav" aria-label="University"><a href="?" <?= $page === 'home' ? 'aria-current="page"' : '' ?>>Home</a><a href="?page=about" <?= $page === 'about' ? 'aria-current="page"' : '' ?>>About</a><a href="?page=courses" <?= $page === 'courses' ? 'aria-current="page"' : '' ?>>Programs</a><a href="?page=admissions" <?= $page === 'admissions' ? 'aria-current="page"' : '' ?>>Admissions</a><a href="?page=notices" <?= $page === 'notices' ? 'aria-current="page"' : '' ?>>Notices</a><a href="?page=faculty" <?= $page === 'faculty' ? 'aria-current="page"' : '' ?>>Faculty</a><a href="?page=contact" <?= $page === 'contact' ? 'aria-current="page"' : '' ?>>Contact</a></nav>
-<div class="u-header-btns"><button class="theme-toggle" data-theme-toggle type="button" aria-label="Toggle dark mode" title="Toggle dark mode"><span aria-hidden="true">🌙</span></button><a class="u-btn ghost" href="?page=login">Sign In</a><a class="u-btn solid" href="public/apply.php">Apply Now</a></div></header>
+<?=siteHeader($brand,$brandKind,$page,'<a class="u-btn ghost" href="'.e(siteHomeUrl().'?page=login').'">Sign In</a><a class="u-btn solid" href="'.e(sitePublicUrl('apply.php')).'">Apply Now</a>')?>
 <main class="u-main">
 <?php if (!$ready): ?>
 <section class="u-card u-setup"><h1>Welcome — setup required</h1><p>This university website is connected to the institute CRM, which has not been installed yet. The server administrator should open the setup wizard to create the database, owner account and first institute. This page updates itself automatically afterwards.</p><p><a class="u-btn solid" href="public/setup.php">Open setup wizard →</a></p></section>
@@ -135,5 +134,5 @@ function uDocHead(string $title, string $brand): void {
 <section class="u-card"><h1>Page not found</h1><p>This university page does not exist.</p><p><a class="u-btn solid" href="?">Back to home →</a></p></section>
 <?php endif; ?>
 </main>
-<footer class="u-footer"><div><strong><?= e($brand) ?></strong><p><?= e($brandKind) ?><?= $brandCity ? ' · ' . e($brandCity) : '' ?></p><?php if (trim($brandAddress) !== ''): ?><p><?= e($brandAddress) ?></p><?php endif; ?><?php if ($brandPhone !== ''): ?><p>☎ <?= e($brandPhone) ?></p><?php endif; ?></div><nav aria-label="University"><a href="?page=about">About</a><a href="?page=courses">Programs</a><a href="?page=admissions">Admissions</a><a href="?page=notices">Notices</a><a href="?page=contact">Contact</a></nav><nav aria-label="Portals"><a href="public/apply.php">Apply</a><a href="public/student.php?page=register">Create account</a><a href="?page=login">Sign in</a><a href="public/index.php">Office</a></nav></footer>
+<?=siteFooter($brand,$brandKind,$brandCity,$brandAddress,$brandPhone)?>
 </body></html>

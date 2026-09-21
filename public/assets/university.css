@@ -624,3 +624,139 @@ html[data-theme="dark"] .u-alert.error {
     width: 100%;
   }
 }
+
+/* Shared portal chrome: the office, student and admissions pages use the same
+   university theme (same tokens, same header/nav/footer/buttons). Loaded before
+   theme.css so dark-mode refinements there keep winning. */
+.sp-top {
+  max-width: 1180px;
+  margin: 14px auto 0;
+  position: sticky;
+  top: 10px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 12px 18px;
+  background: color-mix(in srgb, var(--t-card, #fff) 90%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--t-line, #e2e7f0);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px #1c21400a;
+}
+.sp-top .u-brand {
+  font-size: 18px;
+}
+.sp-top .u-brand-mark {
+  width: 36px;
+  height: 36px;
+  font-size: 19px;
+}
+.sp-top-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+.sp-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 15px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13.5px;
+  background: var(--t-card, #fff);
+  color: var(--t-ink, #1e2a32);
+  border: 1px solid var(--t-line, #e2e7f0);
+}
+.sp-back:hover {
+  border-color: #0d6e5f;
+  color: #0d6e5f;
+}
+.sp-nav {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+.sp-nav a {
+  color: var(--t-ink, #1e2a32);
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+.sp-nav a:hover {
+  background: #0d6e5f12;
+  color: #0d6e5f;
+}
+.sp-nav a[aria-current="page"] {
+  background: #0d6e5f;
+  color: #fff;
+}
+.sp-footer,
+.app-footer,
+.sp-footnote {
+  max-width: 1180px;
+  margin: 26px auto 30px;
+  padding: 18px 22px 0;
+  border-top: 1px solid var(--t-line, #e2e7f0);
+  color: var(--t-muted, #5c6474);
+  font-size: 13.5px;
+  display: flex;
+  gap: 8px 18px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+.sp-footer a,
+.app-footer a,
+.sp-footnote a {
+  color: var(--t-teal, #0d6e5f);
+  font-weight: 600;
+}
+.nav-link.site-back {
+  color: var(--t-teal, #0d6e5f);
+  font-weight: 700;
+  border: 1px dashed var(--t-line, #e2e7f0);
+  border-radius: 10px;
+}
+.sidebar .brand-mark {
+  background: linear-gradient(135deg, #0d6e5f, #0f8672);
+  color: #fff;
+}
+.nav-link.active {
+  background: #0d6e5f14;
+  color: #0b5a4e;
+}
+.button:not(.secondary),
+.sp-button {
+  background: linear-gradient(135deg, #0d6e5f, #0f8672);
+  color: #fff;
+  border-color: transparent;
+}
+.card,
+.panel,
+.sp-card,
+.stat {
+  border-radius: 14px;
+  border: 1px solid var(--t-line, #e2e7f0);
+  box-shadow: var(--t-shadow, 0 12px 32px #1c21400d);
+}
+@media (max-width: 760px) {
+  .sp-top {
+    position: static;
+    margin: 10px 12px 0;
+  }
+  .sp-footer,
+  .app-footer,
+  .sp-footnote {
+    margin: 20px 12px 24px;
+    justify-content: center;
+    text-align: center;
+  }
+}

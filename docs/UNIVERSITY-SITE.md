@@ -29,6 +29,16 @@ the site brand; every institute appears under About and Contact. The `address` c
 is added automatically by `public/upgrade.php` / `bin/migrate.php`; fresh installs
 include it.
 
+## One theme, no dead ends
+
+The root site and every portal page share one theme (`app/site-chrome.php` +
+`public/assets/university.css`): the same header, navigation, footer, buttons and
+dark-mode toggle. On every page the brand links back to the university front page,
+and every portal (admissions, student, office homepage and office workspace) shows
+an explicit **← Back to website** link, so the Admissions button never strands the
+visitor: click the brand or the back button to return. The one-time installer and
+upgrade pages keep their own minimal styling.
+
 ## Safety notes
 
 - The page is sessionless and read-only; it never exposes enquiries, payments,

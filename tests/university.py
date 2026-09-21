@@ -146,7 +146,21 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
         portal = Browser(base, 'public/student.php')
         check('value="linkme@example.test"' in portal.get('public/student.php?email=linkme@example.test'),
               'student sign-in prefills the detected email')
+        apply = uni.get('public/apply.php')
+        check('<a class="u-brand" href="/index.php"' in apply and '← Back to website' in apply,
+              'admissions brand and back button return to the university site')
+        check('university.css' in apply and 'My applications' in apply,
+              'admissions page uses the university theme and keeps its navigation')
+        home = owner.get('public/index.php')
+        check('Your workspace awaits' in home and '← Back to website' in home and 'university.css' in home,
+              'office homepage shares the university theme with a way back')
+        spot = portal.get('public/student.php')
+        check('<a class="u-brand" href="/index.php"' in spot and '← Back to website' in spot,
+              'student portal brand and back button return to the university site')
         owner.login('owner@example.test')
+        dash = owner.get('public/index.php?page=dashboard')
+        check('nav-link site-back' in dash and 'university.css' in dash,
+              'office workspace carries the theme and a back-to-website link')
         check('Renamed Pharma University' in owner.post('institute', page='institutes', id=iid, name='Renamed Pharma University',
                                              kind='Pharma', city='Kolkata', phone='+91 91111 11111',
                                              address='99 New Campus Road'),
