@@ -25,6 +25,11 @@ function migrateCommunications(): void {
     migrateServices();
     migrateApplications();
     migrateAutomation();
+    migrateInstituteAddress();
+}
+function migrateInstituteAddress(): void {
+    try { one('SELECT address FROM institutes WHERE 1=0'); return; }
+    catch (PDOException $e) { db()->exec("ALTER TABLE institutes ADD COLUMN address VARCHAR(300) NOT NULL DEFAULT ''"); }
 }
 
 require_once __DIR__.'/portal.php';

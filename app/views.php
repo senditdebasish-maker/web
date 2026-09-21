@@ -6,7 +6,7 @@ function icon(string $name): string {
 }
 function field(string $label,string $name,mixed $value='',string $type='text',bool $required=true): void {
     if ($_SERVER['REQUEST_METHOD']==='POST' && $type!=='password' && isset($_POST[$name]) && is_string($_POST[$name])) $value=$_POST[$name];
-    $max=match($name){'name'=>120,'phone'=>30,'city'=>100,'kind'=>60,'duration'=>80,'password','current_password','confirm_password'=>72,default=>200};
+    $max=match($name){'name'=>120,'phone'=>30,'city'=>100,'kind'=>60,'duration'=>80,'address'=>300,'password','current_password','confirm_password'=>72,default=>200};
     echo '<label>'.e($label).'<input name="'.e($name).'" type="'.e($type).'" value="'.e($value).'" '.($required?'required ':'').' maxlength="'.$max.'"'.($type==='password'?' autocomplete="new-password"':'').'></label>';
 }
 function selectField(string $label,string $name,array $options,mixed $value='',bool $required=true): void {
@@ -32,6 +32,7 @@ function options(array $data,string $label='name'): array { $o=[]; foreach($data
 function editLink(string $page,int $id): string { return '<a class="text-link" href="?page='.$page.'&edit='.$id.'">View / edit ↗</a>'; }
 function scoped(string $alias=''): array { global $scope; return $scope ? [($alias ? $alias.'.':'').'institute_id = ?',[$scope]] : ['1=1',[]]; }
 function url(array $overrides=[]): string { return '?'.http_build_query(array_merge($_GET,$overrides)); }
+function loginPrefill(): string { $v=is_string($_GET['email'] ?? null)?trim(substr($_GET['email'],0,200)):''; return filter_var($v,FILTER_VALIDATE_EMAIL)?$v:''; }
 ?>
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Northstar · Institute CRM</title><link rel="stylesheet" href="assets/app.css"><?php if(!$user): ?><link rel="stylesheet" href="assets/home.css"><?php endif; ?><link rel="stylesheet" href="assets/theme.css"><script src="assets/app.js" defer></script><script src="assets/theme.js" defer></script></head><body>
 <?php if(!$user):
@@ -67,9 +68,9 @@ $homeCities=array_values(array_unique(array_column($homeInstitutes,'city')));
 <?php formEnd('Verify & sign in'); ?>
 <hr class="soft-rule">
 <?php endif; ?>
-<?php formStart('request_otp'); field('Staff email address','email',$_SESSION['otp']['email'] ?? '','email'); formEnd(isset($_SESSION['otp'])?'Send a new code':'Send sign-in code'); ?>
+<?php formStart('request_otp'); field('Staff email address','email',$_SESSION['otp']['email'] ?? loginPrefill(),'email'); formEnd(isset($_SESSION['otp'])?'Send a new code':'Send sign-in code'); ?>
 <p class="login-note">No password needed. Codes are sent only to existing, active staff accounts. Wait 60 seconds before resending.</p>
-<?php else: formStart('login'); field('Email address','email','','email'); field('Password','password','','password'); formEnd('Sign in to workspace'); endif; ?>
+<?php else: formStart('login'); field('Email address','email',loginPrefill(),'email'); field('Password','password','','password'); formEnd('Sign in to workspace'); endif; ?>
 <p class="login-note">Need an account? Contact your institute administrator.<br>First time setting up? Follow the README installation guide.<br><a href="student.php">Student? Open your student portal →</a><br><a href="apply.php">New applicant? Browse courses &amp; apply →</a></p>
 </main>
 <footer class="home-foot"><div><strong>Northstar Institutions</strong><p>D.Pharm and allied medical programs. Apply online, track your application, and join your campus.</p></div><nav aria-label="Footer"><a href="apply.php">Apply</a><a href="student.php?page=register">Create account</a><a href="student.php">Student Login</a><a href="#office-login">Office Login</a><a href="apply.php?page=help">Help</a></nav></footer>
@@ -120,7 +121,7 @@ formStart($action,(int)($r['id'] ?? 0));
 if($page!=='institutes') echo '<input type="hidden" name="institute_id" value="'.$formIid.'">';
 echo '<div class="form-grid">';
 if($page==='institutes') {
-    field('Institute name','name',$r['name'] ?? ''); field('Type (Pharma, Medical, etc.)','kind',$r['kind'] ?? ''); field('City','city',$r['city'] ?? ''); field('Contact phone','phone',$r['phone'] ?? '');
+    field('Institute name','name',$r['name'] ?? ''); field('Type (Pharma, Medical, etc.)','kind',$r['kind'] ?? ''); field('City','city',$r['city'] ?? ''); field('Contact phone','phone',$r['phone'] ?? ''); field('Campus address (shown on the public university website)','address',$r['address'] ?? '');
 } elseif($page==='courses') {
     field('Course name','name',$r['name'] ?? ''); field('Duration','duration',$r['duration'] ?? ''); field('Total course fee (INR)','fee',isset($r['fee_minor']) ? number_format($r['fee_minor']/100,2,'.','') : ''); selectField('Availability','active',['1'=>'Active','0'=>'Archived'],$r['active'] ?? '1');
 } elseif($page==='staff') {
@@ -222,7 +223,7 @@ elseif($page==='followups') table(['Student','Due date','Assigned to','Conversat
     return [person($r['name'],$r['phone']),e($r['due_date']).(!$r['completed_at'] && $r['due_date']<date('Y-m-d') ? '<small class="overdue">Overdue</small>' : ''),e($r['counsellor']),'<span class="notes">'.e($r['notes']).'</span>',$action];
 });
 elseif($page==='courses') table(['Course','Institute','Duration','Course fee','Status',''],$data,fn($r)=>['<strong>'.e($r['name']).'</strong>',e($r['institute_name']),e($r['duration']),money((int)$r['fee_minor']),badge($r['active']?'Active':'Archived'),$admin?editLink('courses',(int)$r['id']):'']);
-elseif($page==='institutes') table(['Institute','Specialization','City','Contact',''],$data,fn($r)=>[person($r['name'],'Institute #'.$r['id']),badge($r['kind']),e($r['city']),e($r['phone']),$user['role']==='owner'?editLink('institutes',(int)$r['id']):'']);
+elseif($page==='institutes') table(['Institute','Specialization','City','Contact',''],$data,fn($r)=>[person($r['name'],'Institute #'.$r['id']),badge($r['kind']),e($r['city']).(trim($r['address'] ?? '')!==''?'<br><small>'.e($r['address']).'</small>':''),e($r['phone']),$user['role']==='owner'?editLink('institutes',(int)$r['id']):'']);
 elseif($page==='staff') table(['Team member','Institute','Role','Access',''],$data,function($r)use($user){
     $can=$user['role']==='owner' || ($r['role']==='counsellor' && (int)$r['id']!==(int)$user['id']);
     $revoke=$can && operationsReady()?'<form method="post">'.csrf().'<input type="hidden" name="action" value="revoke_sessions"><input type="hidden" name="user_id" value="'.$r['id'].'"><button class="text-button">Revoke sessions</button></form>':'';

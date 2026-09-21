@@ -12,3 +12,4 @@ __pycache__/
 !/storage/.htaccess
 /releases/*
 !/releases/northstar-setup.zip
+preview-router.php

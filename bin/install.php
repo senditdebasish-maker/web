@@ -16,7 +16,7 @@ try {
     if (isset($options['demo'])) {
         $now = date('Y-m-d H:i:s');
         foreach ([['Northstar Pharmacy Institute','Pharma','Kolkata'],['Northstar Medical Academy','Medical','Howrah']] as $n => $inst) {
-            query('INSERT INTO institutes (name,kind,city,phone,created_at) VALUES (?,?,?,?,?)', [...$inst,'+91 90000 00000',$now]);
+            query('INSERT INTO institutes (name,kind,city,phone,address,created_at) VALUES (?,?,?,?,?,?)', [...$inst,'+91 90000 00000',$n ? '12 College Street, Howrah, West Bengal 711101' : '45 Park Street, Kolkata, West Bengal 700016',$now]);
             $iid = (int)db()->lastInsertId();
             query("INSERT INTO users (institute_id,name,email,password_hash,role) VALUES (?,?,?,?,'counsellor')", [$iid,$n ? 'Riya Das' : 'Arjun Sen', 'counsellor'.($n+1).'@example.test',password_hash(bin2hex(random_bytes(24)),PASSWORD_DEFAULT)]);
             $uid = (int)db()->lastInsertId();

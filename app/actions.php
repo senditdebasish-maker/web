@@ -86,9 +86,9 @@ function handleAction(): string {
 }
 function saveInstitute(): string {
     requireRole(['owner']); $id = (int)($_POST['id'] ?? 0);
-    $values = [input('name',120),input('kind',60),input('city',100),input('phone',30)];
-    if ($id) { instituteAccess($id); query('UPDATE institutes SET name=?,kind=?,city=?,phone=? WHERE id=?',[...$values,$id]); }
-    else { query('INSERT INTO institutes (name,kind,city,phone,created_at) VALUES (?,?,?,?,?)',[...$values,date('Y-m-d H:i:s')]); $id=(int)db()->lastInsertId(); }
+    $values = [input('name',120),input('kind',60),input('city',100),input('phone',30)]; $address=input('address',300,false);
+    if ($id) { instituteAccess($id); query('UPDATE institutes SET name=?,kind=?,city=?,phone=?,address=? WHERE id=?',[...$values,$address,$id]); }
+    else { query('INSERT INTO institutes (name,kind,city,phone,address,created_at) VALUES (?,?,?,?,?,?)',[...$values,$address,date('Y-m-d H:i:s')]); $id=(int)db()->lastInsertId(); }
     audit('saved','institutes',$id); return 'institutes';
 }
 function saveCourse(): string {

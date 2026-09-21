@@ -6,7 +6,7 @@ $mysql = db()->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql';
 $id = $mysql ? 'INTEGER PRIMARY KEY AUTO_INCREMENT' : 'INTEGER PRIMARY KEY AUTOINCREMENT';
 $suffix = $mysql ? ' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4' : '';
 $tables = [
-'institutes' => "id $id, name VARCHAR(120) NOT NULL, kind VARCHAR(60) NOT NULL, city VARCHAR(100) NOT NULL, phone VARCHAR(30) NOT NULL, created_at VARCHAR(19) NOT NULL",
+'institutes' => "id $id, name VARCHAR(120) NOT NULL, kind VARCHAR(60) NOT NULL, city VARCHAR(100) NOT NULL, phone VARCHAR(30) NOT NULL, address VARCHAR(300) NOT NULL DEFAULT '', created_at VARCHAR(19) NOT NULL",
 'users' => "id $id, institute_id INTEGER NULL, name VARCHAR(120) NOT NULL, email VARCHAR(200) NOT NULL UNIQUE, password_hash VARCHAR(255) NOT NULL, role VARCHAR(20) NOT NULL, active INTEGER NOT NULL DEFAULT 1, FOREIGN KEY (institute_id) REFERENCES institutes(id)",
 'courses' => "id $id, institute_id INTEGER NOT NULL, name VARCHAR(120) NOT NULL, duration VARCHAR(80) NOT NULL, fee_minor INTEGER NOT NULL, active INTEGER NOT NULL DEFAULT 1, FOREIGN KEY (institute_id) REFERENCES institutes(id), UNIQUE (institute_id, name)",
 'enquiries' => "id $id, institute_id INTEGER NOT NULL, course_id INTEGER NOT NULL, assigned_to INTEGER NOT NULL, name VARCHAR(120) NOT NULL, phone VARCHAR(30) NOT NULL, email VARCHAR(200) NOT NULL, source VARCHAR(30) NOT NULL, status VARCHAR(30) NOT NULL DEFAULT 'New', notes TEXT NOT NULL, created_at VARCHAR(19) NOT NULL, FOREIGN KEY (institute_id) REFERENCES institutes(id), FOREIGN KEY (course_id) REFERENCES courses(id), FOREIGN KEY (assigned_to) REFERENCES users(id)",

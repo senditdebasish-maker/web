@@ -1,0 +1,41 @@
+# University website (root `index.php`)
+
+A single public front page for the whole institution, served from the project folder
+(`http://localhost/institute-crm/index.php` on XAMPP). Every fact on it is read live
+from the CRM: edit an institute, course listing or teacher in the office workspace and
+the website changes immediately — no file editing.
+
+## Pages (`?page=`)
+
+Home (hero, live stats, featured programs, notices), About (campuses), Programs
+(open listings with fee and closing date), Admissions (process, eligibility, dates),
+Notices (derived from live admission dates), Faculty (active teachers: name,
+qualification and institute only — personal email/phone are never shown), Contact
+(campus addresses and phones) and Sign in.
+
+## One sign-in for everyone
+
+`?page=login` accepts any email and detects the account type: staff addresses go to
+the office dashboard (`public/index.php`), student addresses (portal account,
+registered student user or student record) go to the student dashboard
+(`public/student.php`), with the email prefilled. Unknown addresses get registration
+and application links instead of an error dead-end.
+
+## Campus name and address
+
+The site brand, footer and contact details use the institutes table. Owners edit them
+in **Institutes** (name, type, city, phone, campus address). The first institute is
+the site brand; every institute appears under About and Contact. The `address` column
+is added automatically by `public/upgrade.php` / `bin/migrate.php`; fresh installs
+include it.
+
+## Safety notes
+
+- The page is sessionless and read-only; it never exposes enquiries, payments,
+  documents, applicant data or office announcements.
+- All CRM text is HTML-escaped; unknown pages are 404.
+- On Apache the root `.htaccess` blocks `app/`, `bin/`, `storage/`, `vendor/`,
+  `config.php` and databases. Hosts that ignore `.htaccess` (Nginx) must deny those
+  paths in server configuration when serving the project folder directly.
+- Installations served with document root `public/` only should keep using the
+  portal homepage; the university page needs the project folder itself served.
