@@ -1185,3 +1185,128 @@ html[data-theme="dark"] .u-login-links a {
     text-align: center;
   }
 }
+
+/* ---- front-site account popups (student signup, recovery, enquiry) ---- */
+.u-account-btns {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0 6px;
+}
+.u-account-btns .u-btn {
+  width: 100%;
+}
+.u-otp-alt {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 14px;
+  font-size: 14px;
+}
+.u-otp-alt form {
+  margin: 0;
+}
+.u-link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #1A365D;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+html[data-theme="dark"] .u-link-button {
+  color: #e9cf7a;
+}
+.u-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 18px;
+  overflow-y: auto;
+  background: #12294db8;
+}
+.u-modal[data-open="1"] {
+  display: flex;
+}
+.u-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+  background: var(--t-card, #fff);
+  border: 1px solid var(--t-line, #e2e7f0);
+  border-top: 5px solid #1A365D;
+  border-radius: 16px;
+  box-shadow: 0 24px 64px #00000044;
+  padding: 28px 28px 26px;
+}
+.u-modal-card h2 {
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  font-size: 24px;
+  margin: 6px 0 8px;
+  color: var(--t-ink, #1e2a32);
+}
+.u-modal-card p {
+  color: var(--t-muted, #5c6474);
+}
+.u-modal-card form {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+.u-modal-card label {
+  display: grid;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--t-ink, #1e2a32);
+}
+.u-modal-card input,
+.u-modal-card select,
+.u-modal-card textarea {
+  padding: 11px 13px;
+  border-radius: 10px;
+  border: 1px solid var(--t-line, #e2e7f0);
+  font-size: 15px;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--t-card, #fff);
+  color: var(--t-ink, #1e2a32);
+}
+.u-modal-card textarea {
+  resize: vertical;
+}
+.u-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--t-line, #e2e7f0);
+  background: var(--t-bg, #f1f3f9);
+  color: var(--t-ink, #1e2a32);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.u-honey {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+}
+@media (max-width: 560px) {
+  .u-modal {
+    padding: 20px 12px;
+  }
+  .u-modal-card {
+    padding: 22px 18px;
+  }
+}

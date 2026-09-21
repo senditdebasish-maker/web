@@ -15,11 +15,24 @@ qualification and institute only — personal email/phone are never shown), Cont
 
 ## One sign-in for everyone
 
-`?page=login` accepts any email and detects the account type: staff addresses go to
-the office dashboard (`public/index.php`), student addresses (portal account,
-registered student user or student record) go to the student dashboard
-(`public/student.php`), with the email prefilled. Unknown addresses get registration
-and application links instead of an error dead-end.
+`?page=login` signs visitors in with an emailed OTP code and lands them straight in
+the right dashboard: staff addresses open the office (`public/index.php`), student
+addresses (portal account, registered student user or student record) open the
+student portal (`public/student.php`). Staff on password-mode institutes get a link
+to office password login instead of a code. Unknown addresses choose between
+creating a student account and sending an admission inquiry — never an error
+dead-end. The same page hosts three popups (plain links work without JavaScript):
+
+- **Create Student Account** — name, home address, mobile and Gmail, verified by a
+  Gmail OTP code before the account is created.
+- **Admission Inquiry** — name, mobile, Gmail, address, program and message; saved
+  into office **Enquiries** with the `website` source and an auto-assigned counsellor.
+- **Forgot password?** — student-only Gmail OTP recovery that restores the portal
+  session (student accounts are OTP-based, so verifying the Gmail is the recovery).
+
+All three reuse the CRM's OTP, mail, rate-limit and transaction systems; the
+`address` column on `student_users` is added automatically by `public/upgrade.php` /
+`bin/migrate.php`, and fresh installs include it.
 
 ## Campus name and address
 

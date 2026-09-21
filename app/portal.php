@@ -67,11 +67,12 @@ function migrateStudentUsers(): void {
     $id=$mysql?'INTEGER PRIMARY KEY AUTO_INCREMENT':'INTEGER PRIMARY KEY AUTOINCREMENT';
     $suffix=$mysql?' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4':'';
     foreach ([
-        'student_users'=>"id $id, name VARCHAR(120) NOT NULL, email VARCHAR(200) NOT NULL UNIQUE, phone VARCHAR(30) NOT NULL, active INTEGER NOT NULL DEFAULT 1, version INTEGER NOT NULL DEFAULT 1, created_at VARCHAR(19) NOT NULL",
+        'student_users'=>"id $id, name VARCHAR(120) NOT NULL, email VARCHAR(200) NOT NULL UNIQUE, phone VARCHAR(30) NOT NULL, address VARCHAR(300) NOT NULL DEFAULT '', active INTEGER NOT NULL DEFAULT 1, version INTEGER NOT NULL DEFAULT 1, created_at VARCHAR(19) NOT NULL",
         'student_user_codes'=>'id VARCHAR(64) PRIMARY KEY, email_hash VARCHAR(64) NOT NULL, code_hash VARCHAR(64) NOT NULL, expires_at INTEGER NOT NULL, attempts INTEGER NOT NULL DEFAULT 0, consumed INTEGER NOT NULL DEFAULT 0'
     ] as $table=>$definition) db()->exec("CREATE TABLE IF NOT EXISTS $table ($definition)$suffix");
     $exists=$mysql ? one('SELECT INDEX_NAME FROM information_schema.statistics WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=? AND INDEX_NAME=?',['student_user_codes','idx_suser_code_email']) : one("SELECT name FROM sqlite_master WHERE type='index' AND name=?",['idx_suser_code_email']);
     if (!$exists) db()->exec('CREATE INDEX idx_suser_code_email ON student_user_codes (email_hash)');
+    migrateStudentUserAddress();
 }
 function studentUsersReady(): bool {
     try { foreach(['student_users','student_user_codes'] as $table) query("SELECT id FROM $table WHERE 1=0"); return true; }
@@ -88,7 +89,7 @@ function linkStudentUser(array $u): void {
 }
 function requestStudentUserCode(): string {
     if(!studentUsersReady()) fail('Student registration is not ready. The owner must run the upgrade first.');
-    $name=input('name',120); $phone=input('phone',30); $email=emailInput();
+    $name=input('name',120); $phone=input('phone',30); $email=emailInput(); $address=input('address',300,false);
     if(!preg_match('/^[+0-9 ()-]{7,30}$/D',$phone)) fail('Enter a valid contact phone number.');
     if(input('website',200,false)!=='') fail('Unable to process this request.');
     try{ mailSettings(); dependencies(); }catch(Throwable $e){ fail('Email verification is not configured. Contact the institute.'); }
@@ -105,7 +106,7 @@ function requestStudentUserCode(): string {
         query('INSERT INTO student_user_codes (id,email_hash,code_hash,expires_at) VALUES (?,?,?,?)',[$id,$hash,hash_hmac('sha256',$code,$secret),$now+300]);
         db()->commit();
     }catch(Throwable $e){ if(db()->inTransaction())db()->rollBack(); throw $e; }
-    $_SESSION['suid_pending']=['id'=>$id,'secret'=>$secret,'email'=>$email,'name'=>$name,'phone'=>$phone];
+    $_SESSION['suid_pending']=['id'=>$id,'secret'=>$secret,'email'=>$email,'name'=>$name,'phone'=>$phone,'address'=>$address];
     try{ sendMail($email,'Your student account verification code',"Your student account verification code is: $code\n\nIt expires in five minutes and works only in the requesting browser. Never share it. Ignore this message if you did not request it."); }
     catch(Throwable $e){ query('UPDATE student_user_codes SET consumed=1 WHERE id=?',[$id]); error_log('Northstar student registration code delivery failed.'); }
     $_SESSION['flash']='A verification code has been sent. Enter it below within five minutes.';
@@ -123,7 +124,7 @@ function verifyStudentUserCode(): string {
             query('UPDATE student_user_codes SET attempts=attempts+1 WHERE id=?',[$row['id']]);
             if(preg_match('/^\d{6}$/D',$code) && hash_equals($row['code_hash'],hash_hmac('sha256',$code,$pending['secret']))){
                 $user=one('SELECT * FROM student_users WHERE email=?'.lockSuffix(),[$pending['email']]);
-                if(!$user){ query('INSERT INTO student_users (name,email,phone,created_at) VALUES (?,?,?,?)',[$pending['name'],$pending['email'],$pending['phone'],date('Y-m-d H:i:s')]); $user=one('SELECT * FROM student_users WHERE id=?',[(int)db()->lastInsertId()]); }
+                if(!$user){ query('INSERT INTO student_users (name,email,phone,address,created_at) VALUES (?,?,?,?,?)',[$pending['name'],$pending['email'],$pending['phone'],$pending['address']??'',date('Y-m-d H:i:s')]); $user=one('SELECT * FROM student_users WHERE id=?',[(int)db()->lastInsertId()]); }
                 elseif(!$user['active']){ $user=null; }
                 if($user) query('UPDATE student_user_codes SET consumed=1 WHERE id=?',[$row['id']]);
             }
@@ -142,4 +143,10 @@ function toggleStudentUser(): string {
     $u=one('SELECT * FROM student_users WHERE id=?'.lockSuffix(),[(int)input('user_id')]); if(!$u) fail('Student account not found.');
     query('UPDATE student_users SET active=?,version=version+1 WHERE id=?',[$u['active']?0:1,$u['id']]);
     audit('student_user_toggled','student_users',(int)$u['id']); return 'student-accounts';
+}
+
+function migrateStudentUserAddress(): void {
+    $mysql=db()->getAttribute(PDO::ATTR_DRIVER_NAME)==='mysql';
+    $exists=$mysql ? one('SELECT COLUMN_NAME FROM information_schema.columns WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=? AND COLUMN_NAME=?',['student_users','address']) : one("SELECT name FROM pragma_table_info('student_users') WHERE name='address'");
+    if(!$exists) db()->exec("ALTER TABLE student_users ADD address VARCHAR(300) NOT NULL DEFAULT ''");
 }

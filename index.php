@@ -44,7 +44,22 @@ $HI = ['Home' => 'होम', 'About' => 'हमारे बारे में
 'No notices right now.' => 'अभी कोई सूचना नहीं है।', 'This university page does not exist.' => 'यह विश्वविद्यालय पृष्ठ मौजूद नहीं है।',
 'The portal is not set up yet. Please contact the institute office.' => 'पोर्टल अभी स्थापित नहीं है। कृपया संस्थान कार्यालय से संपर्क करें।',
 'Sign-in lookup is temporarily unavailable. Use the direct portal links below.' => 'साइन-इन खोज अस्थायी रूप से उपलब्ध नहीं है। नीचे दिए सीधे लिंक प्रयोग करें।',
-'Contact details will appear here soon.' => 'संपर्क विवरण शीघ्र यहाँ दिखेगा।', 'Open setup wizard' => 'सेटअप विज़ार्ड खोलें', 'Welcome — setup required' => 'स्वागत — सेटअप आवश्यक'];
+'Contact details will appear here soon.' => 'संपर्क विवरण शीघ्र यहाँ दिखेगा।', 'Open setup wizard' => 'सेटअप विज़ार्ड खोलें', 'Welcome — setup required' => 'स्वागत — सेटअप आवश्यक',
+'Send sign-in code' => 'साइन-इन कोड भेजें', 'Check your inbox' => 'अपना इनबॉक्स देखें', 'We sent a 6-digit code to' => 'हमने 6 अंकों का कोड भेजा है',
+'Enter the 6-digit code' => '6 अंकों का कोड लिखें', 'Verify & sign in' => 'सत्यापित करें व साइन इन करें', 'Resend code' => 'कोड पुनः भेजें',
+'Admission Inquiry' => 'प्रवेश पूछताछ', 'Forgot password?' => 'पासवर्ड भूल गए?', 'Full name' => 'पूरा नाम', 'Mobile number' => 'मोबाइल नंबर',
+'Gmail / email address' => 'Gmail / ईमेल पता', 'Home address' => 'घर का पता', 'Program of interest' => 'इच्छुक कार्यक्रम',
+'Your message (optional)' => 'आपका संदेश (वैकल्पिक)', 'Send inquiry' => 'पूछताछ भेजें', 'Send verification code' => 'सत्यापन कोड भेजें',
+'Recover access' => 'पहुंच पुनः प्राप्त करें', 'Back to sign in' => 'साइन इन पर वापस', 'Start over' => 'पुनः प्रारंभ करें',
+'Staff password sign-in' => 'कर्मचारी पासवर्ड साइन-इन', 'Continue to office login' => 'कार्यालय लॉगिन पर जाएं',
+'Choose how to continue' => 'आगे कैसे बढ़ें चुनें', 'I am a student — create my account' => 'मैं छात्र हूं — मेरा खाता बनाएं',
+'I want to enquire about admission' => 'मैं प्रवेश हेतु पूछताछ करना चाहता हूं', 'Your verification code' => 'आपका सत्यापन कोड',
+'Account recovery' => 'खाता पुनर्प्राप्ति', 'Create your student account' => 'अपना छात्र खाता बनाएं',
+'Verify your Gmail to create your account.' => 'अपना खाता बनाने हेतु अपना Gmail सत्यापित करें।',
+'Verify your Gmail to recover access.' => 'पहुंच पुनः प्राप्त करने हेतु अपना Gmail सत्यापित करें।',
+'Tell us about yourself and the office will respond.' => 'अपने बारे में बताएं, कार्यालय उत्तर देगा।',
+'Your inquiry has been received. The office will contact you soon.' => 'आपकी पूछताछ प्राप्त हो गई है। कार्यालय शीघ्र संपर्क करेगा।',
+'Your institute uses password sign-in for staff. Continue below:' => 'आपका संस्थान कर्मचारियों हेतु पासवर्ड साइन-इन प्रयोग करता है। नीचे जाएं:'];
 $configFile = getenv('CRM_CONFIG_FILE') ?: $root . '/config.php';
 $ready = is_file($configFile);
 if ($ready) {
@@ -52,6 +67,7 @@ if ($ready) {
     require_once $root . '/app/applications.php';
 }
 require_once $root . '/app/site-chrome.php';
+require_once $root . '/app/site-accounts.php';
 $institutes = [];
 $programs = [];
 $teachers = [];
@@ -91,33 +107,110 @@ foreach ($programs as $p) {
 }
 usort($notices, fn($a, $b) => strcmp($a['closes'], $b['closes']));
 $page = is_string($_GET['page'] ?? null) ? $_GET['page'] : 'home';
-$detectError = null;
-$detectEmail = '';
-$detectUnknown = false;
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'detect') {
-    $page = 'login';
-    $detectEmail = strtolower(trim(substr((string)($_POST['email'] ?? ''), 0, 200)));
-    if (!filter_var($detectEmail, FILTER_VALIDATE_EMAIL)) $detectError = tr('Enter a valid email address.');
-    elseif (!$ready) $detectError = tr('The portal is not set up yet. Please contact the institute office.');
-    else {
-        try {
-            if (one('SELECT id FROM users WHERE email=? AND active=1', [$detectEmail])) {
-                header('Location: public/index.php?email=' . urlencode($detectEmail));
+$siteStep = 'email';
+$siteError = null;
+$siteFlash = null;
+$siteEmail = '';
+$show = is_string($_GET['show'] ?? null) ? $_GET['show'] : '';
+if (!in_array($show, ['create', 'inquiry', 'recovery'], true)) $show = '';
+$siteAction = ($_SERVER['REQUEST_METHOD'] === 'POST') ? (string)($_POST['action'] ?? '') : '';
+if (!in_array($siteAction, ['otp_start', 'otp_verify', 'create_start', 'create_verify', 'recovery_start', 'recovery_verify', 'inquiry_save'], true)) $siteAction = '';
+if ($ready) require_once $root . '/app/otp.php';
+if ($page === 'login' || $siteAction !== '') {
+    if ($siteAction !== '') $page = 'login';
+    try {
+        if (!$ready) throw new DomainException(tr('The portal is not set up yet. Please contact the institute office.'));
+        switch ($siteAction) {
+            case '':
+                siteSession('northstar_site');
+                break;
+            case 'otp_start':
+                siteCsrfCheckAny();
+                $email = emailInput();
+                $siteEmail = $email;
+                $kind = siteDetectAccount($email);
+                if ($kind === null) {
+                    $siteStep = 'chooser';
+                    break;
+                }
+                if ($kind === 'staff' && !otpEnabled()) {
+                    $siteStep = 'staff_password';
+                    break;
+                }
+                $want = $kind === 'staff' ? 'northstar_session' : 'northstar_student';
+                if (session_name() !== $want) siteSession($want);
+                requestOtp($kind);
+                $siteFlash = siteTakeFlash();
+                $siteStep = 'code';
+                break;
+            case 'otp_verify':
+                $sess = siteResumePending();
+                siteCsrfCheck();
+                verifyOtp($sess === 'northstar_session' ? 'staff' : 'student');
+                header('Location: ' . ($sess === 'northstar_session' ? 'public/index.php' : 'public/student.php'));
                 exit;
-            }
-            $isStudent = one('SELECT a.id FROM portal_accounts a JOIN students s ON s.id=a.student_id WHERE a.email=? AND a.active=1 AND LOWER(s.email)=a.email', [$detectEmail])
-                ?: one('SELECT id FROM student_users WHERE email=? AND active=1', [$detectEmail])
-                ?: one('SELECT id FROM students WHERE LOWER(email)=?', [$detectEmail]);
-            if ($isStudent) {
-                header('Location: public/student.php?email=' . urlencode($detectEmail));
+            case 'create_start':
+                siteCsrfCheckAny();
+                input('name', 120);
+                $vPhone = input('phone', 30);
+                if (!preg_match('/^[+0-9 ()-]{7,30}$/D', $vPhone)) fail('Enter a valid contact phone number.');
+                emailInput();
+                input('address', 300);
+                if (input('website', 200, false) !== '') fail('Unable to process this request.');
+                siteSession('northstar_student');
+                requestStudentUserCode();
+                $siteFlash = siteTakeFlash();
+                $siteStep = 'create_code';
+                $show = 'create';
+                break;
+            case 'create_verify':
+                siteResumePending();
+                siteCsrfCheck();
+                verifyStudentUserCode();
+                header('Location: public/student.php');
                 exit;
-            }
-            $detectUnknown = true;
-        } catch (Throwable $e) {
-            $detectError = tr('Sign-in lookup is temporarily unavailable. Use the direct portal links below.');
+            case 'recovery_start':
+                siteCsrfCheckAny();
+                $siteEmail = emailInput();
+                siteSession('northstar_student');
+                siteRecoveryRequest();
+                $siteFlash = siteTakeFlash();
+                $siteStep = 'recovery_code';
+                $show = 'recovery';
+                break;
+            case 'recovery_verify':
+                siteResumePending();
+                siteCsrfCheck();
+                siteRecoveryVerify();
+                header('Location: public/student.php');
+                exit;
+            case 'inquiry_save':
+                siteCsrfCheckAny();
+                siteInquirySave();
+                $siteStep = 'inquiry_done';
+                $show = 'inquiry';
+                break;
         }
+    } catch (DomainException $e) {
+        $siteError = $e->getMessage();
+        $siteStep = ['otp_verify' => 'code', 'create_verify' => 'create_code', 'recovery_verify' => 'recovery_code'][$siteAction] ?? $siteStep;
+        if ($siteAction === 'otp_start' && isset($_SESSION['otp'])) $siteStep = 'code';
+        if ($siteAction === 'create_start' && isset($_SESSION['suid_pending'])) {
+            $siteStep = 'create_code';
+            $show = 'create';
+        }
+        if ($siteAction === 'recovery_start' && isset($_SESSION['site_recovery'])) {
+            $siteStep = 'recovery_code';
+            $show = 'recovery';
+        }
+        if (in_array($siteAction, ['create_start', 'create_verify'], true)) $show = 'create';
+        if (in_array($siteAction, ['recovery_start', 'recovery_verify'], true)) $show = 'recovery';
+        if ($siteAction === 'inquiry_save') $show = 'inquiry';
+    } catch (Throwable $e) {
+        $siteError = tr('Sign-in lookup is temporarily unavailable. Use the direct portal links below.');
     }
 }
+$otpEmail = $siteEmail !== '' ? $siteEmail : (string)($_SESSION['otp']['email'] ?? $_SESSION['suid_pending']['email'] ?? $_SESSION['site_recovery']['email'] ?? '');
 $allowed = ['home', 'about', 'courses', 'admissions', 'notices', 'faculty', 'contact', 'login'];
 if (!in_array($page, $allowed, true)) {
     http_response_code(404);
@@ -145,7 +238,7 @@ $vcMsg = $siteLang === 'hi'
     : siteVcMessage($brand);
 function uDocHead(string $title, string $brand): void {
     global $htmlLang;
-    echo '<!doctype html><html lang="' . e($htmlLang) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . e($title) . ' · ' . e($brand) . '</title><link rel="stylesheet" href="public/assets/theme.css"><link rel="stylesheet" href="public/assets/university.css"><script src="public/assets/theme.js" defer></script></head><body>';
+    echo '<!doctype html><html lang="' . e($htmlLang) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . e($title) . ' · ' . e($brand) . '</title><link rel="stylesheet" href="public/assets/theme.css"><link rel="stylesheet" href="public/assets/university.css"><script src="public/assets/theme.js" defer></script><script src="public/assets/site.js" defer></script></head><body>';
 }
 ?>
 <?php uDocHead(tr(['home' => 'Admissions open', 'about' => 'About us', 'courses' => 'Programs & courses', 'admissions' => 'Admissions', 'notices' => 'Notices & dates', 'faculty' => 'Faculty', 'contact' => 'Contact', 'login' => 'Sign in', 'notfound' => 'Page not found'][$page]), $brand); ?>
@@ -183,13 +276,52 @@ function uDocHead(string $title, string $brand): void {
 <?php elseif ($page === 'faculty'): ?>
 <section class="u-section"><div class="u-eyebrow"><?= e(tr('Faculty')) ?></div><h1><?= e(tr('Learn from experienced teachers')) ?></h1><p>Directory updates automatically from the CRM teaching roster. Contact details are shared by the office on request.</p><?php if (!$teachers): ?><p class="u-muted"><?= e(tr('The faculty directory will appear here once the office adds teachers.')) ?></p><?php else: ?><div class="u-grid"><?php foreach ($teachers as $t): ?><article class="u-card u-teacher"><span class="u-avatar"><?= e(strtoupper(substr($t['name'], 0, 1))) ?></span><div><h3><?= e($t['name']) ?></h3><p class="u-meta"><?= e($t['qualification']) ?></p><p class="u-meta"><?= e($t['institute_name']) ?></p></div></article><?php endforeach; ?></div><?php endif; ?></section>
 <?php elseif ($page === 'contact'): ?>
-<section class="u-section"><div class="u-eyebrow"><?= e(tr('Contact')) ?></div><h1><?= e(tr('Visit or call us')) ?></h1><p>Addresses and phone numbers come live from the CRM — always current.</p><?php if (!$institutes): ?><p class="u-muted"><?= e(tr('Contact details will appear here soon.')) ?></p><?php else: ?><div class="u-grid"><?php foreach ($institutes as $i): ?><article class="u-card"><h3><?= e($i['name']) ?></h3><?php if (trim($i['address']) !== ''): ?><p>📍 <?= e($i['address']) ?>, <?= e($i['city']) ?></p><?php else: ?><p>📍 <?= e($i['city']) ?></p><?php endif; ?><p class="u-phone">☎ <?= e($i['phone']) ?></p><p><a class="u-btn ghost" href="?page=admissions"><?= e(tr('Admission help')) ?> →</a></p></article><?php endforeach; ?></div><?php endif; ?><p class="u-muted">Never share passwords or OTP codes with anyone, including callers claiming to be the office.</p></section>
+<section class="u-section"><div class="u-eyebrow"><?= e(tr('Contact')) ?></div><h1><?= e(tr('Visit or call us')) ?></h1><p>Addresses and phone numbers come live from the CRM — always current.</p><p><a class="u-btn solid" href="?page=login&show=inquiry"><?= e(tr('Admission Inquiry')) ?> →</a></p><?php if (!$institutes): ?><p class="u-muted"><?= e(tr('Contact details will appear here soon.')) ?></p><?php else: ?><div class="u-grid"><?php foreach ($institutes as $i): ?><article class="u-card"><h3><?= e($i['name']) ?></h3><?php if (trim($i['address']) !== ''): ?><p>📍 <?= e($i['address']) ?>, <?= e($i['city']) ?></p><?php else: ?><p>📍 <?= e($i['city']) ?></p><?php endif; ?><p class="u-phone">☎ <?= e($i['phone']) ?></p><p><a class="u-btn ghost" href="?page=admissions"><?= e(tr('Admission help')) ?> →</a></p></article><?php endforeach; ?></div><?php endif; ?><p class="u-muted">Never share passwords or OTP codes with anyone, including callers claiming to be the office.</p></section>
 <?php elseif ($page === 'login'): ?>
 <section class="u-login"><div class="u-card"><div class="u-eyebrow"><?= e(tr('ONE SIGN-IN FOR EVERYONE')) ?></div><h1><?= e(tr('Sign in')) ?></h1><p><?= e(tr('Enter your email.')) ?> <?= e(tr('Staff go to the')) ?> <strong><?= e(tr('office dashboard')) ?></strong>; <?= e(tr('students go to the')) ?> <strong><?= e(tr('student dashboard')) ?></strong> <?= e(tr('— automatically.')) ?></p>
-<?php if ($detectError): ?><div class="u-alert error" role="alert"><?= e($detectError) ?></div><?php endif; ?>
-<?php if ($detectUnknown): ?><div class="u-alert" role="status"><?= e(tr('No account found for')) ?> <strong><?= e($detectEmail) ?></strong>. <?= e(tr('New student?')) ?> <a href="public/student.php?page=register"><?= e(tr('Create your account')) ?></a> <?= e(tr('or')) ?> <a href="public/apply.php"><?= e(tr('apply for admission')) ?></a>. <?= e(tr('Staff should contact the administrator.')) ?></div><?php endif; ?>
-<form method="post"><input type="hidden" name="action" value="detect"><label><?= e(tr('Your email address')) ?><input type="email" name="email" maxlength="200" required autocomplete="email" value="<?= e($detectEmail) ?>" placeholder="you@example.com"></label><button class="u-btn solid big" type="submit"><?= e(tr('Continue')) ?> →</button></form>
+<?php if ($siteError): ?><div class="u-alert error" role="alert"><?= e($siteError) ?></div><?php endif; ?>
+<?php if ($siteFlash): ?><div class="u-alert" role="status"><?= e($siteFlash) ?></div><?php endif; ?>
+<?php if ($siteStep === 'code'): ?>
+<p><strong><?= e(tr('Check your inbox')) ?></strong> — <?= e(tr('We sent a 6-digit code to')) ?> <strong><?= e($otpEmail) ?></strong>.</p>
+<form method="post"><?= siteCsrfField() ?><input type="hidden" name="action" value="otp_verify"><label><?= e(tr('Enter the 6-digit code')) ?><input type="text" name="code" inputmode="numeric" maxlength="20" required autocomplete="one-time-code" placeholder="123456"></label><button class="u-btn solid big" type="submit"><?= e(tr('Verify & sign in')) ?> →</button></form>
+<div class="u-otp-alt"><form method="post"><?= siteCsrfField() ?><input type="hidden" name="action" value="otp_start"><input type="hidden" name="email" value="<?= e($otpEmail) ?>"><button class="u-link-button" type="submit"><?= e(tr('Resend code')) ?></button></form><span>·</span><a href="?page=login"><?= e(tr('Start over')) ?></a></div>
+<?php elseif ($siteStep === 'chooser'): ?>
+<div class="u-alert" role="status"><?= e(tr('No account found for')) ?> <strong><?= e($siteEmail) ?></strong>. <?= e(tr('New student?')) ?></div>
+<h3><?= e(tr('Choose how to continue')) ?></h3>
+<div class="u-account-btns"><button type="button" class="u-btn solid" data-modal-open="modal-create"><?= e(tr('I am a student — create my account')) ?></button><button type="button" class="u-btn ghost" data-modal-open="modal-inquiry"><?= e(tr('I want to enquire about admission')) ?></button></div>
+<p><?= e(tr('or')) ?> <a href="public/apply.php"><?= e(tr('apply for admission')) ?></a>. <?= e(tr('Staff should contact the administrator.')) ?></p>
+<p><a href="?page=login"><?= e(tr('Back to sign in')) ?></a></p>
+<?php elseif ($siteStep === 'staff_password'): ?>
+<h3><?= e(tr('Staff password sign-in')) ?></h3>
+<p><?= e(tr('Your institute uses password sign-in for staff. Continue below:')) ?></p>
+<p><a class="u-btn solid" href="public/index.php?email=<?= urlencode($siteEmail) ?>"><?= e(tr('Continue to office login')) ?> →</a></p>
+<p><a href="?page=login"><?= e(tr('Back to sign in')) ?></a></p>
+<?php else: ?>
+<form method="post"><?= siteCsrfField() ?><input type="hidden" name="action" value="otp_start"><label><?= e(tr('Your email address')) ?><input type="email" name="email" maxlength="200" required autocomplete="email" value="<?= e($siteEmail) ?>" placeholder="you@example.com"></label><button class="u-btn solid big" type="submit"><?= e(tr('Send sign-in code')) ?> →</button></form>
+<div class="u-account-btns"><button type="button" class="u-btn ghost" data-modal-open="modal-create"><?= e(tr('Create Student Account')) ?></button><button type="button" class="u-btn ghost" data-modal-open="modal-inquiry"><?= e(tr('Admission Inquiry')) ?></button><button type="button" class="u-btn ghost" data-modal-open="modal-recovery"><?= e(tr('Forgot password?')) ?></button></div>
+<noscript><p><a href="?page=login&amp;show=create"><?= e(tr('Create Student Account')) ?></a> · <a href="?page=login&amp;show=inquiry"><?= e(tr('Admission Inquiry')) ?></a> · <a href="?page=login&amp;show=recovery"><?= e(tr('Forgot password?')) ?></a></p></noscript>
+<?php endif; ?>
 <div class="u-login-links"><a href="public/student.php"><?= e(tr('Student sign-in')) ?> →</a><a href="public/index.php"><?= e(tr('Office sign-in')) ?> →</a><a href="public/student.php?page=register"><?= e(tr('Create student account')) ?> →</a></div></div></section>
+<div class="u-modal" id="modal-create"<?= $show === 'create' ? ' data-open="1"' : '' ?>><div class="u-modal-card" role="dialog" aria-modal="true" aria-label="<?= e(tr('Create your student account')) ?>"><button type="button" class="u-modal-close" data-modal-close aria-label="Close">×</button><div class="u-eyebrow"><?= e(tr('Create Student Account')) ?></div><h2><?= e(tr('Create your student account')) ?></h2><p><?= e(tr('Verify your Gmail to create your account.')) ?></p>
+<?php if ($siteStep === 'create_code'): ?>
+<p><strong><?= e(tr('Check your inbox')) ?></strong> — <?= e(tr('We sent a 6-digit code to')) ?> <strong><?= e($otpEmail) ?></strong>.</p>
+<form method="post"><?= siteCsrfField() ?><input type="hidden" name="action" value="create_verify"><label><?= e(tr('Your verification code')) ?><input type="text" name="code" inputmode="numeric" maxlength="20" required autocomplete="one-time-code" placeholder="123456"></label><button class="u-btn solid big" type="submit"><?= e(tr('Verify & sign in')) ?> →</button></form>
+<?php else: ?>
+<form method="post"><?= siteCsrfField() ?><input type="hidden" name="action" value="create_start"><label><?= e(tr('Full name')) ?><input type="text" name="name" maxlength="120" required autocomplete="name"></label><label><?= e(tr('Home address')) ?><input type="text" name="address" maxlength="300" required autocomplete="street-address"></label><label><?= e(tr('Mobile number')) ?><input type="text" name="phone" maxlength="30" required autocomplete="tel" placeholder="+91 "></label><label><?= e(tr('Gmail / email address')) ?><input type="email" name="email" maxlength="200" required autocomplete="email"></label><input type="text" name="website" value="" class="u-honey" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="u-btn solid big" type="submit"><?= e(tr('Send verification code')) ?> →</button></form>
+<?php endif; ?></div></div>
+<div class="u-modal" id="modal-recovery"<?= $show === 'recovery' ? ' data-open="1"' : '' ?>><div class="u-modal-card" role="dialog" aria-modal="true" aria-label="<?= e(tr('Account recovery')) ?>"><button type="button" class="u-modal-close" data-modal-close aria-label="Close">×</button><div class="u-eyebrow"><?= e(tr('Forgot password?')) ?></div><h2><?= e(tr('Account recovery')) ?></h2><p><?= e(tr('Verify your Gmail to recover access.')) ?></p>
+<?php if ($siteStep === 'recovery_code'): ?>
+<p><strong><?= e(tr('Check your inbox')) ?></strong> — <?= e(tr('We sent a 6-digit code to')) ?> <strong><?= e($otpEmail) ?></strong>.</p>
+<form method="post"><?= siteCsrfField() ?><input type="hidden" name="action" value="recovery_verify"><label><?= e(tr('Your verification code')) ?><input type="text" name="code" inputmode="numeric" maxlength="20" required autocomplete="one-time-code" placeholder="123456"></label><button class="u-btn solid big" type="submit"><?= e(tr('Recover access')) ?> →</button></form>
+<?php else: ?>
+<form method="post"><?= siteCsrfField() ?><input type="hidden" name="action" value="recovery_start"><label><?= e(tr('Gmail / email address')) ?><input type="email" name="email" maxlength="200" required autocomplete="email"></label><button class="u-btn solid big" type="submit"><?= e(tr('Send verification code')) ?> →</button></form>
+<?php endif; ?></div></div>
+<div class="u-modal" id="modal-inquiry"<?= $show === 'inquiry' ? ' data-open="1"' : '' ?>><div class="u-modal-card" role="dialog" aria-modal="true" aria-label="<?= e(tr('Admission Inquiry')) ?>"><button type="button" class="u-modal-close" data-modal-close aria-label="Close">×</button><div class="u-eyebrow"><?= e(tr('Admission Inquiry')) ?></div><h2><?= e(tr('Admission Inquiry')) ?></h2><p><?= e(tr('Tell us about yourself and the office will respond.')) ?></p>
+<?php if ($siteStep === 'inquiry_done'): ?>
+<div class="u-alert" role="status"><?= e(tr('Your inquiry has been received. The office will contact you soon.')) ?></div>
+<?php else: ?>
+<form method="post"><?= siteCsrfField() ?><input type="hidden" name="action" value="inquiry_save"><label><?= e(tr('Full name')) ?><input type="text" name="name" maxlength="120" required autocomplete="name"></label><label><?= e(tr('Mobile number')) ?><input type="text" name="phone" maxlength="30" required autocomplete="tel" placeholder="+91 "></label><label><?= e(tr('Gmail / email address')) ?><input type="email" name="email" maxlength="200" required autocomplete="email"></label><label><?= e(tr('Home address')) ?><input type="text" name="address" maxlength="300" autocomplete="street-address"></label><label><?= e(tr('Program of interest')) ?><select name="course_id" required><option value="">—</option><?php foreach (siteCourseOptions() as $c): ?><option value="<?= (int)$c['id'] ?>"><?= e($c['name']) ?> — <?= e($c['iname']) ?></option><?php endforeach; ?></select></label><label><?= e(tr('Your message (optional)')) ?><textarea name="message" maxlength="1000" rows="3"></textarea></label><input type="text" name="website" value="" class="u-honey" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="u-btn solid big" type="submit"><?= e(tr('Send inquiry')) ?> →</button></form>
+<?php endif; ?></div></div>
 <?php else: ?>
 <section class="u-card"><h1><?= e(tr('Page not found')) ?></h1><p><?= e(tr('This university page does not exist.')) ?></p><p><a class="u-btn solid" href="?"><?= e(tr('Back to home')) ?> →</a></p></section>
 <?php endif; ?>

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""University front-page checks: CRM-driven content, sync and sign-in detection."""
+"""University front-page checks: CRM-driven content, OTP sign-in, signup, recovery, enquiries."""
 import http.cookiejar
 import os
 from pathlib import Path
@@ -146,19 +146,91 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
               'faculty page hides personal contact details')
         check('Visit or call us' in uni.get('index.php?page=contact') and '+91 90000 00000' in uni.html,
               'contact page shows CRM phone numbers')
-        check('ONE SIGN-IN FOR EVERYONE' in uni.get('index.php?page=login'),
-              'unified sign-in page renders')
-        uni.get('index.php?page=login', {'action': 'detect', 'email': 'owner@example.test'})
-        check('public/index.php' in uni.url and 'email=owner' in uni.url,
-              'staff email redirects to the office dashboard')
-        execute("UPDATE students SET email='linkme@example.test' WHERE id=?", (sid,))
-        uni.get('index.php?page=login', {'action': 'detect', 'email': 'linkme@example.test'})
-        check('public/student.php' in uni.url and 'email=linkme' in uni.url,
-              'student email redirects to the student dashboard')
-        check('No account found' in uni.get('index.php?page=login', {'action': 'detect', 'email': 'nobody@example.test'})
-              and 'Create your account' in uni.html, 'unknown email offers registration choices')
-        check('valid email address' in uni.get('index.php?page=login', {'action': 'detect', 'email': 'bad'}),
+        login_html = uni.get('index.php?page=login')
+        check('ONE SIGN-IN FOR EVERYONE' in login_html and 'id="modal-create"' in login_html
+              and 'id="modal-inquiry"' in login_html and 'id="modal-recovery"' in login_html
+              and 'Create Student Account' in login_html and 'Admission Inquiry' in login_html
+              and 'Forgot password?' in login_html, 'unified sign-in page offers OTP, signup, inquiry and recovery')
+        check('data-open="1"' in uni.get('index.php?page=login&show=create'),
+              'signup popup opens directly without JavaScript')
+
+        def form_token(html):
+            return re.search(r'name="csrf" value="([^"]+)"', html).group(1)
+
+        def newest_code():
+            files = sorted(mail.glob('*.eml'), key=lambda f: f.stat().st_mtime, reverse=True)
+            for found in files:
+                matched = re.search(r'code is: (\d{6})', found.read_text(errors='replace'))
+                if matched:
+                    return matched.group(1)
+            raise AssertionError('no OTP mail found')
+
+        check('Staff password sign-in' in uni.post('otp_start', page='login', email='owner@example.test')
+              and 'public/index.php?email=owner' in uni.html,
+              'staff email in password mode leads to office login')
+        check('valid email address' in uni.post('otp_start', page='login', email='bad'),
               'invalid email is rejected')
+        check('No account found' in uni.post('otp_start', page='login', email='nobody@example.test')
+              and 'Choose how to continue' in uni.html, 'unknown email offers signup or inquiry')
+
+        execute("UPDATE students SET email='linkme@example.test' WHERE id=?", (sid,))
+        execute("INSERT INTO portal_accounts (student_id,email,created_at) VALUES (?,?,'2026-01-01 00:00:00')",
+                (sid, 'linkme@example.test'))
+        otp = Browser(base)
+        otp.get('index.php?page=login')
+        otp.get('index.php?page=login', {'action': 'otp_start', 'csrf': form_token(otp.html),
+                                         'email': 'linkme@example.test'})
+        check('Enter the 6-digit code' in otp.html, 'student email triggers an OTP code step')
+        otp.get('index.php?page=login', {'action': 'otp_start', 'csrf': form_token(otp.html),
+                                         'email': 'linkme@example.test'})
+        check('before resending' in otp.html and 'Enter the 6-digit code' in otp.html,
+              'an immediate resend is throttled politely')
+        otp.get('index.php?page=login', {'action': 'otp_verify', 'csrf': form_token(otp.html),
+                                         'code': newest_code()})
+        check('public/student.php' in otp.url, 'the OTP code signs the student in from the homepage')
+        check('Sign out' in otp.get('public/student.php'),
+              'single sign-on opens the student dashboard')
+
+        time.sleep(4)
+        signup = Browser(base)
+        signup.get('index.php?page=login')
+        signup.get('index.php?page=login', {'action': 'create_start', 'csrf': form_token(signup.html),
+                                            'name': 'Mira Sen', 'address': '3 Park Street',
+                                            'phone': '+919000055555', 'email': 'mira@example.test',
+                                            'website': ''})
+        check('Your verification code' in signup.html, 'student signup sends a Gmail code')
+        signup.get('index.php?page=login', {'action': 'create_verify', 'csrf': form_token(signup.html),
+                                            'code': newest_code()})
+        check('public/student.php' in signup.url, 'verified signup lands in the student portal')
+        row = con.execute("SELECT name,phone,address FROM student_users WHERE email='mira@example.test'").fetchone()
+        check(row == ('Mira Sen', '+919000055555', '3 Park Street'),
+              'signup stores the name, mobile and home address')
+        check('Sign out' in signup.get('public/student.php'),
+              'the new account session opens the dashboard')
+
+        time.sleep(4)
+        forgot = Browser(base)
+        forgot.get('index.php?page=login')
+        forgot.get('index.php?page=login', {'action': 'recovery_start', 'csrf': form_token(forgot.html),
+                                            'email': 'mira@example.test'})
+        check('Your verification code' in forgot.html, 'forgot password sends a recovery code')
+        forgot.get('index.php?page=login', {'action': 'recovery_verify', 'csrf': form_token(forgot.html),
+                                            'code': newest_code()})
+        check('public/student.php' in forgot.url, 'the recovery code restores the student session')
+        check('Sign out' in forgot.get('public/student.php'), 'recovered access opens the dashboard')
+
+        enquiry = Browser(base)
+        enquiry.get('index.php?page=login')
+        enquiry.get('index.php?page=login', {'action': 'inquiry_save', 'csrf': form_token(enquiry.html),
+                                             'name': 'Ravi Kumar', 'phone': '+919000011111',
+                                             'email': 'ravi@example.test', 'address': '7 Lake Road',
+                                             'course_id': str(cid), 'message': 'D.Pharm fees?',
+                                             'website': ''})
+        check('received' in enquiry.html, 'admission inquiry confirms receipt')
+        row = con.execute('SELECT source,notes FROM enquiries WHERE email=?', ('ravi@example.test',)).fetchone()
+        check(row and row[0] == 'website' and 'D.Pharm fees?' in row[1] and '7 Lake Road' in row[1],
+              'the inquiry reaches the office with message and address')
+
         check('value="owner@example.test"' in owner.get('public/index.php?email=owner@example.test'),
               'office sign-in prefills the detected email')
         portal = Browser(base, 'public/student.php')
