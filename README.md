@@ -8,7 +8,7 @@ A PHP/MySQL CRM for pharma, medical, and other educational institutes. Includes 
 
 Public applications now support **status email alerts, certificate uploads, owner-authorized automatic eligibility approval and Razorpay fee collection**. All automation stays disabled until explicitly configured.
 
-- Apply/track: **`public/apply.php`** · Enrolled pay: **`public/student.php?page=payments`** · Staff: **Online applications** (queue/listings/eligibility/mail) + **Payments → Online payment orders**.
+- Apply/track: **`apply.php`** · Enrolled pay: **`student.php?page=payments`** · Staff: **Online applications** (queue/listings/eligibility/mail) + **Payments → Online payment orders**.
 - Approval (manual or automatic) creates student + admission PDF/queue + portal access together. Payments credit only after exact captured verification; test mode never credits.
 - **[Automation guide](docs/AUTOMATION.md)** (setup, scanning, policies, test/live gateway, webhooks, MySQL/Gmail verification) · **[Admissions guide](docs/ONLINE-ADMISSIONS.md)**.
 
@@ -23,9 +23,9 @@ Public applications now support **status email alerts, certificate uploads, owne
 
 ## Already installed? Upgrade without reinstalling
 
-**Do not rerun setup.php.** Back up your database and private files, replace application files from the updated ZIP while preserving `config.php` and `storage/`, then sign in as group owner and open **`public/upgrade.php`**. See **[Operations upgrade guide](docs/OPERATIONS.md)** or open `UPGRADE.html` from the package.
+**Do not rerun setup.php.** Back up your database and private files, replace application files from the updated ZIP while preserving `config.php` and `storage/`, then sign in as group owner and open **`upgrade.php`**. See **[Operations upgrade guide](docs/OPERATIONS.md)** or open `UPGRADE.html` from the package.
 
-Then use **Students → Enable student access** and share **`public/student.php`**. Students use email OTP to see only their own admission, fee balance, payments, profile and PDF documents. Each student needs a unique personal email. No access is granted automatically. Changing the student's email or disabling access revokes their sessions; staff must re-enable a corrected address.
+Then use **Students → Enable student access** and share **`student.php`**. Students use email OTP to see only their own admission, fee balance, payments, profile and PDF documents. Each student needs a unique personal email. No access is granted automatically. Changing the student's email or disabling access revokes their sessions; staff must re-enable a corrected address.
 
 ## Easiest installation: open the setup page
 
@@ -35,7 +35,7 @@ The dependency-included installer is tracked at `releases/northstar-setup.zip` s
 
 Use the **ready-to-install `northstar-setup.zip`** (libraries included), extract its `institute-crm` folder into XAMPP's `htdocs`, start Apache/MySQL, and open:
 
-**http://localhost/institute-crm/public/setup.php**
+**http://localhost/institute-crm/setup.php**
 
 The wizard walks through **server checks → database → owner/first institute → PHPMailer/Gmail → inbox verification → install**. No PHP configuration editing or Composer commands are needed when using the packaged ZIP. On first visit, copy the private key from `storage/setup-key.txt` to prove server ownership. Setup locks after completion.
 
@@ -136,7 +136,7 @@ Optional: add `--demo` on the first install for fictional sample institutes/stud
 
 ### 5. Open and sign in
 
-Visit **`http://localhost/institute-crm/public/`**.
+Visit **`http://localhost/institute-crm/`**.
 
 Enter the registered staff email, click **Send sign-in code**, then enter the six-digit code in the same browser. Check spam if necessary. Codes expire after **5 minutes**, allow **5 verification attempts**, and can be used only once. Wait **60 seconds** before resending. A new code invalidates older ones for that address. Login does not create a new account.
 
@@ -317,26 +317,26 @@ app/notifications.php       Claim/retry/deliver notification batches
 app/migrations.php          Additive email/payment schema changes
 app/views.php               CRM screens and OTP login
 app/communication-views.php Payments, document and notification screens
-public/index.php            HTTP entry point, session and security policy
-public/setup.php            Guided setup page
-public/upgrade.php          Owner-only additive upgrade
-public/student.php          Isolated student session and PDF endpoint
+office.php            HTTP entry point, session and security policy
+setup.php            Guided setup page
+upgrade.php          Owner-only additive upgrade
+student.php          Isolated student session and PDF endpoint
 app/portal.php              Portal provisioning, migrations and access checks
 app/student-views.php       Responsive student workspace and own-record views
 app/operations.php          Academic/fee workflows, migrations and session revocation
 app/operations-views.php    Teaching, attendance, fee and deployment screens
-public/export.php           Authorized POST-only CSV exports
+export.php           Authorized POST-only CSV exports
 app/applications.php       Public listings, applicant OTP and reviewed admission workflow
 app/applicant-views.php     Public course catalogue and private application workspace
 app/application-staff-views.php Staff listing controls and review queue
-public/apply.php            Isolated public/applicant entry point
+apply.php            Isolated public/applicant entry point
 app/services.php           Exams, notices, support and worker heartbeat
 app/services-views.php      Staff assessment, notice and help-desk screens
 app/student-services.php    Own published results, notices and support
 bin/backup.php              Private SQLite/local-MySQL backup helper
 bin/health.php              Credential-free JSON operational observations
 bin/build-release.php       Creates a dependency-included installation ZIP
-public/document.php         Authorized PDF download endpoint
+document.php         Authorized PDF download endpoint
 bin/install.php             First-time installation
 bin/migrate.php             Upgrade existing databases
 bin/test-mail.php           SMTP configuration test

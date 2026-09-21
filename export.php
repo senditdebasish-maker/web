@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 ini_set('display_errors','0');
-require dirname(__DIR__).'/app/bootstrap.php';require_once dirname(__DIR__).'/app/operations.php';
+require __DIR__.'/app/bootstrap.php';require_once __DIR__.'/app/operations.php';
 header('Cache-Control: no-store');header('X-Content-Type-Options: nosniff');
-ini_set('session.use_strict_mode','1');session_name('northstar_session');session_set_cookie_params(['httponly'=>true,'secure'=>$config['secure_cookies']??false,'samesite'=>'Lax','path'=>'/']);session_start();
+ini_set('session.use_strict_mode','1');session_name('northstar_session');session_set_cookie_params(sessionCookieParams());session_start();
 if(isset($_SESSION['last_seen'])&&time()-$_SESSION['last_seen']>1800){$_SESSION=[];session_regenerate_id(true);}
 try {
     $u=opsGuard();if($_SERVER['REQUEST_METHOD']!=='POST'){http_response_code(405);header('Allow: POST');exit('Use the report export form.');}

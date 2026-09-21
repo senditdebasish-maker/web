@@ -61,13 +61,13 @@ with tempfile.TemporaryDirectory(prefix='northstar-portal-') as tmp:
     for table in ['portal_otp_challenges','portal_events','portal_accounts']:execute('DROP TABLE '+table)
     with socket.socket() as s:s.bind(('127.0.0.1',0));port=s.getsockname()[1]
     log=open(tmp/'server.log','w+')
-    server=subprocess.Popen(PHP+['-d','opcache.enable=0','-S',f'0.0.0.0:{port}','-t','public'],cwd=ROOT,env=env,stdout=log,stderr=log)
+    server=subprocess.Popen(PHP+['-d','opcache.enable=0','-S',f'0.0.0.0:{port}','-t',str(ROOT)],cwd=ROOT,env=env,stdout=log,stderr=log)
     try:
         base=f'http://127.0.0.1:{port}'
         for _ in range(100):
-            try:urllib.request.urlopen(base+'/index.php',timeout=.5);break
+            try:urllib.request.urlopen(base+'/office.php',timeout=.5);break
             except OSError:time.sleep(.1)
-        owner=Browser(base,'index.php');anon=Browser(base);a=Browser(base);b=Browser(base)
+        owner=Browser(base,'office.php');anon=Browser(base);a=Browser(base);b=Browser(base)
         check('Portal not ready yet' in anon.get() and anon.status==503,'pre-upgrade portal fails safely')
         anon.get('upgrade.php');check(anon.status==403,'anonymous visitor cannot upgrade')
         login(owner,'owner@example.test');check('Hello, Owner' in owner.html,'existing owner can sign in before portal migration')
@@ -79,7 +79,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-portal-') as tmp:
         check('Upgrade complete' in owner.get('upgrade.php',dict(csrf=csrf,backup='yes')),'browser migration is repeatable')
         check(scalar('SELECT COUNT(*) FROM students')==len(students),'upgrade preserves existing students')
         check(scalar('SELECT COUNT(*) FROM portal_accounts')==0,'upgrade does not auto-enable any student')
-        check('Enable student access' in owner.get('index.php?page=students'),'staff student list exposes portal controls')
+        check('Enable student access' in owner.get('office.php?page=students'),'staff student list exposes portal controls')
         clear_limits();before=len(list(capture.glob('*.eml')))
         check('active student portal account' in a.post('request_otp',email='first@example.test'),'not-enabled email gets generic response')
         check(len(list(capture.glob('*.eml')))==before,'not-enabled student receives no code')
@@ -89,7 +89,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-portal-') as tmp:
         check('Invalid' not in owner.post('admission_letter',page='students',student_id=sid),'admission document can be prepared for portal')
         owner.post('admission_letter',page='students',student_id=other_sid)
         doc=scalar("SELECT id FROM documents WHERE student_id=? AND kind='admission'",(sid,));other_doc=scalar('SELECT id FROM documents WHERE student_id=?',(other_sid,))
-        owner.get('index.php?page=payments');nonce=re.search(r'name="request_key" value="([^"]+)"',owner.html).group(1)
+        owner.get('office.php?page=payments');nonce=re.search(r'name="request_key" value="([^"]+)"',owner.html).group(1)
         owner.post('payment',page='payments',student_id=sid,request_key=nonce,amount='1234.50',paid_on='2026-01-01',method='Cash',reference='')
         receipt=scalar("SELECT id FROM documents WHERE student_id=? AND kind='payment'",(sid,))
         a.get();check('Staff login' in a.html and 'Password' not in a.html,'separate student login screen uses OTP only')
@@ -117,7 +117,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-portal-') as tmp:
         a.get('student.php?document='+str(same_doc));check(a.status==404,'same-institute other-student PDF is rejected')
         anon.get('student.php?document='+str(doc));check(anon.status==401,'anonymous student document request denied')
         a.get('document.php?id='+str(receipt));check(a.status==401,'student session cannot use staff document endpoint')
-        check('Your workspace awaits' in a.get('index.php'),'student session cannot authenticate to staff CRM')
+        check('Your workspace awaits' in a.get('office.php'),'student session cannot authenticate to staff CRM')
         a.get('upgrade.php');check(a.status==403,'student session cannot run database upgrade')
         for action in ['payment','portal_access','student_email','admit','login']:
             check('cannot perform' in a.post(action,student_id=other_sid,amount='10',access='enable',email='evil@example.test',password='fake'),'student cannot invoke '+action)
@@ -132,7 +132,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-portal-') as tmp:
         clear_limits();b.post('request_otp',email='second@example.test');exhausted=code_for('second@example.test')
         for _ in range(5):b.post('verify_otp',code='000000')
         check('Invalid, expired' in b.post('verify_otp',code=exhausted),'student OTP locks after five wrong attempts')
-        staff=Browser(base,'index.php');clear_limits();staff.post('request_otp',email='owner@example.test');staff_code=code_for('owner@example.test')
+        staff=Browser(base,'office.php');clear_limits();staff.post('request_otp',email='owner@example.test');staff_code=code_for('owner@example.test')
         check('Request a new' in anon.post('verify_otp',code=staff_code),'staff OTP cannot authenticate a student session')
         clear_limits();b.post('request_otp',email='second@example.test');pending=code_for('second@example.test')
         owner.post('portal_access',page='students',student_id=other_sid,access='disable')
@@ -150,16 +150,16 @@ with tempfile.TemporaryDirectory(prefix='northstar-portal-') as tmp:
         login(a,'changed@example.test');check('Hello, First' in a.html,'re-enabled student can sign in using verified new email')
         # Institute admin/counsellor authorization around the enabling action.
         owner.post('staff',page='staff',institute_id=other_iid,name='Beta Admin',email='beta@example.test',role='admin')
-        admin=Browser(base,'index.php');login(admin,'beta@example.test')
+        admin=Browser(base,'office.php');login(admin,'beta@example.test')
         check('not accessible' in admin.post('portal_access',page='students',student_id=sid,access='disable'),'institute admin cannot change another institute portal access')
         admin.get('upgrade.php');check(admin.status==403,'institute admin cannot run owner-only upgrade')
-        counsellor=Browser(base,'index.php');login(counsellor,'counsellor1@example.test')
+        counsellor=Browser(base,'office.php');login(counsellor,'counsellor1@example.test')
         check('permission' in counsellor.post('portal_access',page='students',student_id=sid,access='disable'),'counsellor cannot enable or disable portal accounts')
         check('access disabled' in admin.post('portal_access',page='students',student_id=other_sid,access='disable'),'institute admin can disable own student portal')
         # Staff and student sessions can coexist but must remain separate.
         owner.endpoint='student.php';login(owner,'changed@example.test')
-        check('Hello, First' in owner.html and 'Hello, Owner' in owner.get('index.php'),'student login does not overwrite staff session in same browser')
-        owner.post('logout');check('Hello, Owner' in owner.get('index.php'),'student logout does not destroy separate staff session')
+        check('Hello, First' in owner.html and 'Hello, Owner' in owner.get('office.php'),'student login does not overwrite staff session in same browser')
+        owner.post('logout');check('Hello, Owner' in owner.get('office.php'),'student logout does not destroy separate staff session')
         print(f'\n{checks} student portal checks passed. No real emails sent.')
         con.close()
     finally:

@@ -11,9 +11,9 @@ if (!is_dir($dir)) mkdir($dir,0700,true);
 $path=$dir.'/northstar-setup.zip';
 $zip=new ZipArchive();
 if ($zip->open($path,ZipArchive::CREATE|ZipArchive::OVERWRITE)!==true) { fwrite(STDERR,"Cannot create release ZIP.\n"); exit(1); }
-$files=['.htaccess','index.php','README.md','START-HERE.html','UPGRADE.html','config.example.php','composer.json','storage/.gitkeep','storage/.htaccess'];
+$files=['.htaccess','index.php','office.php','student.php','apply.php','setup.php','upgrade.php','document.php','export.php','razorpay-webhook.php','README.md','START-HERE.html','UPGRADE.html','config.example.php','composer.json','storage/.gitkeep','storage/.htaccess'];
 if (is_file($root.'/composer.lock')) $files[]='composer.lock';
-foreach (['app','bin','public','docs','tests','vendor'] as $dir) {
+foreach (['app','assets','bin','docs','tests','vendor'] as $dir) {
     $iterator=new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root.'/'.$dir,FilesystemIterator::SKIP_DOTS));
     foreach($iterator as $file) {
         if (!$file->isFile() || $file->isLink()) continue;
@@ -28,4 +28,4 @@ foreach($files as $file) {
 }
 $zip->setArchiveComment('Northstar Institute CRM - browser setup package. No configuration, credentials, databases or mail captures included.');
 if (!$zip->close()) throw new RuntimeException('Could not finish ZIP.');
-echo "Release created: $path\nExtract the institute-crm folder into XAMPP htdocs, then use public/setup.php for a fresh install or UPGRADE.html for an existing installation.\n";
+echo "Release created: $path\nExtract the institute-crm folder into XAMPP htdocs, then use setup.php for a fresh install or UPGRADE.html for an existing installation.\n";

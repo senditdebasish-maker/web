@@ -54,7 +54,7 @@
       need to edit PHP files or install Composer when using this package.
     </p>
     <p>
-      New students apply at <code>public/apply.php</code>. After upgrading,
+      New students apply at <code>apply.php</code>. After upgrading,
       staff must open course listings in <strong>Online applications</strong>;
       no course is published automatically. Automation (alerts, uploads,
       eligibility, online payments) stays disabled until configured. Read
@@ -72,8 +72,8 @@
       </li>
       <li>
         Open
-        <a href="http://localhost/institute-crm/public/setup.php"
-          >http://localhost/institute-crm/public/setup.php</a
+        <a href="http://localhost/institute-crm/setup.php"
+          >http://localhost/institute-crm/setup.php</a
         >
         in your browser. Do not open a PHP file directly from File Explorer.
       </li>
@@ -129,7 +129,7 @@
     </p>
     <h2>Moving to live hosting</h2>
     <p>
-      Use HTTPS, serve only <code>public/</code>, protect private files, and use
+      Use HTTPS, keep the bundled <code>.htaccess</code> protections, and use
       a dedicated database account. Choose Live server mode in the wizard for a
       fresh deployment. Existing installations must follow the upgrade
       instructions, not rerun setup.

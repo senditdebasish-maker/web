@@ -16,16 +16,15 @@ if (!function_exists('tr')) {
     }
 }
 // Web path of the project folder, e.g. '' on a domain root or '/institute-crm' under XAMPP htdocs.
+// The project folder is the web root: index.php, office.php, student.php, apply.php and assets/ sit side by side.
 function siteWebRoot(): string {
     $dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/index.php'));
-    if (strtolower(basename($dir)) === 'public') $dir = dirname($dir);
     if ($dir === '/' || $dir === '.' || $dir === '\\' || $dir === '') return '';
     return rtrim($dir, '/');
 }
-// URL of the university front page (root index.php) from any page, including public/*.php.
-// Installations that serve only public/ fall back to the portal home on the same host.
+// URL of the university front page (root index.php) from any page.
 function siteHomeUrl(): string { return siteWebRoot() . '/index.php'; }
-function sitePublicUrl(string $path): string { return siteWebRoot() . '/public/' . ltrim($path, '/'); }
+function sitePublicUrl(string $path): string { return siteWebRoot() . '/' . ltrim($path, '/'); }
 function siteToggle(): string {
     return '<button class="theme-toggle" data-theme-toggle type="button" aria-label="Toggle dark mode" title="Toggle dark mode"><span aria-hidden="true">🌙</span></button>';
 }
@@ -97,7 +96,7 @@ function siteFooter(string $brand, string $kind, string $city = '', string $addr
     $h = '<footer class="u-footer"><div class="u-footer-grid"><div><strong>' . e($brand) . '</strong><p>' . e($kind) . ($city !== '' ? ' · ' . e($city) : '') . '</p>';
     $h .= '<h4>' . e(tr('Follow Us')) . '</h4>' . siteSocial() . '</div>';
     $h .= '<div><h4>' . e(tr('Quick Links')) . '</h4><nav aria-label="University"><a href="' . e($home . '?page=about') . '">' . e(tr('About us')) . '</a><a href="' . e($home . '?page=courses') . '">' . e(tr('Programs')) . '</a><a href="' . e($home . '?page=admissions') . '">' . e(tr('Admissions')) . '</a><a href="' . e($home . '?page=notices') . '">' . e(tr('Notices')) . '</a><a href="' . e($home . '?page=faculty') . '">' . e(tr('Faculty')) . '</a></nav></div>';
-    $h .= '<div><h4>' . e(tr('Portals')) . '</h4><nav aria-label="Portals"><a href="' . e(sitePublicUrl('apply.php')) . '">' . e(tr('Apply online')) . '</a><a href="' . e(sitePublicUrl('student.php?page=register')) . '">' . e(tr('Create account')) . '</a><a href="' . e($home . '?page=login') . '">' . e(tr('Sign in')) . '</a><a href="' . e(sitePublicUrl('index.php')) . '">' . e(tr('Office login')) . '</a></nav></div>';
+    $h .= '<div><h4>' . e(tr('Portals')) . '</h4><nav aria-label="Portals"><a href="' . e(sitePublicUrl('apply.php')) . '">' . e(tr('Apply online')) . '</a><a href="' . e(sitePublicUrl('student.php?page=register')) . '">' . e(tr('Create account')) . '</a><a href="' . e($home . '?page=login') . '">' . e(tr('Sign in')) . '</a><a href="' . e(sitePublicUrl('office.php')) . '">' . e(tr('Office login')) . '</a></nav></div>';
     $h .= '<div><h4>' . e(tr('Address')) . '</h4><p>' . ($address !== '' ? e($address) . '<br>' : '') . ($city !== '' ? e($city) : '') . '</p>' . ($phone !== '' ? '<p>☎ ' . e($phone) . '</p>' : '') . '<p><a href="' . e($home . '?page=contact') . '">' . e(tr('All campuses')) . ' →</a></p></div></div>';
     $h .= '<div class="u-footer-bottom"><span>© ' . date('Y') . ' ' . e($brand) . '. ' . e(tr('All rights reserved.')) . '</span><span>' . e(tr('Admissions open · Apply online')) . '</span></div></footer>';
     return $h;

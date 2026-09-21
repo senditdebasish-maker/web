@@ -16,9 +16,9 @@ qualification and institute only — personal email/phone are never shown), Cont
 ## One sign-in for everyone
 
 `?page=login` signs visitors in with an emailed OTP code and lands them straight in
-the right dashboard: staff addresses open the office (`public/index.php`), student
+the right dashboard: staff addresses open the office (`office.php`), student
 addresses (portal account, registered student user or student record) open the
-student portal (`public/student.php`). Staff on password-mode institutes get a link
+student portal (`student.php`). Staff on password-mode institutes get a link
 to office password login instead of a code. Unknown addresses choose between
 creating a student account and sending an admission inquiry — never an error
 dead-end. The same page hosts three popups (plain links work without JavaScript):
@@ -31,7 +31,7 @@ dead-end. The same page hosts three popups (plain links work without JavaScript)
   session (student accounts are OTP-based, so verifying the Gmail is the recovery).
 
 All three reuse the CRM's OTP, mail, rate-limit and transaction systems; the
-`address` column on `student_users` is added automatically by `public/upgrade.php` /
+`address` column on `student_users` is added automatically by `upgrade.php` /
 `bin/migrate.php`, and fresh installs include it.
 
 ## Campus name and address
@@ -39,14 +39,14 @@ All three reuse the CRM's OTP, mail, rate-limit and transaction systems; the
 The site brand, footer and contact details use the institutes table. Owners edit them
 in **Institutes** (name, type, city, phone, campus address). The first institute is
 the site brand; every institute appears under About and Contact. The `address` column
-is added automatically by `public/upgrade.php` / `bin/migrate.php`; fresh installs
+is added automatically by `upgrade.php` / `bin/migrate.php`; fresh installs
 include it.
 
 ## Homepage design and starter showcase content
 
 The homepage follows a classic university layout: navy crest header, scrolling
 announcement ticker (built live from CRM admission dates and closing dates), a
-campus hero banner (`public/assets/campus-hero.jpg` — replace this file with a
+campus hero banner (`assets/campus-hero.jpg` — replace this file with a
 photo of your own campus to rebrand instantly), accreditation badges, a stats
 band, a Vice-Chancellor feature, featured programs, notices, and a sidebar with
 mini badges, the Vice-Chancellor's card, a program showcase grid, recruiters and
@@ -66,7 +66,7 @@ will make these editable without touching code.
 ## One theme, no dead ends
 
 The root site and every portal page share one theme (`app/site-chrome.php` +
-`public/assets/university.css`): the same header, navigation, footer, buttons and
+`assets/university.css`): the same header, navigation, footer, buttons and
 dark-mode toggle. On every page the brand links back to the university front page,
 and every portal (admissions, student, office homepage and office workspace) shows
 an explicit **← Back to website** link, so the Admissions button never strands the
@@ -81,5 +81,6 @@ upgrade pages keep their own minimal styling.
 - On Apache the root `.htaccess` blocks `app/`, `bin/`, `storage/`, `vendor/`,
   `config.php` and databases. Hosts that ignore `.htaccess` (Nginx) must deny those
   paths in server configuration when serving the project folder directly.
-- Installations served with document root `public/` only should keep using the
-  portal homepage; the university page needs the project folder itself served.
+- The project folder itself is the web root: `index.php` (university site),
+  `office.php` (staff), `student.php`, `apply.php` and `assets/` sit side by side,
+  exactly as XAMPP serves them from `htdocs/institute-crm/`.

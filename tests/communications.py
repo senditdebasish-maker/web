@@ -33,16 +33,16 @@ class Browser:
     def __init__(self,base):
         self.base=base
         self.client=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
-    def get(self,path='?page=dashboard',data=None):
+    def get(self,path='office.php?page=dashboard',data=None):
         try:
             r=self.client.open(self.base+'/'+path,urllib.parse.urlencode(data).encode() if data is not None else None,timeout=40)
         except urllib.error.HTTPError as ex: r=ex
         self.status=r.status; self.headers=r.headers; self.raw=r.read(); self.html=self.raw.decode('utf-8',errors='replace')
         return self.html
     def post(self,action,page='dashboard',**fields):
-        self.get('?page='+page)
+        self.get('office.php?page='+page)
         token=re.search(r'name="csrf" value="([^"]+)"',self.html).group(1)
-        return self.get('?page='+page,dict(action=action,csrf=token,**fields))
+        return self.get('office.php?page='+page,dict(action=action,csrf=token,**fields))
 
 with tempfile.TemporaryDirectory(prefix='northstar-mail-') as tmp:
     tmp=Path(tmp); database=tmp/'data.sqlite'; capture=tmp/'mail'; cfg=tmp/'config.php'
@@ -69,7 +69,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-mail-') as tmp:
         raise AssertionError('OTP email not captured')
     with socket.socket() as sock: sock.bind(('127.0.0.1',0)); port=sock.getsockname()[1]
     log=open(tmp/'server.log','w+')
-    server=subprocess.Popen(PHP+['-d','opcache.enable=0','-S',f'0.0.0.0:{port}','-t','public'],cwd=ROOT,env=env,stdout=log,stderr=log)
+    server=subprocess.Popen(PHP+['-d','opcache.enable=0','-S',f'0.0.0.0:{port}','-t',str(ROOT)],cwd=ROOT,env=env,stdout=log,stderr=log)
     try:
         base=f'http://127.0.0.1:{port}'
         for _ in range(100):
@@ -112,7 +112,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-mail-') as tmp:
         sid=scalar('SELECT id FROM students WHERE enquiry_id=?',(eid,))
         doc=scalar('SELECT id FROM documents WHERE student_id=?',(sid,)); nid=scalar('SELECT id FROM notifications WHERE document_id=?',(doc,))
         check(scalar('SELECT status FROM notifications WHERE id=?',(nid,))=='pending','admission email pending until worker runs')
-        check('student@example.test' in owner.get('?page=notifications'),'notification page shows intended recipient')
+        check('student@example.test' in owner.get('office.php?page=notifications'),'notification page shows intended recipient')
         owner.get(f'document.php?id={doc}')
         check(owner.status==200 and owner.raw.startswith(b'%PDF-') and b'%%EOF' in owner.raw,'admission download is a real PDF')
         check(owner.headers.get_content_type()=='application/pdf' and 'attachment;' in owner.headers['Content-Disposition'],'PDF download has correct headers')
@@ -123,14 +123,14 @@ with tempfile.TemporaryDirectory(prefix='northstar-mail-') as tmp:
         attachments=list(msg.iter_attachments())
         check(len(attachments)==1 and attachments[0].get_content_type()=='application/pdf' and attachments[0].get_payload(decode=True).startswith(b'%PDF-'),'admission email contains generated PDF attachment')
         before=len(messages()); cli('bin/send-notifications.php'); check(len(messages())==before,'completed queue item is not sent again')
-        owner.get('?page=payments'); nonce=re.search(r'name="request_key" value="([^"]+)"',owner.html).group(1)
+        owner.get('office.php?page=payments'); nonce=re.search(r'name="request_key" value="([^"]+)"',owner.html).group(1)
         payment=dict(student_id=sid,request_key=nonce,amount='1000.25',paid_on='2026-01-01',method='UPI',reference='TEST-UPI-001')
         check('Payment recorded' in owner.post('payment',page='payments',**payment),'record payment and queue receipt')
         pid=scalar('SELECT id FROM payments WHERE student_id=?',(sid,)); pdoc=scalar("SELECT id FROM documents WHERE event_key=?",('payment:'+str(pid),))
         check(scalar('SELECT amount_minor FROM payments WHERE id=?',(pid,))==100025,'payment amount uses integer paise')
         check('already recorded' in owner.post('payment',page='payments',**payment),'duplicate form submission is idempotent')
         check(scalar('SELECT COUNT(*) FROM payments WHERE student_id=?',(sid,))==1,'duplicate submission creates no second payment')
-        owner.get('?page=payments'); nonce=re.search(r'name="request_key" value="([^"]+)"',owner.html).group(1)
+        owner.get('office.php?page=payments'); nonce=re.search(r'name="request_key" value="([^"]+)"',owner.html).group(1)
         payment['request_key']=nonce
         check('exceeds' in owner.post('payment',page='payments',**dict(payment,amount='9999999')),'overpayment rejected')
         check('positive amount' in owner.post('payment',page='payments',**dict(payment,amount='-1')),'negative payment rejected')
@@ -175,9 +175,9 @@ with tempfile.TemporaryDirectory(prefix='northstar-mail-') as tmp:
         execute('DROP TRIGGER fail_notification')
         unthrottle(); other=Browser(base); other.post('request_otp',email='counsellor2@example.test'); other.post('verify_otp',code=last_code('counsellor2@example.test'))
         other.get(f'document.php?id={doc}'); check(other.status==403,'cross-institute admission PDF denied')
-        other.get('?page=notifications'); check(other.status==403 and 'student@example.test' not in other.html,'counsellor cannot view notification management')
+        other.get('office.php?page=notifications'); check(other.status==403 and 'student@example.test' not in other.html,'counsellor cannot view notification management')
         check('permission' in other.post('payment',**payment),'counsellor cannot record payments')
-        other.get('?page=documents'); check('New Student' not in other.html,'documents list enforces institute scope')
+        other.get('office.php?page=documents'); check('New Student' not in other.html,'documents list enforces institute scope')
         unthrottle(); ownCounsellor=Browser(base); ownCounsellor.post('request_otp',email='counsellor1@example.test'); ownCounsellor.post('verify_otp',code=last_code('counsellor1@example.test'))
         ownCounsellor.get(f'document.php?id={pdoc}'); check(ownCounsellor.status==403,'counsellor cannot download own-institute financial PDFs')
         unthrottle(); disabled=Browser(base); disabled.post('request_otp',email='counsellor1@example.test'); pending_code=last_code('counsellor1@example.test')
@@ -187,7 +187,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-mail-') as tmp:
         check('not configured' in stranger.post('request_otp',email='owner@example.test'),'mail capture cannot enable OTP login in production')
         write_config()
         for page in ['payments','documents','notifications','settings']:
-            owner.get('?page='+page); check(owner.status==200 and 'temporarily unavailable' not in owner.html,page+' page renders')
+            owner.get('office.php?page='+page); check(owner.status==200 and 'temporarily unavailable' not in owner.html,page+' page renders')
         print(f'\n{checks} communications checks passed. No real emails sent.')
         con.close()
     finally:

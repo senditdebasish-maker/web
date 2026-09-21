@@ -3,19 +3,19 @@ declare(strict_types=1);
 ini_set('display_errors','0');
 // Buffer rendering so authorization/error responses can still set the correct status.
 ob_start();
-require dirname(__DIR__) . '/app/bootstrap.php';
+require __DIR__ . '/app/bootstrap.php';
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: same-origin');
 header('Cache-Control: no-store');
 header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'self'; object-src 'none'");
 ini_set('session.use_strict_mode','1');
 session_name('northstar_session');
-session_set_cookie_params(['httponly'=>true,'secure'=>$config['secure_cookies'] ?? false,'samesite'=>'Lax','path'=>'/']);
+session_set_cookie_params(sessionCookieParams());
 session_start();
 if (isset($_SESSION['last_seen']) && time()-$_SESSION['last_seen']>1800) { $_SESSION=[]; session_regenerate_id(true); }
 $_SESSION['last_seen']=time();
 $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
-require dirname(__DIR__) . '/app/actions.php';
+require __DIR__ . '/app/actions.php';
 $page=is_string($_GET['page'] ?? null) ? $_GET['page'] : 'dashboard';
 $error=null;
 try {
@@ -50,4 +50,4 @@ try {
 } catch (DomainException $ex) { if(defined('CRM_DOCUMENT_REQUEST')) { http_response_code(403); exit('Document not accessible.'); } if(isset($_GET['certificate'])){http_response_code(403);exit('Upload not accessible.');} $error=$ex->getMessage(); $user=currentUser(); if (!$user) $page='login'; }
 catch (Throwable $ex) { if(defined('CRM_DOCUMENT_REQUEST')) { http_response_code(503); exit('PDF unavailable. Ask your administrator to check Composer dependencies.'); } if(isset($_GET['certificate'])){http_response_code(503);exit('Upload unavailable.');} error_log((string)$ex); $error='The request could not be saved. Check for duplicate records or try again. If this continues, contact your administrator.'; $user=null; try { $user=currentUser(); } catch(Throwable $ignored) {} if (!$user) $page='login'; }
 $flash=$_SESSION['flash'] ?? null; unset($_SESSION['flash']);
-require dirname(__DIR__) . '/app/views.php';
+require __DIR__ . '/app/views.php';

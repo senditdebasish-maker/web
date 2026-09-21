@@ -6,11 +6,11 @@ The `northstar-setup.zip` package contains the CRM, PHPMailer, PDF libraries and
 
 1. Extract the **institute-crm** folder into `C:\xampp\htdocs\`.
 2. Start **Apache** and **MySQL** in XAMPP. PHP 8.2+ is required.
-3. Open **http://localhost/institute-crm/public/setup.php**.
+3. Open **http://localhost/institute-crm/setup.php**.
 4. The page creates a private `storage/setup-key.txt`. Open it in Notepad (or the hosting file manager) and copy its key into the setup form. This proves you own the server; a public visitor cannot claim your owner account first.
 5. Complete the guided steps below.
 
-If you open the unconfigured CRM's `public/index.php`, it redirects to the setup page automatically. Do not double-click PHP files in File Explorer; Apache must serve them.
+If you open the unconfigured CRM's `office.php`, it redirects to the setup page automatically. Do not double-click PHP files in File Explorer; Apache must serve them.
 
 ## Wizard steps
 
@@ -110,7 +110,7 @@ Setup sessions expire after 30 minutes of inactivity. **Cancel & clear private s
 
 MySQL schema operations are not fully transactional. If schema creation fails, empty tables may remain even though no owner was committed. Diagnose privileges/extensions and use a **new empty database**; the installer never drops tables for you. If the owner was committed but publishing `config.php` fails, `storage/setup-recovery.php` retains the configuration and blocks further installation. A server operator must verify the database/permissions and move that private recovery file to `config.php`. Do not repeat owner creation.
 
-After setup, make the application code/configuration read-only to the web user where practical, while keeping required runtime storage writable. Serve only `public/`; private sessions, setup keys, config files, databases, captured mail and recovery files must not be web-accessible. Avoid setting directory permissions to 777.
+After setup, make the application code/configuration read-only to the web user where practical, while keeping required runtime storage writable. Keep the bundled `.htaccess` protections; private sessions, setup keys, config files, databases, captured mail and recovery files must not be web-accessible. Avoid setting directory permissions to 777.
 
 ## Source checkout / building a new package
 
@@ -120,7 +120,7 @@ A GitHub source checkout intentionally excludes `vendor/`. Install dependencies 
 composer install --no-dev --prefer-dist
 ```
 
-Then open `public/setup.php`, or build a ready-to-install ZIP:
+Then open `setup.php`, or build a ready-to-install ZIP:
 
 ```sh
 php bin/build-release.php

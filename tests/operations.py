@@ -25,7 +25,7 @@ def check(ok,msg):
     checks+=1;print('PASS',msg)
 
 class Browser:
-    def __init__(self,base,endpoint='index.php'):
+    def __init__(self,base,endpoint='office.php'):
         self.base=base;self.endpoint=endpoint
         self.client=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
     def get(self,path=None,data=None):
@@ -52,17 +52,17 @@ with tempfile.TemporaryDirectory(prefix='northstar-ops-') as temp:
     execute("UPDATE students SET admission_date='2026-01-01',name='Beta Secret Student' WHERE id=?",(other_sid,))
     with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
     log=open(temp/'server.log','w+')
-    server=subprocess.Popen(PHP+['-d','opcache.enable=0','-S',f'0.0.0.0:{port}','-t','public'],cwd=ROOT,env=env,stdout=log,stderr=log)
+    server=subprocess.Popen(PHP+['-d','opcache.enable=0','-S',f'0.0.0.0:{port}','-t',str(ROOT)],cwd=ROOT,env=env,stdout=log,stderr=log)
     try:
         base=f'http://127.0.0.1:{port}'
         for _ in range(100):
-            try:urllib.request.urlopen(base+'/index.php',timeout=.5);break
+            try:urllib.request.urlopen(base+'/office.php',timeout=.5);break
             except OSError:time.sleep(.1)
         owner=Browser(base);other_owner=Browser(base);owner.login('owner@example.test');other_owner.login('owner@example.test')
         for table in ['fee_plan_revisions','fee_installments','fee_plans','attendance_revisions','attendance','class_days','enrollments','batches','teachers','staff_security']:
             execute('DROP TABLE '+table)
         legacy=Browser(base);check('Hello, Owner' in legacy.login('owner@example.test'),'legacy owner can log in without staff security table')
-        legacy.get('index.php?page=teachers');check('Operations upgrade required' in legacy.html,'pre-upgrade operations fail safely')
+        legacy.get('office.php?page=teachers');check('Operations upgrade required' in legacy.html,'pre-upgrade operations fail safely')
         legacy.get('upgrade.php');token=re.search(r'name="csrf" value="([^"]+)"',legacy.html).group(1)
         check('Upgrade complete' in legacy.get('upgrade.php',dict(csrf=token,backup='yes')),'browser upgrades a portal-only database to operations')
         check('Upgrade complete' in legacy.get('upgrade.php',dict(csrf=token,backup='yes')),'operations browser upgrade is repeatable')
@@ -118,10 +118,10 @@ with tempfile.TemporaryDirectory(prefix='northstar-ops-') as temp:
         check(scalar('SELECT amount_minor FROM fee_installments WHERE plan_id=? ORDER BY due_on LIMIT 1',(pid,))==100000,'failed revision rolls back replacement installments')
         execute('DROP TRIGGER fail_plan_revision')
         def pay(amount):
-            owner.get('index.php?page=payments');nonce=re.search(r'name="request_key" value="([^"]+)"',owner.html).group(1)
+            owner.get('office.php?page=payments');nonce=re.search(r'name="request_key" value="([^"]+)"',owner.html).group(1)
             return owner.post('payment',page='payments',student_id=sid,request_key=nonce,amount=amount,paid_on='2026-01-05',method='Cash',reference='')
         check('Payment recorded' in pay('500'),'record partial installment coverage')
-        check('₹500.00' in owner.get('index.php?page=fee-plans&student='+str(sid)) and 'Overdue' in owner.html,'schedule shows partial overdue amount')
+        check('₹500.00' in owner.get('office.php?page=fee-plans&student='+str(sid)) and 'Overdue' in owner.html,'schedule shows partial overdue amount')
         def export(browser,kind,**fields):return browser.get('export.php',dict(csrf=browser.token(),report=kind,**fields))
         csv=export(owner,'fees',institute_id=iid)
         check(owner.headers.get_content_type()=='text/csv' and '500.00,Overdue' not in csv and '500.00,Scheduled' in csv,'fee CSV computes partial overdue balance')
@@ -166,19 +166,19 @@ with tempfile.TemporaryDirectory(prefix='northstar-ops-') as temp:
         check('not accessible' in admin.post('teacher',page='teachers',id=tid,**teacher(iid,'Changed')),'cross-institute teacher edit denied')
         check('not accessible' in admin.post('attendance',page='attendance',class_id=day,version='3',reason='Attack',**{f'attendance[{sid}]':'Absent'}),'cross-institute attendance write denied')
         check('not accessible' in admin.post('fee_plan',page='fee-plans',**dict(plan,version='2')),'cross-institute schedule write denied')
-        admin.get('index.php?page=attendance&class='+str(day));check(admin.status==403,'direct cross-institute class URL denied')
-        admin.get('index.php?page=batches&roster='+str(bid));check(admin.status==403,'direct cross-institute roster URL denied')
+        admin.get('office.php?page=attendance&class='+str(day));check(admin.status==403,'direct cross-institute class URL denied')
+        admin.get('office.php?page=batches&roster='+str(bid));check(admin.status==403,'direct cross-institute roster URL denied')
         export(admin,'fees',institute_id=iid);check(admin.status==403,'cross-institute CSV scope manipulation denied')
         export(admin,'attendance',class_id=day);check(admin.status==403,'cross-institute class export denied')
-        admin.get('index.php?page=health');check(admin.status==403,'deployment diagnostics owner-only')
+        admin.get('office.php?page=health');check(admin.status==403,'deployment diagnostics owner-only')
         for page in ['teachers','batches','attendance','fee-plans','fee-reports','health']:
-            owner.get('index.php?page='+page);check(owner.status==200 and 'temporarily unavailable' not in owner.html,page+' screen renders')
+            owner.get('office.php?page='+page);check(owner.status==200 and 'temporarily unavailable' not in owner.html,page+' screen renders')
         for page in ['teachers&edit='+str(tid),'batches&edit='+str(bid),'batches&roster='+str(bid),'attendance&class='+str(day),'fee-plans&student='+str(sid)]:
-            owner.get('index.php?page='+page);check(owner.status==200 and 'temporarily unavailable' not in owner.html,page+' detail screen renders')
+            owner.get('office.php?page='+page);check(owner.status==200 and 'temporarily unavailable' not in owner.html,page+' detail screen renders')
         owner.post('staff',page='staff',institute_id=iid,name='Counsellor',email='counsellor@example.test',role='counsellor',password='Staff-Test-Password!')
         counsellor=Browser(base);counsellor.login('counsellor@example.test','Staff-Test-Password!')
         check('permission' in counsellor.post('teacher',page='enquiries',**teacher(iid,'Forbidden')),'counsellor cannot change teaching directory')
-        counsellor.get('index.php?page=fee-reports');check(counsellor.status==403,'counsellor cannot read financial report')
+        counsellor.get('office.php?page=fee-reports');check(counsellor.status==403,'counsellor cannot read financial report')
         check('Changes saved' in owner.post('revoke_sessions',page='staff',user_id=admin_id),'owner can revoke another staff account sessions')
         check('Your workspace awaits' in admin.get(),'revoked staff session immediately denied on next request')
         admin.login('beta@example.test','Staff-Test-Password!')

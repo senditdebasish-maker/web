@@ -1,14 +1,14 @@
 # Student portal phase
 
-New students can now apply through **`public/apply.php`**. Staff approval creates the enrolled-student account and admission letter. See [Online admissions](ONLINE-ADMISSIONS.md); applicant and student sessions remain separate.
+New students can now apply through **`apply.php`**. Staff approval creates the enrolled-student account and admission letter. See [Online admissions](ONLINE-ADMISSIONS.md); applicant and student sessions remain separate.
 
 ## Upgrade an already-installed CRM (do not reinstall)
 
 1. Export the MySQL/MariaDB database in phpMyAdmin. Privately back up `config.php`, `storage/`, and the working application files. Test that the backup is usable.
 2. Stop normal use/notification workers temporarily. Extract the updated ZIP into a **separate temporary folder**.
 3. Merge/replace its `app/`, `public/`, `bin/`, `docs/`, `vendor/`, `composer.json` and help files into the existing project. **Keep your existing config.php, storage contents, database and installer locks. Never delete the existing project folder or rerun setup.php.** Do not nest an extra institute-crm folder.
-4. Restart Apache (clears cached PHP). Sign in as the **group owner** at your usual `public/index.php`.
-5. Open `public/upgrade.php`, confirm the backup and run the additive upgrade. It adds `portal_accounts`, `portal_otp_challenges`, `portal_events`, and the latest operations tables (see [Operations](OPERATIONS.md)); existing CRM tables/data remain in place. Re-running is safe. A database account with schema-creation/index permissions is needed during upgrade. Native MySQL DDL is not fully transactional; if it fails part-way, fix permissions and rerun rather than deleting data.
+4. Restart Apache (clears cached PHP). Sign in as the **group owner** at your usual `office.php`.
+5. Open `upgrade.php`, confirm the backup and run the additive upgrade. It adds `portal_accounts`, `portal_otp_challenges`, `portal_events`, and the latest operations tables (see [Operations](OPERATIONS.md)); existing CRM tables/data remain in place. Re-running is safe. A database account with schema-creation/index permissions is needed during upgrade. Native MySQL DDL is not fully transactional; if it fails part-way, fix permissions and rerun rather than deleting data.
 6. Alternatively, a server operator can run `php bin/migrate.php`. Fresh installations automatically include the new tables.
 7. Test portal access with an email inbox you control, then resume normal work and the existing notification worker.
 
@@ -29,8 +29,8 @@ Staff manage these accounts in **Student accounts** (owner/admin): verified name
 - Open **Students** as owner or institute admin.
 - Check the correct **personal student email**, using Manage email / letter to fix it if needed. Verify the address with the student before granting access; an email typo can give another mailbox owner access to that student's documents.
 - Click **Enable student access**. Counsellors cannot grant or revoke portal access. Institute admins can only manage their own institute's students.
-- Share `https://your-institute-domain/student.php` when your web root is `public/`, or the corresponding `/institute-crm/public/student.php` subdirectory URL.
-- On the XAMPP computer: `http://localhost/institute-crm/public/student.php`. That localhost URL is **not** reachable by students on their own devices. Deploy to a secured live server before providing remote access.
+- Share `https://your-institute-domain/student.php`, or the corresponding `/institute-crm/student.php` subdirectory URL under XAMPP.
+- On the XAMPP computer: `http://localhost/institute-crm/student.php`. That localhost URL is **not** reachable by students on their own devices. Deploy to a secured live server before providing remote access.
 
 Enabling does **not** send an invitation email automatically. Students are not automatically enabled when admitted. Every account must be explicitly enabled by authorized staff.
 

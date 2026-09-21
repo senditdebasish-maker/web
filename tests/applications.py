@@ -25,7 +25,7 @@ def check(ok,msg):
     checks+=1;print('PASS',msg)
 
 class Browser:
-    def __init__(self,base,endpoint='index.php'):
+    def __init__(self,base,endpoint='office.php'):
         self.base=base;self.endpoint=endpoint
         self.client=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
     def get(self,path=None,data=None):
@@ -52,11 +52,11 @@ with tempfile.TemporaryDirectory(prefix='northstar-applications-') as temp:
     execute("UPDATE students SET admission_date='2026-01-01',name='Beta Secret Student' WHERE id=?",(other_sid,))
     with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
     log=open(temp/'server.log','w+')
-    server=subprocess.Popen(PHP+['-d','opcache.enable=0','-S',f'0.0.0.0:{port}','-t','public'],cwd=ROOT,env=env,stdout=log,stderr=log)
+    server=subprocess.Popen(PHP+['-d','opcache.enable=0','-S',f'0.0.0.0:{port}','-t',str(ROOT)],cwd=ROOT,env=env,stdout=log,stderr=log)
     try:
         base=f'http://127.0.0.1:{port}'
         for _ in range(100):
-            try:urllib.request.urlopen(base+'/index.php',timeout=.5);break
+            try:urllib.request.urlopen(base+'/office.php',timeout=.5);break
             except OSError:time.sleep(.1)
         owner=Browser(base);other_owner=Browser(base);owner.login('owner@example.test');other_owner.login('owner@example.test')
         visitor=Browser(base,'apply.php')
@@ -92,7 +92,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-applications-') as temp:
         check('My applications' in visitor.post('verify_code',page='login',code=code) and 'Your email is verified' in visitor.html,'verified email creates isolated applicant account')
         check(scalar('SELECT COUNT(*) FROM applicant_accounts')==1,'one applicant account created after verification')
         check('Request an applicant code first' in visitor.post('verify_code',page='login',code=code),'used applicant code cannot be replayed')
-        visitor.get('index.php');check('Your workspace awaits' in visitor.html,'applicant session cannot authenticate to staff CRM')
+        visitor.get('office.php');check('Your workspace awaits' in visitor.html,'applicant session cannot authenticate to staff CRM')
         visitor.get('student.php');check('Your student space awaits' in visitor.html,'applicant session cannot authenticate to student portal')
         for forbidden in ['application_admit','payment','portal_access']:
             check('cannot perform' in visitor.post(forbidden,page='dashboard',student_id=sid),'applicant cannot invoke '+forbidden)
@@ -124,11 +124,11 @@ with tempfile.TemporaryDirectory(prefix='northstar-applications-') as temp:
         check('Application not accessible' in other.post('withdraw_application',page='dashboard',application_id=appid,version='1',reason='Attack'),'other applicant cannot withdraw application')
         owner.post('staff',page='staff',institute_id=other_iid,name='Beta Admin',email='beta@example.test',role='admin',password='Staff-Test-Password!')
         admin=Browser(base);admin.login('beta@example.test','Staff-Test-Password!')
-        admin.get('index.php?page=applications&application='+str(appid));check(admin.status==403,'other-institute admin cannot view application')
+        admin.get('office.php?page=applications&application='+str(appid));check(admin.status==403,'other-institute admin cannot view application')
         check('not accessible' in admin.post('application_review',page='applications',application_id=appid,version='1',status='Rejected',message='Attack'),'cross-institute application review rejected')
         check('not accessible' in admin.post('admission_listing',page='applications',**dict(listing,version='1')),'cross-institute listing edit rejected')
         owner.post('staff',page='staff',institute_id=iid,name='Counsellor',email='counsellor@example.test',role='counsellor',password='Staff-Test-Password!')
-        counsellor=Browser(base);counsellor.login('counsellor@example.test','Staff-Test-Password!');counsellor.get('index.php?page=applications');check(counsellor.status==403,'counsellor cannot access online admission decisions')
+        counsellor=Browser(base);counsellor.login('counsellor@example.test','Staff-Test-Password!');counsellor.get('office.php?page=applications');check(counsellor.status==403,'counsellor cannot access online admission decisions')
         check('Changes saved' in owner.post('application_review',page='applications',application_id=appid,version='1',status='Changes requested',message='Please provide full qualification details.'),'office requests applicant corrections')
         check('Please provide full qualification' in visitor.get('apply.php?page=application&id='+str(appid)),'applicant sees office message and correction form')
         check('Wait for the applicant' in owner.post('application_admit',page='applications',application_id=appid,version='2',message='Approval',approval='yes'),'cannot approve while corrections are outstanding')
@@ -158,7 +158,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-applications-') as temp:
         check('₹85,000.00' in student.get('student.php?page=payments'),'approved applicant can log in to own student portal')
         doc=scalar('SELECT id FROM documents WHERE student_id=?',(new_sid,));student.get('student.php?document='+str(doc));check(student.raw.startswith(b'%PDF'),'approved student can download actual admission PDF')
         for url in ['applications','applications&tab=listings','applications&listing='+str(cid),'applications&application='+str(appid)]:
-            owner.get('index.php?page='+url);check(owner.status==200 and 'temporarily unavailable' not in owner.html,url+' staff page renders')
+            owner.get('office.php?page='+url);check(owner.status==200 and 'temporarily unavailable' not in owner.html,url+' staff page renders')
         for url in ['courses','course&course='+str(cid),'dashboard','application&id='+str(appid),'help']:
             visitor.get('apply.php?page='+url);check(visitor.status==200 and 'temporarily unavailable' not in visitor.html,url+' applicant page renders')
         # New applicant exercises withdrawal, closing a listing and terminal review states.
@@ -198,7 +198,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-applications-') as temp:
         # Same browser can hold independent staff and applicant cookies without privilege sharing.
         execute('DELETE FROM auth_events');owner.get('apply.php?page=login');owner.endpoint='apply.php';owner.post('request_code',page='login',email='other-applicant@example.test');owner.post('verify_code',page='login',code=code_for('other-applicant@example.test'))
         check('My applications' in owner.get('apply.php?page=dashboard'),'existing enabled applicant can sign in again')
-        owner.post('logout',page='dashboard');owner.endpoint='index.php';check('Hello, Owner' in owner.get(),'applicant logout preserves separate staff session')
+        owner.post('logout',page='dashboard');owner.endpoint='office.php';check('Hello, Owner' in owner.get(),'applicant logout preserves separate staff session')
         # Suspend pending codes, not only authenticated sessions.
         execute('DELETE FROM auth_events');pending=Browser(base,'apply.php');pending.post('request_code',page='login',email='other-applicant@example.test');pending_code=code_for('other-applicant@example.test')
         owner.post('applicant_toggle',page='applications',application_id=third_id);owner.post('applicant_toggle',page='applications',application_id=third_id)

@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 ini_set('display_errors','0');ob_start();
-require dirname(__DIR__).'/app/bootstrap.php';require_once dirname(__DIR__).'/app/applications.php';
+require __DIR__.'/app/bootstrap.php';require_once __DIR__.'/app/applications.php';
 header('Cache-Control: no-store');header('X-Content-Type-Options: nosniff');header('Referrer-Policy: same-origin');
 header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; form-action 'self'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'");
-ini_set('session.use_strict_mode','1');session_name('northstar_applicant');session_set_cookie_params(['httponly'=>true,'secure'=>$config['secure_cookies']??false,'samesite'=>'Lax','path'=>'/']);session_start();
+ini_set('session.use_strict_mode','1');session_name('northstar_applicant');session_set_cookie_params(sessionCookieParams());session_start();
 if(isset($_SESSION['last_seen'])&&time()-$_SESSION['last_seen']>1800){$_SESSION=[];session_regenerate_id(true);}
 $_SESSION['last_seen']=time();$_SESSION['csrf']??=bin2hex(random_bytes(32));
 $page=is_string($_GET['page']??null)?$_GET['page']:'courses';$error=null;$actor=null;$application=null;$course=null;
@@ -45,4 +45,4 @@ try{
 }catch(DomainException $e){http_response_code(403);$error=$e->getMessage();$page='notfound';}
 catch(Throwable $e){http_response_code(503);$page='unavailable';$error='Admissions are temporarily unavailable. Contact the institute.';}
 $flash=$_SESSION['flash']??null;unset($_SESSION['flash']);
-try{require dirname(__DIR__).'/app/applicant-views.php';}catch(Throwable $e){ob_clean();http_response_code(503);echo 'Admissions are temporarily unavailable. Contact the institute.';error_log('Northstar public admissions view failed.');}
+try{require __DIR__.'/app/applicant-views.php';}catch(Throwable $e){ob_clean();http_response_code(503);echo 'Admissions are temporarily unavailable. Contact the institute.';error_log('Northstar public admissions view failed.');}

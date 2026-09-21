@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 ini_set('display_errors','0');
-require dirname(__DIR__).'/app/bootstrap.php';
-require_once dirname(__DIR__).'/app/online-payments.php';
+require __DIR__.'/app/bootstrap.php';
+require_once __DIR__.'/app/online-payments.php';
 header('X-Content-Type-Options: nosniff');header('Cache-Control: no-store');
 if(($_SERVER['REQUEST_METHOD']??'')!=='POST'){http_response_code(405);header('Allow: POST');exit('Method not allowed.');}
 try{

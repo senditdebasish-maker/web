@@ -13,6 +13,18 @@ function query(string $sql, array $args = []): PDOStatement { $s = db()->prepare
 function rows(string $sql, array $args = []): array { return query($sql, $args)->fetchAll(); }
 function one(string $sql, array $args = []): ?array { return query($sql, $args)->fetch() ?: null; }
 function e(mixed $s): string { return htmlspecialchars((string)($s ?? ''), ENT_QUOTES, 'UTF-8'); }
+// Session cookie flags that survive HTTPS tasting frames and proxies: first-party
+// HTTP keeps Lax; real HTTPS (direct, forced by config, or via a TRUSTED proxy flag)
+// uses Secure + SameSite=None so embedded previews keep the session. Login CSRF
+// tokens remain the primary forgery protection in every mode.
+function sessionCookieParams(): array {
+    global $config;
+    $direct = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+    $proxy = getenv('CRM_TRUST_HTTPS_PROXY') === '1' && ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+    $forced = (bool)($config['secure_cookies'] ?? false);
+    $https = $direct || $proxy || $forced;
+    return ['httponly' => true, 'secure' => $https, 'samesite' => $https ? 'None' : 'Lax', 'path' => '/'];
+}
 function fail(string $message): never { throw new DomainException($message); }
 function input(string $key, int $max = 200, bool $required = true): string {
     $v = $_POST[$key] ?? '';

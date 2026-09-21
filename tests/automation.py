@@ -24,7 +24,7 @@ def check(ok,msg):
     assert ok,msg
     checks+=1;print('PASS',msg)
 class Browser:
-    def __init__(self,base,endpoint='index.php'):
+    def __init__(self,base,endpoint='office.php'):
         self.base=base;self.endpoint=endpoint
         self.client=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
     def get(self,path=None,data=None,headers=None):
@@ -66,11 +66,11 @@ with tempfile.TemporaryDirectory(prefix='northstar-automation-') as temp:
     cfg.write_text("<?php return ['dsn'=>'sqlite:"+str(database)+"','timezone'=>'Asia/Kolkata','auth_mode'=>'password','environment'=>'local','secure_cookies'=>false,'mail'=>['transport'=>'log','from_email'=>'sender@example.test','log_path'=>'"+str(mail)+"'],'certificates'=>['enabled'=>true,'directory'=>'"+str(certdir)+"','scanner'=>'manual','clamav_host'=>'127.0.0.1','clamav_port'=>3310],'razorpay'=>['accounts'=>["+str(iid)+"=>['enabled'=>true,'mode'=>'test','key_id'=>'rzp_test_1234567890ab','key_secret'=>'testsecret123','webhook_secret'=>'webhooksecret123','ledger_actor_id'=>"+str(owner_id)+"]]]];")
     with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
     log=open(temp/'server.log','w+')
-    server=subprocess.Popen(PHP+['-d','opcache.enable=0','-d','upload_max_filesize=10M','-d','post_max_size=12M','-S',f'0.0.0.0:{port}','-t','public'],cwd=ROOT,env=env,stdout=log,stderr=log)
+    server=subprocess.Popen(PHP+['-d','opcache.enable=0','-d','upload_max_filesize=10M','-d','post_max_size=12M','-S',f'0.0.0.0:{port}','-t',str(ROOT)],cwd=ROOT,env=env,stdout=log,stderr=log)
     try:
         base=f'http://127.0.0.1:{port}'
         for _ in range(100):
-            try:urllib.request.urlopen(base+'/index.php',timeout=.5);break
+            try:urllib.request.urlopen(base+'/office.php',timeout=.5);break
             except OSError:time.sleep(.1)
         owner=Browser(base);owner.login('owner@example.test')
         visitor=Browser(base,'apply.php')
@@ -95,7 +95,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-automation-') as temp:
         # Application mail queue: submission creates exactly one queued alert.
         check(scalar('SELECT COUNT(*) FROM application_mail WHERE application_id=?',(appid,))==1,'submission queues applicant status email')
         check(scalar("SELECT status FROM application_mail WHERE application_id=?",(appid,))=='pending','queued alert starts pending')
-        check('Email alerts' in owner.get('index.php?page=applications&tab=mail'),'mail tab renders')
+        check('Email alerts' in owner.get('office.php?page=applications&tab=mail'),'mail tab renders')
         check('auto-applicant@example.test' in owner.html,'mail queue shows recipient')
         job=subprocess.run(PHP+['bin/send-notifications.php','--limit=25'],cwd=ROOT,env=env,capture_output=True,text=True)
         check(job.returncode==0 and 'Application notification' in job.stdout,'worker processes application alerts')
@@ -129,12 +129,12 @@ with tempfile.TemporaryDirectory(prefix='northstar-automation-') as temp:
         execute('DELETE FROM auth_events')
         other=Browser(base,'apply.php');other.post('request_code',page='login',email='other-auto@example.test');other.post('verify_code',page='login',code=code_for('other-auto@example.test'))
         other.get(f'apply.php?certificate={cert1}');check(other.status==404,'other applicant cannot download upload')
-        owner.get(f'index.php?certificate={cert1}');check(owner.status==200 and owner.raw.startswith(b'%PDF'),'staff can download institute upload')
+        owner.get(f'office.php?certificate={cert1}');check(owner.status==200 and owner.raw.startswith(b'%PDF'),'staff can download institute upload')
         owner.post('staff',page='staff',institute_id=other_iid,name='Other Admin',email='other-admin@example.test',role='admin',password='Staff-Test-Password!')
         admin=Browser(base);admin.login('other-admin@example.test','Staff-Test-Password!')
-        admin.get(f'index.php?certificate={cert1}');check(admin.status==403,'cross-institute staff cannot download upload')
+        admin.get(f'office.php?certificate={cert1}');check(admin.status==403,'cross-institute staff cannot download upload')
         # Eligibility policy: owner-only, validation, versioning.
-        check('Eligibility automation' in owner.get('index.php?page=applications&tab=eligibility'),'eligibility tab renders')
+        check('Eligibility automation' in owner.get('office.php?page=applications&tab=eligibility'),'eligibility tab renders')
         check('Review policy' in owner.html,'policy list shows course')
         policy_fields=dict(course_id=cid,version='0',enabled='1',qualification_code='12TH-SCI',minimum_percentage='60',minimum_age='17',maximum_age='25',cutoff_on='2026-01-01',description='Test board rules for automation.',confirm='yes')
         check('permission' in admin.post('eligibility_policy',page='applications',**policy_fields),'admin cannot authorize automation')
@@ -195,13 +195,13 @@ with tempfile.TemporaryDirectory(prefix='northstar-automation-') as temp:
         student_browser.get('student.php?page=payments',dict(action='online_order',csrf=tok2,amount='500'))
         check(scalar('SELECT COUNT(*) FROM online_orders WHERE student_id=?',(sid,))==1,'hold prevents duplicate online order')
         execute("UPDATE users SET active=1 WHERE id=?",(owner_id,))
-        owner.get('index.php?page=payments');check('Online payment orders' in owner.html,'staff sees online orders')
+        owner.get('office.php?page=payments');check('Online payment orders' in owner.html,'staff sees online orders')
         check('Uncertain' in owner.html,'staff sees Uncertain state')
         # Manual payment blocked while hold exists.
-        owner.get('index.php?page=payments');m=re.search(r'name="request_key" value="([^"]+)"',owner.html)
+        owner.get('office.php?page=payments');m=re.search(r'name="request_key" value="([^"]+)"',owner.html)
         if m:
             tok3=re.search(r'name="csrf" value="([^"]+)"',owner.html).group(1)
-            check('pending or needs reconciliation' in owner.get('index.php?page=payments',dict(action='payment',csrf=tok3,request_key=m.group(1),student_id=sid,amount='100',paid_on='2026-01-02',method='Cash',reference='')),'manual payment blocked during online hold')
+            check('pending or needs reconciliation' in owner.get('office.php?page=payments',dict(action='payment',csrf=tok3,request_key=m.group(1),student_id=sid,amount='100',paid_on='2026-01-02',method='Cash',reference='')),'manual payment blocked during online hold')
         # Webhook: invalid signature rejected, ignored event accepted, duplicate idempotent.
         def webhook(iid,body,sig,event):
             req=urllib.request.Request(base+f'/razorpay-webhook.php?institute={iid}',data=body.encode(),headers={'X-Razorpay-Signature':sig,'X-Razorpay-Event-Id':event})

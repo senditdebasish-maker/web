@@ -2,17 +2,17 @@
 
 ## Entry points
 
-- **New applicants:** `public/apply.php` — course catalogue, course detail/contact, email verification, application form, private tracking, correction/resubmission, withdrawal and application help.
-- **Enrolled students:** `public/student.php` — admission/profile, fees/installments, PDFs, attendance, published results, notices and support.
-- **Staff:** `public/index.php?page=applications` — public listing controls and institute-scoped review queue.
+- **New applicants:** `apply.php` — course catalogue, course detail/contact, email verification, application form, private tracking, correction/resubmission, withdrawal and application help.
+- **Enrolled students:** `student.php` — admission/profile, fees/installments, PDFs, attendance, published results, notices and support.
+- **Staff:** `office.php?page=applications` — public listing controls and institute-scoped review queue.
 
-On XAMPP, open **http://localhost/institute-crm/public/apply.php**. A `localhost` link is usable only on that computer. Share your deployed **HTTPS** address for applicants on other devices. All in-app links are relative; there are no hardcoded localhost API calls.
+On XAMPP, open **http://localhost/institute-crm/apply.php**. A `localhost` link is usable only on that computer. Share your deployed **HTTPS** address for applicants on other devices. All in-app links are relative; there are no hardcoded localhost API calls.
 
 ## Upgrade and open admissions
 
 1. Pause use and the notification worker; back up the existing database, private configuration/storage and working code.
 2. Follow `UPGRADE.html` to replace program files from the new dependency-included ZIP. Preserve `config.php`, the database, `storage/` and installer locks. **Do not reinstall.**
-3. Restart Apache, sign in as group owner, and run **`public/upgrade.php`**. CLI operators may use `php bin/migrate.php` instead. MySQL DDL can partially commit; fix permissions and rerun after a failure rather than deleting records.
+3. Restart Apache, sign in as group owner, and run **`upgrade.php`**. CLI operators may use `php bin/migrate.php` instead. MySQL DDL can partially commit; fix permissions and rerun after a failure rather than deleting records.
 4. Open **Online applications → Manage public course listings → Configure public listing** for an active course.
 5. Enter a public description, eligibility/original-document requirements, and your actual institute privacy notice. The notice should explain purpose, office contact, retention, correction and any guardian-consent requirements. The CRM does not create a legally approved privacy policy for you or automate legal retention/erasure.
 6. Set opening/closing dates and **Open within date window**. Dates are inclusive in the configured server timezone. **All courses are closed to public applications by default**, including after migration. Archived courses never appear publicly.
@@ -71,7 +71,7 @@ Applicant OTPs expire after five minutes, are hashed, bound to the requesting br
 
 These controls are **not** CAPTCHA, distributed bot protection, DDoS protection, identity/qualification verification or phishing-resistant MFA. Before exposing the public endpoint:
 
-- Use HTTPS and secure cookies, serve only `public/`, patch dependencies and validate trusted proxy/client-IP handling on the real host. Never expose private application/storage/configuration directories.
+- Use HTTPS and secure cookies, keep the bundled `.htaccess` protections, patch dependencies and validate trusted proxy/client-IP handling on the real host. Never expose private application/storage/configuration directories.
 - Configure provider quotas, perimeter rate limiting/bot protection, private monitoring/logging and incident ownership. Do not trust arbitrary `X-Forwarded-For` headers. Shared campus IPs may hit limits; review capacity through a tested security policy rather than removing throttling.
 - Test real Gmail/inbox delivery, native MySQL concurrency, two institutes and multiple applicant/student sessions on staging.
 - Schedule and monitor the admission/PDF notification worker. Staff must separately check the application queue regularly.

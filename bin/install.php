@@ -30,5 +30,5 @@ try {
             }
         }
     }
-    db()->commit(); echo "Installed successfully. Open public/ and sign in with your owner account.\n";
+    db()->commit(); echo "Installed successfully. Open office.php and sign in with your owner account.\n";
 } catch (Throwable $e) { db()->rollBack(); throw $e; }

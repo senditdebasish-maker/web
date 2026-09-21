@@ -81,7 +81,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
           'fresh install includes institute address column')
     check('Park Street' in scalar('SELECT address FROM institutes WHERE id=1'),
           'demo institutes carry campus addresses')
-    check((ROOT / 'public' / 'assets' / 'campus-hero.jpg').is_file(),
+    check((ROOT / 'assets' / 'campus-hero.jpg').is_file(),
           'homepage hero image is packaged with the site')
     iid = scalar('SELECT id FROM institutes ORDER BY id LIMIT 1')
     cid = scalar('SELECT id FROM courses WHERE institute_id=?', (iid,))
@@ -105,7 +105,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
             except OSError:
                 time.sleep(.1)
         uni = Browser(base)
-        owner = Browser(base, 'public/index.php')
+        owner = Browser(base, 'office.php')
         check('Northstar University' in uni.get() and '45 Park Street' in uni.html,
               'homepage brand and address come from the CRM')
         check('Diploma in Pharmacy' in uni.html and 'Apply Now' in uni.html,
@@ -166,7 +166,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
             raise AssertionError('no OTP mail found')
 
         check('Staff password sign-in' in uni.post('otp_start', page='login', email='owner@example.test')
-              and 'public/index.php?email=owner' in uni.html,
+              and 'office.php?email=owner' in uni.html,
               'staff email in password mode leads to office login')
         check('valid email address' in uni.post('otp_start', page='login', email='bad'),
               'invalid email is rejected')
@@ -187,8 +187,8 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
               'an immediate resend is throttled politely')
         otp.get('index.php?page=login', {'action': 'otp_verify', 'csrf': form_token(otp.html),
                                          'code': newest_code()})
-        check('public/student.php' in otp.url, 'the OTP code signs the student in from the homepage')
-        check('Sign out' in otp.get('public/student.php'),
+        check('student.php' in otp.url, 'the OTP code signs the student in from the homepage')
+        check('Sign out' in otp.get('student.php'),
               'single sign-on opens the student dashboard')
 
         time.sleep(4)
@@ -201,11 +201,11 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
         check('Your verification code' in signup.html, 'student signup sends a Gmail code')
         signup.get('index.php?page=login', {'action': 'create_verify', 'csrf': form_token(signup.html),
                                             'code': newest_code()})
-        check('public/student.php' in signup.url, 'verified signup lands in the student portal')
+        check('student.php' in signup.url, 'verified signup lands in the student portal')
         row = con.execute("SELECT name,phone,address FROM student_users WHERE email='mira@example.test'").fetchone()
         check(row == ('Mira Sen', '+919000055555', '3 Park Street'),
               'signup stores the name, mobile and home address')
-        check('Sign out' in signup.get('public/student.php'),
+        check('Sign out' in signup.get('student.php'),
               'the new account session opens the dashboard')
 
         time.sleep(4)
@@ -216,8 +216,8 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
         check('Your verification code' in forgot.html, 'forgot password sends a recovery code')
         forgot.get('index.php?page=login', {'action': 'recovery_verify', 'csrf': form_token(forgot.html),
                                             'code': newest_code()})
-        check('public/student.php' in forgot.url, 'the recovery code restores the student session')
-        check('Sign out' in forgot.get('public/student.php'), 'recovered access opens the dashboard')
+        check('student.php' in forgot.url, 'the recovery code restores the student session')
+        check('Sign out' in forgot.get('student.php'), 'recovered access opens the dashboard')
 
         enquiry = Browser(base)
         enquiry.get('index.php?page=login')
@@ -231,24 +231,24 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
         check(row and row[0] == 'website' and 'D.Pharm fees?' in row[1] and '7 Lake Road' in row[1],
               'the inquiry reaches the office with message and address')
 
-        check('value="owner@example.test"' in owner.get('public/index.php?email=owner@example.test'),
+        check('value="owner@example.test"' in owner.get('office.php?email=owner@example.test'),
               'office sign-in prefills the detected email')
-        portal = Browser(base, 'public/student.php')
-        check('value="linkme@example.test"' in portal.get('public/student.php?email=linkme@example.test'),
+        portal = Browser(base, 'student.php')
+        check('value="linkme@example.test"' in portal.get('student.php?email=linkme@example.test'),
               'student sign-in prefills the detected email')
-        apply = uni.get('public/apply.php')
+        apply = uni.get('apply.php')
         check('<a class="u-brand" href="/index.php"' in apply and '← Back to website' in apply,
               'admissions brand and back button return to the university site')
         check('university.css' in apply and 'My applications' in apply,
               'admissions page uses the university theme and keeps its navigation')
-        home = owner.get('public/index.php')
+        home = owner.get('office.php')
         check('Your workspace awaits' in home and '← Back to website' in home and 'university.css' in home,
               'office homepage shares the university theme with a way back')
-        spot = portal.get('public/student.php')
+        spot = portal.get('student.php')
         check('<a class="u-brand" href="/index.php"' in spot and '← Back to website' in spot,
               'student portal brand and back button return to the university site')
         owner.login('owner@example.test')
-        dash = owner.get('public/index.php?page=dashboard')
+        dash = owner.get('office.php?page=dashboard')
         check('nav-link site-back' in dash and 'university.css' in dash,
               'office workspace carries the theme and a back-to-website link')
         check('Renamed Pharma University' in owner.post('institute', page='institutes', id=iid, name='Renamed Pharma University',

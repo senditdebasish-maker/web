@@ -4,7 +4,7 @@ This release extends the operations CRM. It does **not** turn it into an accredi
 
 ## Upgrade once, without reinstalling
 
-Pause use and the email worker. Back up the database, configuration, private storage and working application. Replace program files from the updated dependency-included ZIP while preserving `config.php`, `storage/`, the database and installer locks. Restart Apache, sign in as group owner, and open **`public/upgrade.php`**. Confirm your backup and run the upgrade. The CLI alternative is `php bin/migrate.php`.
+Pause use and the email worker. Back up the database, configuration, private storage and working application. Replace program files from the updated dependency-included ZIP while preserving `config.php`, `storage/`, the database and installer locks. Restart Apache, sign in as group owner, and open **`upgrade.php`**. Confirm your backup and run the upgrade. The CLI alternative is `php bin/migrate.php`.
 
 The additive migration creates exam/result/revision, announcement/revision, support conversation and worker-heartbeat tables and indexes. Existing accounts, fees, payments and student records are retained. It can be rerun after fixing permissions; MySQL DDL is not fully transactional. A clean browser installation includes these tables automatically.
 

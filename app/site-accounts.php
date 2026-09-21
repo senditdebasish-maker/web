@@ -8,7 +8,7 @@ function siteSession(string $name): void {
     if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
     ini_set('session.use_strict_mode', '1');
     session_name($name);
-    session_set_cookie_params(['httponly' => true, 'secure' => $config['secure_cookies'] ?? false, 'samesite' => 'Lax', 'path' => '/']);
+    session_set_cookie_params(sessionCookieParams());
     session_start();
     $_SESSION['last_seen'] = time();
     $_SESSION['site_csrf'] ??= bin2hex(random_bytes(32));

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 ini_set('display_errors','0');
 ob_start();
-require dirname(__DIR__).'/app/setup.php';
+require __DIR__.'/app/setup.php';
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: no-referrer');
@@ -63,12 +63,12 @@ $steps=['Secure access','Server checks','Database','Your institute','Email & OTP
 <?php if($notice): ?><div class="setup-alert" role="status"><?=e($notice)?></div><?php endif; ?>
 <?php if($done): ?>
 <div class="setup-success-icon">✓</div><p class="eyebrow">ALL SET</p><h2>Your workspace is ready.</h2><p class="setup-intro">The database, owner account and PHPMailer settings are saved. Setup is now locked. Sign in using a new code sent to your verified owner email.</p>
-<a class="setup-button" href="index.php">Open CRM login <span>→</span></a>
+<a class="setup-button" href="office.php">Open CRM login <span>→</span></a>
 <div class="setup-card"><h3>One last thing: student email delivery</h3><p>Login codes send immediately. Admission letters, payment receipts and applicant status alerts use a background worker.</p><code>php bin/send-notifications.php --limit=25</code><p>Schedule this command every minute in Windows Task Scheduler or your hosting control panel's Cron Jobs. The website cannot create operating-system tasks for you.</p><p>Windows program: <code>C:\xampp\php\php.exe</code><br>Arguments: your project path + <code>\bin\send-notifications.php --limit=25</code></p></div>
 <?php elseif($locked): ?>
-<p class="eyebrow">PROTECTED WORKSPACE</p><h2>Setup is locked.</h2><p class="setup-intro">A configuration, completed installation, or recovery file already exists. This page cannot change credentials, overwrite your database, or create another owner.</p><a class="setup-button" href="index.php">Go to CRM login <span>→</span></a><div class="setup-card"><h3>Updating an existing installation?</h3><p>Use the upgrade instructions in README.md. Do not remove configuration or installer locks on a live website. A server operator must review recovery files and backups before making any changes.</p></div>
+<p class="eyebrow">PROTECTED WORKSPACE</p><h2>Setup is locked.</h2><p class="setup-intro">A configuration, completed installation, or recovery file already exists. This page cannot change credentials, overwrite your database, or create another owner.</p><a class="setup-button" href="office.php">Go to CRM login <span>→</span></a><div class="setup-card"><h3>Updating an existing installation?</h3><p>Use the upgrade instructions in README.md. Do not remove configuration or installer locks on a live website. A server operator must review recovery files and backups before making any changes.</p></div>
 <?php elseif(!setupAllowedTransport()): ?>
-<p class="eyebrow">SECURE CONNECTION REQUIRED</p><h2>Let's protect your settings.</h2><p class="setup-intro">Open this page over HTTPS before entering credentials. For XAMPP on your own computer, use <code>http://localhost/institute-crm/public/setup.php</code>.</p><div class="setup-card"><p>If your host terminates HTTPS at a trusted proxy, ask the server administrator to configure <code>CRM_TRUST_HTTPS_PROXY=1</code> only when that proxy is trusted. Arbitrary forwarded headers are not trusted automatically.</p></div>
+<p class="eyebrow">SECURE CONNECTION REQUIRED</p><h2>Let's protect your settings.</h2><p class="setup-intro">Open this page over HTTPS before entering credentials. For XAMPP on your own computer, use <code>http://localhost/institute-crm/setup.php</code>.</p><div class="setup-card"><p>If your host terminates HTTPS at a trusted proxy, ask the server administrator to configure <code>CRM_TRUST_HTTPS_PROXY=1</code> only when that proxy is trusted. Arbitrary forwarded headers are not trusted automatically.</p></div>
 <?php elseif($step===0): ?>
 <p class="eyebrow">STEP 01 / SECURE ACCESS</p><h2>Welcome to your new workspace.</h2><p class="setup-intro">Before we begin, confirm that you control this server. We've created a private setup key for you. No terminal commands or PHP editing needed.</p>
 <div class="setup-card"><h3>Find your setup key</h3><ol><li>Open this project's <strong>storage</strong> folder in File Explorer or your hosting file manager.</li><li>Open <code>setup-key.txt</code> with a text editor.</li><li>Copy its complete key and paste it below.</li></ol><p>This key is not displayed on the website. Do not share it or put it in a public URL.</p></div>

@@ -49,14 +49,14 @@ with tempfile.TemporaryDirectory(prefix='northstar-setup-') as temp:
     env=dict(os.environ,CRM_SETUP_ROOT=str(temp),CRM_CONFIG_FILE=str(cfg))
     with socket.socket() as s:s.bind(('127.0.0.1',0));port=s.getsockname()[1]
     log=open(temp/'server.log','w+')
-    server=subprocess.Popen(PHP+['-d','opcache.enable=0','-S',f'0.0.0.0:{port}','-t','public'],cwd=ROOT,env=env,stdout=log,stderr=log)
+    server=subprocess.Popen(PHP+['-d','opcache.enable=0','-S',f'0.0.0.0:{port}','-t',str(ROOT)],cwd=ROOT,env=env,stdout=log,stderr=log)
     try:
         base=f'http://127.0.0.1:{port}'
         for _ in range(100):
             try:urllib.request.urlopen(base+'/setup.php',timeout=.5);break
             except OSError:time.sleep(.1)
         a=Browser(base); b=Browser(base)
-        check('confirm that you control' in a.get('index.php'),'unconfigured app redirects to protected browser setup')
+        check('confirm that you control' in a.get('office.php'),'unconfigured app redirects to protected browser setup')
         key=(storage/'setup-key.txt').read_text().strip()
         check(len(key)==64 and key not in a.html,'setup key generated privately and never exposed in HTML')
         check('confirm that you control' in a.get('setup.php?step=5'),'review step cannot bypass authorization')
@@ -124,12 +124,12 @@ with tempfile.TemporaryDirectory(prefix='northstar-setup-') as temp:
         check(a.status==403 and 'Setup is locked' in a.html,'competing old session cannot reinstall after completion')
         check(hashlib.sha256(cfg.read_bytes()).hexdigest()==before and con.execute('SELECT COUNT(*) FROM users').fetchone()[0]==1,'reinstall attempt changes neither configuration nor owner count')
         fresh=Browser(base);check('Setup is locked' in fresh.get('setup.php') and fresh.status==403,'fresh browser sees locked installer')
-        check('Secure email-code sign in' in fresh.get('index.php'),'installed CRM opens on OTP login')
-        fresh.get('index.php');csrf=re.search(r'name="csrf" value="([^"]+)"',fresh.html).group(1)
-        fresh.get('index.php',dict(action='request_otp',csrf=csrf,email='other@example.test'))
+        check('Secure email-code sign in' in fresh.get('office.php'),'installed CRM opens on OTP login')
+        fresh.get('office.php');csrf=re.search(r'name="csrf" value="([^"]+)"',fresh.html).group(1)
+        fresh.get('office.php',dict(action='request_otp',csrf=csrf,email='other@example.test'))
         login_code=code_for('other@example.test')
         csrf=re.search(r'name="csrf" value="([^"]+)"',fresh.html).group(1)
-        fresh.get('index.php',dict(action='verify_otp',csrf=csrf,code=login_code))
+        fresh.get('office.php',dict(action='verify_otp',csrf=csrf,code=login_code))
         check('Hello, Other' in fresh.html,'owner created by wizard can authenticate through PHPMailer OTP')
         check('password' not in b.html.lower() or 'App Password' not in b.html,'success page does not echo SMTP credentials')
         con.close()

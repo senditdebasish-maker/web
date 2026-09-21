@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 ini_set('display_errors','0'); ob_start();
-require dirname(__DIR__).'/app/bootstrap.php';
-require_once dirname(__DIR__).'/app/otp.php';
-require_once dirname(__DIR__).'/app/documents.php';
-require_once dirname(__DIR__).'/app/operations.php';
-require_once dirname(__DIR__).'/app/services.php';
-require_once dirname(__DIR__).'/app/online-payments.php';
+require __DIR__.'/app/bootstrap.php';
+require_once __DIR__.'/app/otp.php';
+require_once __DIR__.'/app/documents.php';
+require_once __DIR__.'/app/operations.php';
+require_once __DIR__.'/app/services.php';
+require_once __DIR__.'/app/online-payments.php';
 header('Cache-Control: no-store'); header('X-Content-Type-Options: nosniff'); header('Referrer-Policy: same-origin');
 header("Content-Security-Policy: default-src 'self'; script-src 'self' https://checkout.razorpay.com; style-src 'self'; img-src 'self' data: https://*.razorpay.com; frame-src https://api.razorpay.com https://*.razorpay.com; connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com; form-action 'self'; base-uri 'none'; object-src 'none'");
 ini_set('session.use_strict_mode','1'); session_name('northstar_student');
-session_set_cookie_params(['httponly'=>true,'secure'=>$config['secure_cookies'] ?? false,'samesite'=>'Lax','path'=>'/']); session_start();
+session_set_cookie_params(sessionCookieParams()); session_start();
 if (isset($_SESSION['last_seen']) && time()-$_SESSION['last_seen']>1800) { $_SESSION=[]; session_regenerate_id(true); }
 $_SESSION['last_seen']=time(); $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
 $error=null; $student=null; $portalUser=null; $ready=portalReady();
@@ -66,4 +66,4 @@ try {
 } catch(DomainException $e) { $error=$e->getMessage();if($page==='support' && isset($_GET['ticket'])){unset($_GET['ticket']);if($_SERVER['REQUEST_METHOD']==='GET')http_response_code(403);}$student=$ready?portalStudent():null;$portalUser=$ready?currentStudentUser():null;if(!$student)$page=$portalUser?'account':($page==='register'?'register':'login'); }
 catch(Throwable $e) { http_response_code(503);$error='Your portal is temporarily unavailable. Please contact your institute.';$page='unavailable';error_log('Northstar student portal operation failed.'); }
 $flash=$_SESSION['flash'] ?? null;unset($_SESSION['flash']);
-require dirname(__DIR__).'/app/student-views.php';
+require __DIR__.'/app/student-views.php';

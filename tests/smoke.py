@@ -39,7 +39,7 @@ class Browser:
         self.status = 0
 
     def request(self, page='dashboard', data=None):
-        url = self.base + '/?page=' + page
+        url = self.base + '/office.php?page=' + page
         body = urllib.parse.urlencode(data).encode() if data is not None else None
         try:
             response = self.client.open(url, body, timeout=20)
@@ -74,7 +74,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-test-') as temp:
         s.bind(('127.0.0.1', 0))
         port = s.getsockname()[1]
     log = open(temp / 'server.log', 'w+')
-    server = subprocess.Popen(PHP + ['-S', f'0.0.0.0:{port}', '-t', 'public'],
+    server = subprocess.Popen(PHP + ['-S', f'0.0.0.0:{port}', '-t', str(ROOT)],
                               cwd=ROOT, env=env, stdout=log, stderr=log)
     try:
         base = f'http://127.0.0.1:{port}'

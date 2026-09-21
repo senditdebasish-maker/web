@@ -11,7 +11,7 @@ This release adds four opt-in automation modules on top of public admissions. **
 
 1. Back up database, `config.php`, `storage/` and code. Pause use and the worker.
 2. Follow `UPGRADE.html` (replace program files, preserve config/database/storage/locks). **Do not reinstall.**
-3. As group owner run **`public/upgrade.php`** (or `php bin/migrate.php`). Verify **Automation: ready**.
+3. As group owner run **`upgrade.php`** (or `php bin/migrate.php`). Verify **Automation: ready**.
 4. Configure below. Test end-to-end on staging before inviting real applicants.
 
 ## Application-status emails
@@ -78,7 +78,7 @@ Owner-only per course: **Online applications → Eligibility automation → Revi
 - Start with `mode=test`. Use `live` only on production HTTPS with `secure_cookies=true`.
 - `key_id` must match mode (`rzp_test_…` vs `rzp_live_…`). Secrets in env vars or private config; never commit.
 - `ledger_actor_id` = active owner/admin responsible for postings (admin must belong to same institute).
-- Webhook in Razorpay dashboard per institute: `https://your-host/institute-crm/public/razorpay-webhook.php?institute=<id>`. Copy the webhook secret. Enable auto-capture. localhost cannot receive webhooks; use staging with public URL.
+- Webhook in Razorpay dashboard per institute: `https://your-host/institute-crm/razorpay-webhook.php?institute=<id>`. Copy the webhook secret. Enable auto-capture. localhost cannot receive webhooks; use staging with public URL.
 - Requires PHP `curl`. No card data touches the CRM; checkout runs on Razorpay.
 
 ### Student flow
@@ -107,7 +107,7 @@ Sandbox evidence is PHP-WASM + SQLite + private `.eml` capture. Before productio
 
 - **MySQL:** run `php tests/mysql-smoke.php` against an empty private TEST database (`CRM_MYSQL_TEST_ALLOW=1`, never production). Verifies repeatable migration, hostel concurrency guard, receipt snapshots, public listing, approval, mail queue, policy save, online hold and webhook HMAC. Then load-test concurrency, backups and restore on your host.
 - **Gmail:** configure App Password (not account password), valid sender, STARTTLS 587. Run `php bin/test-mail.php --to=controlled-inbox`, check inbox/spam, bounces and quotas. Verify OTP, admission PDFs, receipts and applicant alerts separately.
-- **HTTPS/hosting:** serve only `public/`, enable secure cookies, patch PHP/extensions, configure trusted proxy handling, perimeter rate limits/bot protection, monitoring, encrypted off-server backups and isolated restore drills.
+- **HTTPS/hosting:** keep the bundled `.htaccess` protections, enable secure cookies, patch PHP/extensions, configure trusted proxy handling, perimeter rate limits/bot protection, monitoring, encrypted off-server backups and isolated restore drills.
 - **Browser:** test applicant, student and staff journeys in real browsers (uploads, checkout popup, PDFs, printing). `localhost` works only on that machine.
 
 ## Tests

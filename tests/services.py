@@ -25,7 +25,7 @@ def check(ok,msg):
     checks+=1;print('PASS',msg)
 
 class Browser:
-    def __init__(self,base,endpoint='index.php'):
+    def __init__(self,base,endpoint='office.php'):
         self.base=base;self.endpoint=endpoint
         self.client=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
     def get(self,path=None,data=None):
@@ -52,17 +52,17 @@ with tempfile.TemporaryDirectory(prefix='northstar-services-') as temp:
     execute("UPDATE students SET admission_date='2026-01-01',name='Beta Secret Student' WHERE id=?",(other_sid,))
     with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
     log=open(temp/'server.log','w+')
-    server=subprocess.Popen(PHP+['-d','opcache.enable=0','-S',f'0.0.0.0:{port}','-t','public'],cwd=ROOT,env=env,stdout=log,stderr=log)
+    server=subprocess.Popen(PHP+['-d','opcache.enable=0','-S',f'0.0.0.0:{port}','-t',str(ROOT)],cwd=ROOT,env=env,stdout=log,stderr=log)
     try:
         base=f'http://127.0.0.1:{port}'
         for _ in range(100):
-            try:urllib.request.urlopen(base+'/index.php',timeout=.5);break
+            try:urllib.request.urlopen(base+'/office.php',timeout=.5);break
             except OSError:time.sleep(.1)
         owner=Browser(base);other_owner=Browser(base);owner.login('owner@example.test');other_owner.login('owner@example.test')
         # Verify upgrade from the previous operations release, with no new student data loss.
         for table in ['exam_revisions','exam_results','exams','announcement_revisions','announcements','support_messages','support_tickets','runtime_jobs']:
             execute('DROP TABLE '+table)
-        owner.get('index.php?page=exams');check('Student services upgrade required' in owner.html,'old installations have safe services upgrade prompt')
+        owner.get('office.php?page=exams');check('Student services upgrade required' in owner.html,'old installations have safe services upgrade prompt')
         owner.get('upgrade.php');token=re.search(r'name="csrf" value="([^"]+)"',owner.html).group(1)
         check('Upgrade complete' in owner.get('upgrade.php',dict(csrf=token,backup='yes')),'owner upgrades services tables without reinstalling')
         check('Upgrade complete' in owner.get('upgrade.php',dict(csrf=token,backup='yes')),'services migration is repeatable')
@@ -178,16 +178,16 @@ with tempfile.TemporaryDirectory(prefix='northstar-services-') as temp:
         owner.post('staff',page='staff',institute_id=other_iid,name='Beta Admin',email='beta@example.test',role='admin',password='Staff-Test-Password!')
         admin=Browser(base);admin.login('beta@example.test','Staff-Test-Password!')
         for url in ['exams&exam='+str(xid),'announcements&edit='+str(aid),'support&ticket='+str(ticket)]:
-            admin.get('index.php?page='+url);check(admin.status==403,'cross-institute '+url+' denied')
+            admin.get('office.php?page='+url);check(admin.status==403,'cross-institute '+url+' denied')
         check('not accessible' in admin.post('exam_grade',page='exams',**dict(grade,version='6')),'cross-institute grade write denied')
         check('not accessible' in admin.post('support_reply',page='support',ticket_id=ticket,version='6',body='Attack',status='Resolved',request_key='bad'),'cross-institute support write denied')
         owner.post('staff',page='staff',institute_id=iid,name='Counsellor',email='counsellor@example.test',role='counsellor',password='Staff-Test-Password!')
         counsellor=Browser(base);counsellor.login('counsellor@example.test','Staff-Test-Password!')
         for page in ['exams','announcements','support']:
-            counsellor.get('index.php?page='+page);check(counsellor.status==403,'counsellor cannot read '+page)
-            owner.get('index.php?page='+page);check(owner.status==200 and 'temporarily unavailable' not in owner.html,page+' staff screen renders')
+            counsellor.get('office.php?page='+page);check(counsellor.status==403,'counsellor cannot read '+page)
+            owner.get('office.php?page='+page);check(owner.status==200 and 'temporarily unavailable' not in owner.html,page+' staff screen renders')
         for url in ['exams&exam='+str(xid),'announcements&edit='+str(aid),'support&ticket='+str(ticket)]:
-            owner.get('index.php?page='+url);check(owner.status==200 and 'temporarily unavailable' not in owner.html,url+' details render')
+            owner.get('office.php?page='+url);check(owner.status==200 and 'temporarily unavailable' not in owner.html,url+' details render')
         # CLI diagnostics and a real SQLite backup restored into an isolated connection.
         job=subprocess.run(PHP+['bin/send-notifications.php','--limit=1'],cwd=ROOT,env=env,capture_output=True,text=True)
         check(job.returncode==0 and scalar("SELECT outcome FROM runtime_jobs WHERE job_key='notifications'")=='ok','worker records completed operational heartbeat')

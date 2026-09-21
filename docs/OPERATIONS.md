@@ -9,7 +9,7 @@ The CRM now has teacher records, course batches, capacity-controlled allocation,
 1. Pause staff activity and the notification worker during the file update. Export the database and privately back up the working code, `config.php`, and `storage/`.
 2. Extract the updated `northstar-setup.zip` into a temporary folder. Replace application files (`app/`, `public/`, `bin/`, `docs/`, `vendor/`, `composer.json`, and help HTML files) in the existing installation. **Keep your existing configuration, database, storage and installer locks. Do not reinstall or nest a second project folder.**
 3. Restart Apache and sign in as the group owner. This release deliberately requires existing staff sessions to sign in again because their session security format changes.
-4. Open **`public/upgrade.php`** or **Account settings → Upgrade installed modules**, acknowledge your backup, and run the additive upgrade. It creates operations tables and indexes; it does not recreate the owner, alter student fees, or delete admissions/payments.
+4. Open **`upgrade.php`** or **Account settings → Upgrade installed modules**, acknowledge your backup, and run the additive upgrade. It creates operations tables and indexes; it does not recreate the owner, alter student fees, or delete admissions/payments.
 5. A server operator may instead run `php bin/migrate.php`. DDL privileges are needed during migration. MySQL DDL is not fully transactional; correct any privilege errors and rerun rather than deleting data. Normal operation should use least-privilege database permissions.
 6. Test with fictional data before enabling normal activity. Confirm SMTP and resume your worker schedule. For a clean installation, the ordinary browser setup includes all modules automatically.
 
@@ -87,11 +87,11 @@ Staff authentication now includes a server-side security version and a fingerpri
 ### Minimum go-live gate
 
 - [ ] Run all tests on staging using the **actual PHP, Apache/Nginx and MySQL/MariaDB versions** you will deploy. Test two institutes, each staff role and two student accounts. Load-test expected class sizes and concurrent clerks; SQLite tests alone are insufficient.
-- [ ] Serve only `public/`. Use HTTPS, secure cookies, patched dependencies, correct reverse-proxy trust, appropriate CSP/anti-framing headers and restricted private filesystem permissions. Never expose XAMPP itself publicly.
+- [ ] Keep the bundled `.htaccess` protections. Use HTTPS, secure cookies, patched dependencies, correct reverse-proxy trust, appropriate CSP/anti-framing headers and restricted private filesystem permissions. Never expose XAMPP itself publicly.
 - [ ] Use unique strong owner credentials/mail security. Restrict the migration account's DDL permissions after upgrading; application accounts should not be database root.
 - [ ] Run `composer audit` for each release. Scan the application and review authentication, data exports, financial integrity and privilege boundaries with a qualified reviewer.
 - [ ] Configure actual SMTP, test inbox delivery, monitor bounces/provider quotas, and schedule the notification worker. Alert on failures/stuck messages; the displayed queue count is not monitoring.
-- [ ] Automate **encrypted database backups**, keep an off-server copy, define retention and secure access. Use MySQL/MariaDB's supported dump tooling with credentials supplied privately, not command-line passwords. Never store backups under `public/` or commit them to Git.
+- [ ] Automate **encrypted database backups**, keep an off-server copy, define retention and secure access. Use MySQL/MariaDB's supported dump tooling with credentials supplied privately, not command-line passwords. Never store backups under the web root or commit them to Git.
 - [ ] Restore a backup into a **separate test database**, verify student/payment/document/attendance counts and account isolation, and record the drill externally. A successful dump command is not proof of a working restore. The backup helper does not automate encryption, scheduling or restore validation; see [Recovery](RECOVERY.md).
 - [ ] Set external uptime checks, private error-log monitoring/rotation, disk-space alerts and incident response ownership. Define recovery time and acceptable data-loss targets.
 - [ ] Obtain appropriate student consent; document privacy notices, retention and account/email-verification processes. Email/PDF exports carry personal and financial information and are not end-to-end encryption.
