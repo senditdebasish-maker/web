@@ -2,11 +2,11 @@
 
 ## Entry points
 
-- **New applicants:** `apply.php` — course catalogue, course detail/contact, email verification, application form, private tracking, correction/resubmission, withdrawal and application help.
+- **New applicants:** `student.php?page=admissions` — secure course catalogue, course details, main-site email verification, application form, private tracking, certificate uploads, withdrawal and application help.
 - **Enrolled students:** `student.php` — admission/profile, fees/installments, PDFs, attendance, published results, notices and support.
 - **Staff:** `office.php?page=applications` — public listing controls and institute-scoped review queue.
 
-On XAMPP, open **http://localhost/institute-crm/apply.php**. A `localhost` link is usable only on that computer. Share your deployed **HTTPS** address for applicants on other devices. All in-app links are relative; there are no hardcoded localhost API calls.
+On XAMPP, open **http://localhost/institute-crm/** and use the main sign-in, then open the Admissions tab in the student dashboard. A `localhost` link is usable only on that computer. Share your deployed **HTTPS** address for applicants on other devices. All in-app links are relative; there are no hardcoded localhost API calls.
 
 ## Upgrade and open admissions
 

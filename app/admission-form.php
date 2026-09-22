@@ -1,0 +1,19 @@
+<?php
+declare(strict_types=1);
+require_once __DIR__.'/site-chrome.php';
+
+function apField(string $label,string $name,string $value='',int $max=200,string $type='text',bool $required=true): void {
+    if(isset($_POST[$name])&&is_string($_POST[$name]))$value=$_POST[$name];
+    echo '<label>'.e($label).($required?' <span class="u-required">*</span>':' <span class="u-optional">Optional</span>').'<input name="'.e($name).'" type="'.$type.'" maxlength="'.$max.'" value="'.e($value).'"'.($required?' required':'').'></label>';
+}
+function applicationFormFields(array $data,string $privacy): void {
+    echo '<fieldset class="u-form-section"><legend>1. Personal details</legend><p class="u-section-note">Enter your name exactly as it appears on your certificates.</p><div class="u-form-grid">';
+    apField('Full legal name','name',(string)($data['name']??''),120);apField('Date of birth','date_of_birth',(string)($data['date_of_birth']??''),10,'date',false);apField('Gender','gender',(string)($data['gender']??''),30,'text',false);apField('Nationality','nationality',(string)($data['nationality']??'Indian'),60,'text',false);apField('Category','category',(string)($data['category']??''),40,'text',false);echo '</div></fieldset>';
+    echo '<fieldset class="u-form-section"><legend>2. Contact and family details</legend><div class="u-form-grid">';
+    apField('Applicant mobile number','phone',(string)($data['phone']??''),30,'tel');apField('City / town','city',(string)($data['city']??''),100);apField("Father's name",'father_name',(string)($data['father_name']??''),120,'text',false);apField("Mother's name",'mother_name',(string)($data['mother_name']??''),120,'text',false);apField('Parent / guardian name','guardian_name',(string)($data['guardian_name']??''),120,'text',false);apField('State','state',(string)($data['state']??''),100,'text',false);apField('PIN code','pincode',(string)($data['pincode']??''),10,'text',false);echo '</div><label>Full correspondence address <span class="u-optional">Optional</span><textarea name="address" maxlength="300" rows="3">'.e((string)($data['address']??'')).'</textarea></label></fieldset>';
+    echo '<fieldset class="u-form-section"><legend>3. Educational background</legend><div class="u-form-grid">';
+    apField('Highest completed qualification','qualification',(string)($data['qualification']??''),300);apField('Completion / passing year','completion_year',(string)($data['completion_year']??''),4);apField('Board / university','board_university',(string)($data['board_university']??''),160,'text',false);apField('Percentage / CGPA','percentage',(string)($data['percentage']??''),20,'text',false);echo '</div></fieldset>';
+    echo '<fieldset class="u-form-section"><legend>4. Course and entrance details</legend><p class="u-section-note">The selected course is shown above. Add entrance details only when applicable.</p><div class="u-form-grid">';
+    apField('Entrance examination','entrance_exam',(string)($data['entrance_exam']??''),100,'text',false);apField('Entrance rank / score','entrance_rank',(string)($data['entrance_rank']??''),30,'text',false);echo '</div></fieldset>';
+    $note=is_string($_POST['note']??null)?$_POST['note']:($data['note']??'');echo '<fieldset class="u-form-section"><legend>5. Declaration and privacy</legend><label>Additional information <span class="u-optional">Optional</span><textarea name="note" maxlength="1500" rows="4" placeholder="Do not enter Aadhaar, PAN, medical details, passwords or OTPs.">'.e($note).'</textarea></label><details open><summary>Institute application privacy notice</summary><p>'.nl2br(e($privacy)).'</p></details><label class="u-check"><input type="checkbox" name="consent" value="yes" required> I have read the notice and consent to processing this application. The details are accurate, and I understand admission requires eligibility verification and office approval. I will contact the office about any required guardian consent.</label></fieldset>';
+}

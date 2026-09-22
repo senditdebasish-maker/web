@@ -76,7 +76,7 @@ function uploadCertificate(): int {
     $destination=null;writeTransaction();try{
         one('SELECT id FROM applicant_accounts WHERE id=?'.lockSuffix(),[$actor['id']]);$a=ownApplication((int)input('application_id'),$actor);$a=one('SELECT * FROM admission_applications WHERE id=?'.lockSuffix(),[$a['id']]);
         if((int)input('version')!==(int)$a['version'])fail('Application changed. Reload before uploading.');
-        if(!in_array($a['status'],['Submitted','Under review','Changes requested'],true))fail('Uploads are closed for this application.');
+        if(!in_array($a['status'],['Draft','Pending Review','Submitted','Under review','Changes requested','Revision'],true))fail('Uploads are closed for this application.');
         if((int)query('SELECT COUNT(*) FROM certificates WHERE application_id=?',[$a['id']])->fetchColumn()>=5)fail('Maximum five certificate uploads per application. Ask the office for help.');
         $key=bin2hex(random_bytes(24));$destination=$root.DIRECTORY_SEPARATOR.$key;
         if(!move_uploaded_file($file['tmp_name'],$destination))fail('Private upload storage failed.');chmod($destination,0600);
@@ -101,7 +101,7 @@ function scanCertificate(): string {
     $u=applicationStaff();$c=one('SELECT * FROM certificates WHERE id=?',[(int)input('certificate_id')]);if(!$c)fail('Certificate not found.');$a=staffApplication((int)$c['application_id']);
     one('SELECT id FROM applicant_accounts WHERE id=?'.lockSuffix(),[$a['applicant_id']]);$a=one('SELECT * FROM admission_applications WHERE id=?'.lockSuffix(),[$a['id']]);$c=one('SELECT * FROM certificates WHERE id=?'.lockSuffix(),[$c['id']]);
     if((int)input('version')!==(int)$a['version'])fail('Application changed. Reload.');
-    if(!in_array($a['status'],['Submitted','Under review','Changes requested'],true))fail('Application is closed.');
+    if(!in_array($a['status'],['Draft','Pending Review','Submitted','Under review','Changes requested','Revision'],true))fail('Application is closed.');
     if($c['scan_state']!=='Pending')fail('This certificate has already been scanned.');
     global $config;$mode=(string)($config['certificates']['scanner']??'manual');$path=certificatePath($c);
     if($mode==='clamav'){
@@ -129,7 +129,7 @@ function saveEligibilityPolicy(): string {
 function reviewCertificate(): string {
     $u=applicationStaff();$c=one('SELECT * FROM certificates WHERE id=?',[(int)input('certificate_id')]);if(!$c)fail('Certificate not found.');$a=staffApplication((int)$c['application_id']);
     one('SELECT id FROM applicant_accounts WHERE id=?'.lockSuffix(),[$a['applicant_id']]);$a=one('SELECT * FROM admission_applications WHERE id=?'.lockSuffix(),[$a['id']]);$c=one('SELECT * FROM certificates WHERE id=?'.lockSuffix(),[$c['id']]);
-    if((int)input('version')!==(int)$a['version'])fail('Application changed. Reload.');if(!in_array($a['status'],['Submitted','Under review','Changes requested'],true))fail('Application is closed.');
+    if((int)input('version')!==(int)$a['version'])fail('Application changed. Reload.');if(!in_array($a['status'],['Draft','Pending Review','Submitted','Under review','Changes requested','Revision'],true))fail('Application is closed.');
     if($c['scan_state']!=='Clean')fail('Certificate must pass configured malware scanning first.');certificatePath($c);
     $state=choice('review_state',['Verified','Rejected']);$note=input('review_note',500);$code='';$percent=null;$dob=null;
     if($state==='Verified'){if(input('authenticity',3,false)!=='yes')fail('Confirm original authenticity, evidence accuracy, all other eligibility/consent requirements and available capacity.');$code=strtoupper(input('qualification_code',80));$percent=percentageMinor(input('percentage'));$dob=validDate('birth_date');if($dob>date('Y-m-d')||$dob<'1900-01-01')fail('Enter a valid verified date of birth.');}
