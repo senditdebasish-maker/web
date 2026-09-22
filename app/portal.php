@@ -22,7 +22,7 @@ function portalReady(): bool {
     } catch(PDOException $e) { return false; }
 }
 function portalAccountByEmail(string $email): ?array {
-    return one('SELECT a.* FROM portal_accounts a JOIN students s ON s.id=a.student_id WHERE a.email=? AND a.active=1 AND LOWER(s.email)=a.email',[$email]);
+    return one('SELECT a.* FROM portal_accounts a JOIN students s ON s.id=a.student_id WHERE LOWER(a.email)=? AND a.active=1 AND LOWER(s.email)=LOWER(a.email)',[$email]);
 }
 function portalAccountById(int $id): ?array {
     return one('SELECT a.* FROM portal_accounts a JOIN students s ON s.id=a.student_id WHERE a.id=? AND a.active=1 AND LOWER(s.email)=a.email',[$id]);
@@ -60,7 +60,11 @@ function portalControl(array $student): string {
     if (!portalReady()) return '<small>Student portal upgrade required.</small><a class="text-link" href="upgrade.php">Upgrade instructions ↗</a>';
     $account=one('SELECT * FROM portal_accounts WHERE student_id=?',[$student['id']]);
     $enabled=$account && $account['active'] && $account['email']===strtolower($student['email']);
+<<<<<<< HEAD
     return '<div class="portal-access"><small>Portal: '.($enabled?'Enabled':'Disabled').'</small><form method="post">'.csrf().'<input type="hidden" name="action" value="portal_access"><input type="hidden" name="student_id" value="'.$student['id'].'"><input type="hidden" name="access" value="'.($enabled?'disable':'enable').'"><button class="text-button">'.($enabled?'Disable student access':'Enable student access').'</button></form><a class="text-link" href="index.php?page=login">Student sign-in ↗</a></div>';
+=======
+    return '<div class="portal-access"><small>Portal: '.($enabled?'Enabled':'Disabled').'</small><form method="post">'.csrf().'<input type="hidden" name="action" value="portal_access"><input type="hidden" name="student_id" value="'.$student['id'].'"><input type="hidden" name="access" value="'.($enabled?'disable':'enable').'"><button class="text-button">'.($enabled?'Disable student access':'Enable student access').'</button></form><a class="text-link" href="index.php?page=login">Open master sign-in ↗</a></div>';
+>>>>>>> main
 }
 function migrateStudentUsers(): void {
     $mysql=db()->getAttribute(PDO::ATTR_DRIVER_NAME)==='mysql';
@@ -83,6 +87,32 @@ function currentStudentUser(): ?array {
     $u=one('SELECT * FROM student_users WHERE id=? AND active=1',[(int)$_SESSION['suid']]);
     return $u && (int)$u['version']===(int)$_SESSION['sversion'] ? $u : null;
 }
+function syncStudentApplicant(array $user): ?array {
+    global $config;
+    if (!function_exists('applicationsReady') || !applicationsReady()) return null;
+    $account=one('SELECT * FROM applicant_accounts WHERE email=?',[$user['email']]);
+    if ($account && !$account['active']) return null;
+    if (!$account) {
+        query('INSERT INTO applicant_accounts (email,created_at) VALUES (?,?)',[$user['email'],date('Y-m-d H:i:s')]);
+        $account=one('SELECT * FROM applicant_accounts WHERE id=?',[(int)db()->lastInsertId()]);
+    }
+    if (!$account) return null;
+    $_SESSION['applicant_id']=(int)$account['id'];
+    $_SESSION['applicant_version']=(int)$account['version'];
+    $_SESSION['applicant_email']=$account['email'];
+    $_SESSION['applicant_site']=hash('sha256',__DIR__.$config['dsn']);
+    return $account;
+}
+function updateStudentProfile(): string {
+    $user=currentStudentUser(); if(!$user) fail('Sign in again to update your profile.');
+    $name=input('name',120); $phone=input('phone',30); $address=input('address',300,false);
+    if($name==='') fail('Enter your full name.');
+    if(!preg_match('/^[+0-9 ()\-]{7,30}$/D',$phone)) fail('Enter a valid contact phone number.');
+    query('UPDATE student_users SET name=?,phone=?,address=?,version=version+1 WHERE id=?',[$name,$phone,$address,$user['id']]);
+    $_SESSION['sversion']=(int)$user['version']+1;
+    $_SESSION['flash']='Your profile was updated.';
+    return 'profile';
+}
 function linkStudentUser(array $u): void {
     $portal=portalAccountByEmail($u['email']);
     if($portal){ $_SESSION['portal_id']=(int)$portal['id']; $_SESSION['portal_version']=(int)$portal['access_version']; portalEvent((int)$portal['student_id'],'login'); }
@@ -90,7 +120,7 @@ function linkStudentUser(array $u): void {
 function requestStudentUserCode(): string {
     if(!studentUsersReady()) fail('Student registration is not ready. The owner must run the upgrade first.');
     $name=input('name',120); $phone=input('phone',30); $email=emailInput(); $address=input('address',300,false);
-    if(!preg_match('/^[+0-9 ()-]{7,30}$/D',$phone)) fail('Enter a valid contact phone number.');
+    if(!preg_match('/^[0-9]{10}$/D',$phone)) fail('Enter a valid 10-digit mobile number.');
     if(input('website',200,false)!=='') fail('Unable to process this request.');
     try{ mailSettings(); dependencies(); }catch(Throwable $e){ fail('Email verification is not configured. Contact the institute.'); }
     $now=time(); $hash=hash('sha256','student-user:'.$email); $ip=hash('sha256',$_SERVER['REMOTE_ADDR']??'unknown');

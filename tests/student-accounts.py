@@ -79,8 +79,13 @@ with tempfile.TemporaryDirectory(prefix='northstar-student-accounts-') as temp:
         code=code_for('newstudent@example.test')
         check(code not in s.html,'verification code not exposed in browser response')
         check(scalar('SELECT code_hash FROM student_user_codes ORDER BY expires_at DESC LIMIT 1')!=code,'verification code not stored as plaintext')
+<<<<<<< HEAD
         check('Invalid, expired' in master_s.create_verify(step_new,'000000'),'incorrect verification code rejected')
         check('STUDENT ACCOUNT' in master_s.create_verify(step_new,code) and 'Apply for admission' in s.html,'verified email creates the student account')
+=======
+        check('Invalid, expired' in s.post('register_verify',page='register',code='000000'),'incorrect verification code rejected')
+        check('YOUR STUDENT SPACE' in s.post('register_verify',page='register',code=code) and 'Admissions portal' in s.html and 'Open courses' in s.html,'verified email opens the unified pre-admission dashboard')
+>>>>>>> main
         check(scalar('SELECT COUNT(*) FROM student_users')==1,'one student account created after verification')
         check('Your session expired' in master_s.create_verify(master_s.page(),code),'used verification code cannot be replayed')
         t=Browser(base,'student.php');master_t=Master(t);clear_limits()

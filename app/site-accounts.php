@@ -22,11 +22,64 @@ function siteSession(string $name): void {
 }
 // Resume whichever portal session holds a pending OTP handshake (login or creation).
 function siteResumePending(): string {
+<<<<<<< HEAD
     foreach (['northstar_student', 'northstar_session', 'northstar_applicant'] as $name) {
+=======
+    foreach (['northstar_auth', 'northstar_site', 'northstar_student', 'northstar_session'] as $name) {
+>>>>>>> main
         siteSession($name);
         if (isset($_SESSION['otp']) || isset($_SESSION['suid_pending']) || isset($_SESSION['site_recovery']) || isset($_SESSION['applicant_pending'])) return $name;
     }
     fail('Your session expired. Start again.');
+}
+function siteTransferSession(string $name): void {
+    $data = $_SESSION;
+    if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
+    siteSession($name);
+    session_regenerate_id(true);
+    $_SESSION = $data;
+    $_SESSION['last_seen'] = time();
+        if ($name === 'northstar_site') {
+        $params=sessionCookieParams();
+        setcookie('northstar_identity','student',$params + ['expires'=>time()+1800]);
+    } elseif ($name === 'northstar_session') {
+        $params=sessionCookieParams();
+        setcookie('northstar_identity','staff',$params + ['expires'=>time()+1800]);
+    }
+}
+function siteProfile(): ?array {
+    $preferred=($_COOKIE['northstar_identity']??'')==='student'?'northstar_site':(($_COOKIE['northstar_identity']??'')==='staff'?'northstar_session':null);
+    $sessions=$preferred?array_values(array_unique([$preferred,'northstar_session','northstar_student','northstar_applicant'])):['northstar_site','northstar_session','northstar_student','northstar_applicant'];
+    foreach ($sessions as $name) {
+        siteSession($name);
+        if ($name === 'northstar_session' && isset($_SESSION['uid'], $_SESSION['staff_stamp'])) {
+            $user = one('SELECT * FROM users WHERE id=? AND active=1', [(int)$_SESSION['uid']]);
+            if ($user && hash_equals(staffStamp($user), $_SESSION['staff_stamp'])) return ['name' => $user['name'], 'email' => $user['email'], 'role' => $user['role'], 'url' => 'office.php'];
+        }
+        if (in_array($name,['northstar_site','northstar_student'],true)) {
+            if (isset($_SESSION['portal_id'], $_SESSION['portal_version'])) {
+                $student = portalStudent();
+                if ($student) return ['name' => $student['name'], 'email' => $student['email'], 'role' => 'Student', 'url' => 'student.php'];
+            }
+            if (isset($_SESSION['suid'], $_SESSION['sversion'])) {
+                $user = currentStudentUser();
+                if ($user) return ['name' => $user['name'], 'email' => $user['email'], 'role' => 'Student', 'url' => 'student.php'];
+            }
+            if ($name === 'northstar_site' && function_exists('currentApplicant')) {
+                $applicant=currentApplicant();
+                if ($applicant) return ['name' => $applicant['email'], 'email' => $applicant['email'], 'role' => 'Applicant', 'url' => 'student.php?page=applications'];
+            }
+        }
+        if ($name === 'northstar_applicant' && function_exists('currentApplicant')) {
+            $applicant=currentApplicant();
+            if ($applicant) return ['name' => $applicant['email'], 'email' => $applicant['email'], 'role' => 'Applicant', 'url' => 'student.php?page=applications'];
+        }
+    }
+    return null;
+}
+function clearSiteIdentity(): void {
+    $params=sessionCookieParams();
+    setcookie('northstar_identity','',$params + ['expires'=>time()-3600]);
 }
 function siteCsrfField(): string {
     return '<input type="hidden" name="csrf" value="' . e($_SESSION['site_csrf'] ?? '') . '">';
@@ -37,7 +90,11 @@ function siteCsrfCheck(): void {
 // Start actions may be posted from a page rendered under any of our sessions
 // (site or portal handshake). Accept the token whichever session issued it.
 function siteCsrfCheckAny(): void {
+<<<<<<< HEAD
     foreach (['northstar_site', 'northstar_student', 'northstar_session', 'northstar_applicant'] as $name) {
+=======
+    foreach (['northstar_site', 'northstar_auth', 'northstar_student', 'northstar_session'] as $name) {
+>>>>>>> main
         siteSession($name);
         if (hash_equals($_SESSION['site_csrf'] ?? '', (string)($_POST['csrf'] ?? ''))) return;
     }
@@ -51,10 +108,10 @@ function siteTakeFlash(): ?string {
 // 'staff', 'student' or null (unknown email). Students include portal holders,
 // registered users and admitted records awaiting portal access.
 function siteDetectAccount(string $email): ?string {
-    if (one('SELECT id FROM users WHERE email=? AND active=1', [$email])) return 'staff';
-    if (one('SELECT a.id FROM portal_accounts a JOIN students s ON s.id=a.student_id WHERE a.email=? AND a.active=1 AND LOWER(s.email)=a.email', [$email])
-        || one('SELECT id FROM student_users WHERE email=? AND active=1', [$email])
-        || one('SELECT id FROM students WHERE LOWER(email)=?', [$email])) return 'student';
+    if (one('SELECT id FROM users WHERE LOWER(email)=? AND active=1', [$email])) return 'staff';
+    if (one('SELECT a.id FROM portal_accounts a JOIN students s ON s.id=a.student_id WHERE LOWER(a.email)=? AND a.active=1 AND LOWER(s.email)=LOWER(a.email)', [$email])) return 'student';
+    if (one('SELECT id FROM student_users WHERE LOWER(email)=? AND active=1', [$email])) return 'student';
+    if (function_exists('applicationsReady') && applicationsReady() && one('SELECT id FROM applicant_accounts WHERE LOWER(email)=? AND active=1', [$email])) return 'student';
     return null;
 }
 // "Forgot password" for students: Gmail OTP proof, then sign in (student accounts

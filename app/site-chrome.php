@@ -54,6 +54,9 @@ function siteCrest(): string {
 function siteHeader(string $brand, string $kind, string $active, string $buttons, array $ticker = []): string {
     return '<header class="u-header"><a class="u-brand" href="' . e(siteHomeUrl()) . '" title="Back to the university website"><span class="u-brand-mark">' . siteCrest() . '</span><span>' . e($brand) . '<em>' . e($kind) . '</em></span></a>' . siteNav($active) . '<div class="u-header-btns">' . siteToggle() . $buttons . '</div></header>' . siteTicker($ticker);
 }
+function siteProfileBox(array $profile): string {
+    return '<a class="u-profile-box" href="' . e($profile['url'] ?? siteHomeUrl()) . '"><span class="u-profile-avatar">' . e(strtoupper(mb_substr((string)($profile['name'] ?? ''), 0, 1))) . '</span><span><strong>' . e($profile['name'] ?? '') . '</strong><small>' . e($profile['role'] ?? '') . '</small></span></a>';
+}
 // Scrolling announcement strip under the header. Items repeat twice for a seamless loop.
 function siteTicker(array $items): string {
     $items = array_values(array_filter(array_map('trim', array_map('strval', $items)), fn($s) => $s !== ''));
@@ -96,7 +99,11 @@ function siteFooter(string $brand, string $kind, string $city = '', string $addr
     $h = '<footer class="u-footer"><div class="u-footer-grid"><div><strong>' . e($brand) . '</strong><p>' . e($kind) . ($city !== '' ? ' · ' . e($city) : '') . '</p>';
     $h .= '<h4>' . e(tr('Follow Us')) . '</h4>' . siteSocial() . '</div>';
     $h .= '<div><h4>' . e(tr('Quick Links')) . '</h4><nav aria-label="University"><a href="' . e($home . '?page=about') . '">' . e(tr('About us')) . '</a><a href="' . e($home . '?page=courses') . '">' . e(tr('Programs')) . '</a><a href="' . e($home . '?page=admissions') . '">' . e(tr('Admissions')) . '</a><a href="' . e($home . '?page=notices') . '">' . e(tr('Notices')) . '</a><a href="' . e($home . '?page=faculty') . '">' . e(tr('Faculty')) . '</a></nav></div>';
+<<<<<<< HEAD
     $h .= '<div><h4>' . e(tr('Portals')) . '</h4><nav aria-label="Portals"><a href="' . e(sitePublicUrl('apply.php')) . '">' . e(tr('Apply online')) . '</a><a href="' . e($home . '?page=login&show=create') . '">' . e(tr('Create account')) . '</a><a href="' . e($home . '?page=login') . '">' . e(tr('Sign in')) . '</a><a href="' . e($home . '?page=login') . '">' . e(tr('Office login')) . '</a></nav></div>';
+=======
+    $h .= '<div><h4>' . e(tr('Portals')) . '</h4><nav aria-label="Portals"><a href="' . e(sitePublicUrl('student.php?page=admissions')) . '">' . e(tr('Apply online')) . '</a><a href="' . e($home . '?page=login') . '">' . e(tr('Sign in')) . '</a></nav></div>';
+>>>>>>> main
     $h .= '<div><h4>' . e(tr('Address')) . '</h4><p>' . ($address !== '' ? e($address) . '<br>' : '') . ($city !== '' ? e($city) : '') . '</p>' . ($phone !== '' ? '<p>☎ ' . e($phone) . '</p>' : '') . '<p><a href="' . e($home . '?page=contact') . '">' . e(tr('All campuses')) . ' →</a></p></div></div>';
     $h .= '<div class="u-footer-bottom"><span>© ' . date('Y') . ' ' . e($brand) . '. ' . e(tr('All rights reserved.')) . '</span><span>' . e(tr('Admissions open · Apply online')) . '</span></div></footer>';
     return $h;
