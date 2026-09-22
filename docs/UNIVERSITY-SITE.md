@@ -18,10 +18,11 @@ qualification and institute only — personal email/phone are never shown), Cont
 `?page=login` signs visitors in with an emailed OTP code and lands them straight in
 the right dashboard: staff addresses open the office (`office.php`), student
 addresses (portal account, registered student user or student record) open the
-student portal (`student.php`). Staff on password-mode institutes get a link
-to office password login instead of a code. Unknown addresses choose between
-creating a student account and sending an admission inquiry — never an error
-dead-end. The same page hosts three popups (plain links work without JavaScript):
+student portal (`student.php`). Staff on password-mode institutes get an inline
+password step on the same page instead of a code. Unknown addresses choose between
+creating a student account, sending an admission inquiry and tracking an
+application — never an error dead-end. The same page hosts four popups (plain
+links work without JavaScript):
 
 - **Create Student Account** — name, home address, mobile and Gmail, verified by a
   Gmail OTP code before the account is created.
@@ -29,8 +30,10 @@ dead-end. The same page hosts three popups (plain links work without JavaScript)
   into office **Enquiries** with the `website` source and an auto-assigned counsellor.
 - **Forgot password?** — student-only Gmail OTP recovery that restores the portal
   session (student accounts are OTP-based, so verifying the Gmail is the recovery).
+- **Track application** — applicant email verification that returns to the chosen
+  course or the application workspace (`apply.php`).
 
-All three reuse the CRM's OTP, mail, rate-limit and transaction systems; the
+All four reuse the CRM's OTP, mail, rate-limit and transaction systems; the
 `address` column on `student_users` is added automatically by `upgrade.php` /
 `bin/migrate.php`, and fresh installs include it.
 

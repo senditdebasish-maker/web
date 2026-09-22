@@ -18,6 +18,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from master import Master
 ROOT=Path(__file__).resolve().parents[1];PHP=shlex.split(os.environ.get('PHP_BIN','php'));checks=0
 def check(ok,msg):
     global checks
@@ -37,7 +38,7 @@ class Browser:
     def token(self,page='dashboard'):
         self.get(self.endpoint+'?page='+page);return re.search(r'name="csrf" value="([^"]+)"',self.html).group(1)
     def post(self,action,page='dashboard',**fields):return self.get(self.endpoint+'?page='+page,dict(action=action,csrf=self.token(page),**fields))
-    def login(self,address,password='Test-Owner-Password!'):return self.post('login',email=address,password=password)
+    def login(self,address,password='Test-Owner-Password!'):master=Master(self);return master.password_login(master.otp_start(address),address,password)
     def upload(self,path,fields,file_field,filename,file_bytes,mime):
         boundary='----Northstar'+os.urandom(8).hex()
         parts=[]
@@ -77,7 +78,8 @@ with tempfile.TemporaryDirectory(prefix='northstar-automation-') as temp:
         # Publish listing and submit application (minimal journey).
         listing=dict(course_id=cid,version='0',description='Test course',eligibility='Office checks originals.',privacy_notice='Test privacy notice with contact.',opens_on='2026-01-01',closes_on='2030-12-31',accepting='1')
         check('Changes saved' in owner.post('admission_listing',page='applications',**listing),'publish listing for automation applicant')
-        check('If applications are open' in visitor.post('request_code',page='login',email='auto-applicant@example.test'),'automation applicant requests code')
+        master_visitor=Master(visitor);step_auto=master_visitor.applicant_start('auto-applicant@example.test')
+        check('If applications are open' in step_auto,'automation applicant requests code')
         def code_for(address):
             for f in sorted(mail.glob('*.eml'),key=lambda p:p.stat().st_mtime_ns,reverse=True):
                 msg=email.message_from_bytes(f.read_bytes(),policy=policy.default)
@@ -85,7 +87,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-automation-') as temp:
                     m=re.search(r'code is: (\d{6})',msg.get_body(preferencelist=('plain',)).get_content())
                     if m:return m.group(1)
             raise AssertionError('No code for '+address)
-        visitor.post('verify_code',page='login',code=code_for('auto-applicant@example.test'))
+        master_visitor.applicant_verify(step_auto,code_for('auto-applicant@example.test'))
         fields=dict(name='Auto Applicant',phone='9000000000',city='Kolkata',qualification='Higher secondary science',completion_year='2025',note='',consent='yes')
         def submit(browser):
             browser.get('apply.php?page=apply&course='+str(cid));token=re.search(r'name="csrf" value="([^"]+)"',browser.html).group(1);nonce=re.search(r'name="request_key" value="([^"]+)"',browser.html).group(1);offer=re.search(r'name="offer_token" value="([^"]+)"',browser.html).group(1)
@@ -127,7 +129,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-automation-') as temp:
         # Download authorization.
         visitor.get(f'apply.php?certificate={cert1}');check(visitor.status==200 and visitor.raw.startswith(b'%PDF'),'applicant can download own upload')
         execute('DELETE FROM auth_events')
-        other=Browser(base,'apply.php');other.post('request_code',page='login',email='other-auto@example.test');other.post('verify_code',page='login',code=code_for('other-auto@example.test'))
+        other=Browser(base,'apply.php');master_other=Master(other);master_other.applicant_verify(master_other.applicant_start('other-auto@example.test'),code_for('other-auto@example.test'))
         other.get(f'apply.php?certificate={cert1}');check(other.status==404,'other applicant cannot download upload')
         owner.get(f'office.php?certificate={cert1}');check(owner.status==200 and owner.raw.startswith(b'%PDF'),'staff can download institute upload')
         owner.post('staff',page='staff',institute_id=other_iid,name='Other Admin',email='other-admin@example.test',role='admin',password='Staff-Test-Password!')
@@ -155,7 +157,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-automation-') as temp:
         check('Automatically admitted' in visitor.get(f'apply.php?page=application&id={appid}'),'applicant sees automatic decision')
         # Second applicant with non-matching evidence stays manual.
         execute('DELETE FROM auth_events')
-        second=Browser(base,'apply.php');second.post('request_code',page='login',email='second-auto@example.test');second.post('verify_code',page='login',code=code_for('second-auto@example.test'))
+        second=Browser(base,'apply.php');master_second=Master(second);master_second.applicant_verify(master_second.applicant_start('second-auto@example.test'),code_for('second-auto@example.test'))
         second.get('apply.php?page=apply&course='+str(cid));t2=re.search(r'name="csrf" value="([^"]+)"',second.html).group(1);n2=re.search(r'name="request_key" value="([^"]+)"',second.html).group(1);o2=re.search(r'name="offer_token" value="([^"]+)"',second.html).group(1)
         second.get('apply.php?page=apply&course='+str(cid),dict(action='submit_application',csrf=t2,request_key=n2,offer_token=o2,course_id=cid,**dict(fields,name='Second Auto')))
         app2=scalar('SELECT MAX(id) FROM admission_applications')
@@ -171,7 +173,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-automation-') as temp:
         execute("UPDATE students SET email='pay-student@example.test' WHERE id=?",(sid,))
         execute("INSERT OR IGNORE INTO portal_accounts (student_id,email,created_at) VALUES (?,?,?)",(sid,'pay-student@example.test','2026-01-01 00:00:00'))
         execute('DELETE FROM auth_events')
-        student_browser.post('request_otp',email='pay-student@example.test')
+        master_pay=Master(student_browser);step_pay=master_pay.otp_start('pay-student@example.test')
         # OTP code retrieval for student portal
         def student_code(addr):
             for f in sorted(mail.glob('*.eml'),key=lambda p:p.stat().st_mtime_ns,reverse=True):
@@ -180,7 +182,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-automation-') as temp:
                     m=re.search(r'code is: (\d{6})',msg.get_body(preferencelist=('plain',)).get_content())
                     if m:return m.group(1)
             raise AssertionError('No student code')
-        student_browser.post('verify_otp',code=student_code('pay-student@example.test'))
+        master_pay.otp_verify(step_pay,student_code('pay-student@example.test'))
         check('Pay online' in student_browser.get('student.php?page=payments'),'student sees online payment section')
         check('Test mode' in student_browser.html,'test gateway banner shown')
         # Create order (gateway unreachable -> Uncertain, no crash).

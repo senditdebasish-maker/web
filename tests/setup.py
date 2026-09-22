@@ -18,6 +18,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from master import Master, MASTER_MARK
 
 ROOT=Path(__file__).resolve().parents[1]
 PHP=shlex.split(os.environ.get('PHP_BIN','php'))
@@ -124,12 +125,10 @@ with tempfile.TemporaryDirectory(prefix='northstar-setup-') as temp:
         check(a.status==403 and 'Setup is locked' in a.html,'competing old session cannot reinstall after completion')
         check(hashlib.sha256(cfg.read_bytes()).hexdigest()==before and con.execute('SELECT COUNT(*) FROM users').fetchone()[0]==1,'reinstall attempt changes neither configuration nor owner count')
         fresh=Browser(base);check('Setup is locked' in fresh.get('setup.php') and fresh.status==403,'fresh browser sees locked installer')
-        check('Secure email-code sign in' in fresh.get('office.php'),'installed CRM opens on OTP login')
-        fresh.get('office.php');csrf=re.search(r'name="csrf" value="([^"]+)"',fresh.html).group(1)
-        fresh.get('office.php',dict(action='request_otp',csrf=csrf,email='other@example.test'))
+        check(MASTER_MARK in fresh.get('office.php') and 'Send sign-in code' in fresh.html,'installed CRM opens on the master OTP login')
+        fresh_master=Master(fresh);fresh_step=fresh_master.otp_start('other@example.test')
         login_code=code_for('other@example.test')
-        csrf=re.search(r'name="csrf" value="([^"]+)"',fresh.html).group(1)
-        fresh.get('office.php',dict(action='verify_otp',csrf=csrf,code=login_code))
+        fresh_master.otp_verify(fresh_step,login_code)
         check('Hello, Other' in fresh.html,'owner created by wizard can authenticate through PHPMailer OTP')
         check('password' not in b.html.lower() or 'App Password' not in b.html,'success page does not echo SMTP credentials')
         con.close()

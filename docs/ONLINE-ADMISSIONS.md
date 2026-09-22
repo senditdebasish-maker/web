@@ -2,7 +2,7 @@
 
 ## Entry points
 
-- **New applicants:** `apply.php` — course catalogue, course detail/contact, email verification, application form, private tracking, correction/resubmission, withdrawal and application help.
+- **New applicants:** `apply.php` — course catalogue, course detail/contact, application form, private tracking, correction/resubmission, withdrawal and application help. Email verification happens on the master sign-in (`index.php?page=login`), which returns here afterwards.
 - **Enrolled students:** `student.php` — admission/profile, fees/installments, PDFs, attendance, published results, notices and support.
 - **Staff:** `office.php?page=applications` — public listing controls and institute-scoped review queue.
 

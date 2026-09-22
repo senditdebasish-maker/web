@@ -18,7 +18,7 @@ The owner can also find the upgrade link in **Account settings**. Non-owners and
 
 Students can now create their own account before admission:
 
-1. Open `student.php?page=register` (linked from the homepage, the student sign-in page and the portal header).
+1. Open `index.php?page=login&show=create` (the **Create Student Account** button on the master sign-in page).
 2. Enter full name, personal email and phone, then verify the six-digit email code (five-minute expiry, same-browser, 60-second resend cooldown).
 3. The verified account shows an application checklist: apply for admission, track the latest application status, and — once the office admits them and enables portal access — refresh into the full student portal automatically.
 
@@ -29,8 +29,8 @@ Staff manage these accounts in **Student accounts** (owner/admin): verified name
 - Open **Students** as owner or institute admin.
 - Check the correct **personal student email**, using Manage email / letter to fix it if needed. Verify the address with the student before granting access; an email typo can give another mailbox owner access to that student's documents.
 - Click **Enable student access**. Counsellors cannot grant or revoke portal access. Institute admins can only manage their own institute's students.
-- Share `https://your-institute-domain/student.php`, or the corresponding `/institute-crm/student.php` subdirectory URL under XAMPP.
-- On the XAMPP computer: `http://localhost/institute-crm/student.php`. That localhost URL is **not** reachable by students on their own devices. Deploy to a secured live server before providing remote access.
+- Share `https://your-institute-domain/index.php?page=login`, or the corresponding `/institute-crm/index.php?page=login` subdirectory URL under XAMPP.
+- On the XAMPP computer: `http://localhost/institute-crm/index.php?page=login`. That localhost URL is **not** reachable by students on their own devices. Deploy to a secured live server before providing remote access.
 
 Enabling does **not** send an invitation email automatically. Students are not automatically enabled when admitted. Every account must be explicitly enabled by authorized staff.
 

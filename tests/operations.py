@@ -17,6 +17,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from master import Master, MASTER_MARK
 ROOT=Path(__file__).resolve().parents[1];PHP=shlex.split(os.environ.get('PHP_BIN','php'));checks=0
 
 def check(ok,msg):
@@ -35,7 +36,7 @@ class Browser:
     def token(self,page='dashboard'):
         self.get(self.endpoint+'?page='+page);return re.search(r'name="csrf" value="([^"]+)"',self.html).group(1)
     def post(self,action,page='dashboard',**fields):return self.get(self.endpoint+'?page='+page,dict(action=action,csrf=self.token(page),**fields))
-    def login(self,address,password='Test-Owner-Password!'):return self.post('login',email=address,password=password)
+    def login(self,address,password='Test-Owner-Password!'):master=Master(self);return master.password_login(master.otp_start(address),address,password)
 
 with tempfile.TemporaryDirectory(prefix='northstar-ops-') as temp:
     temp=Path(temp);database=temp/'db.sqlite';cfg=temp/'config.php';mail=temp/'mail'
@@ -147,12 +148,12 @@ with tempfile.TemporaryDirectory(prefix='northstar-ops-') as temp:
         owner.post('class_day',page='attendance',batch_id=dest,held_on='2026-01-11',topic='Unpublished lesson')
         # Enable own student portal, which must only show the student's published records.
         owner.post('portal_access',page='students',student_id=sid,access='enable')
-        student=Browser(base,'student.php');execute('DELETE FROM auth_events');student.post('request_otp',email='student@example.test')
+        student=Browser(base,'student.php');master_student=Master(student);execute('DELETE FROM auth_events');step_student=master_student.otp_start('student@example.test')
         for f in sorted(mail.glob('*.eml'),key=lambda p:p.stat().st_mtime_ns,reverse=True):
             msg=email.message_from_bytes(f.read_bytes(),policy=policy.default)
             if 'student@example.test' in msg['To']:
                 code=re.search(r'code is: (\d{6})',msg.get_body(preferencelist=('plain',)).get_content()).group(1);break
-        student.post('verify_otp',code=code)
+        master_student.otp_verify(step_student,code)
         check('Anatomy practice' in student.get('student.php?page=academics') and '100.0%' in student.html,'student sees own attendance history and defined attendance rate')
         check('Alpha B' in student.html and '2026-01-09' in student.html,'student sees current and historical batch allocation')
         check('Unpublished lesson' not in student.html,'draft classes excluded from student view')
@@ -180,21 +181,21 @@ with tempfile.TemporaryDirectory(prefix='northstar-ops-') as temp:
         check('permission' in counsellor.post('teacher',page='enquiries',**teacher(iid,'Forbidden')),'counsellor cannot change teaching directory')
         counsellor.get('office.php?page=fee-reports');check(counsellor.status==403,'counsellor cannot read financial report')
         check('Changes saved' in owner.post('revoke_sessions',page='staff',user_id=admin_id),'owner can revoke another staff account sessions')
-        check('Your workspace awaits' in admin.get(),'revoked staff session immediately denied on next request')
+        check(MASTER_MARK in admin.get(),'revoked staff session immediately denied on next request')
         admin.login('beta@example.test','Staff-Test-Password!')
         owner.post('staff_toggle',page='staff',id=admin_id);owner.post('staff_toggle',page='staff',id=admin_id)
-        check('Your workspace awaits' in admin.get(),'disable then re-enable does not revive old staff session')
+        check(MASTER_MARK in admin.get(),'disable then re-enable does not revive old staff session')
         check('Changes saved' in owner.post('password',page='settings',current_password='Test-Owner-Password!',password='New-Owner-Password!',confirm_password='New-Owner-Password!'),'password change keeps changing browser authenticated')
-        check('Your workspace awaits' in other_owner.get(),'password change revokes another device session')
+        check(MASTER_MARK in other_owner.get(),'password change revokes another device session')
         cfg.write_text(cfg.read_text().replace("'auth_mode'=>'password'","'auth_mode'=>'otp'"))
-        pending=Browser(base);execute('DELETE FROM auth_events');pending.post('request_otp',email='owner@example.test')
-        check('Check your inbox' in pending.html,'pending staff OTP can be requested before revocation')
+        pending=Browser(base);master_pending=Master(pending);execute('DELETE FROM auth_events');step_pending=master_pending.otp_start('owner@example.test')
+        check('Check your inbox' in step_pending,'pending staff OTP can be requested before revocation')
         for f in sorted(mail.glob('*.eml'),key=lambda p:p.stat().st_mtime_ns,reverse=True):
             msg=email.message_from_bytes(f.read_bytes(),policy=policy.default)
             if 'owner@example.test' in msg['To']:
                 pending_code=re.search(r'code is: (\d{6})',msg.get_body(preferencelist=('plain',)).get_content()).group(1);break
-        check('Your workspace awaits' in owner.post('revoke_sessions',page='settings',user_id=scalar("SELECT id FROM users WHERE role='owner'")),'self revoke signs out all own staff sessions')
-        check('Invalid, expired' in pending.post('verify_otp',code=pending_code),'session revocation invalidates a pending staff OTP')
+        check(MASTER_MARK in owner.post('revoke_sessions',page='settings',user_id=scalar("SELECT id FROM users WHERE role='owner'")),'self revoke signs out all own staff sessions')
+        check('Invalid, expired' in master_pending.otp_verify(step_pending,pending_code),'session revocation invalidates a pending staff OTP')
         print(f'\n{checks} operations checks passed. No real emails sent.');con.close()
     finally:
         server.terminate()

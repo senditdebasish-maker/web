@@ -17,6 +17,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from master import Master
 ROOT=Path(__file__).resolve().parents[1];PHP=shlex.split(os.environ.get('PHP_BIN','php'));checks=0
 
 def check(ok,msg):
@@ -35,7 +36,7 @@ class Browser:
     def token(self,page='dashboard'):
         self.get(self.endpoint+'?page='+page);return re.search(r'name="csrf" value="([^"]+)"',self.html).group(1)
     def post(self,action,page='dashboard',**fields):return self.get(self.endpoint+'?page='+page,dict(action=action,csrf=self.token(page),**fields))
-    def login(self,address,password='Test-Owner-Password!'):return self.post('login',email=address,password=password)
+    def login(self,address,password='Test-Owner-Password!'):master=Master(self);return master.password_login(master.otp_start(address),address,password)
 
 with tempfile.TemporaryDirectory(prefix='northstar-services-') as temp:
     temp=Path(temp);database=temp/'db.sqlite';cfg=temp/'config.php';mail=temp/'mail'
@@ -95,12 +96,12 @@ with tempfile.TemporaryDirectory(prefix='northstar-services-') as temp:
         check('another window' in owner.post('exam_grade',page='exams',**grade),'stale mark entry rejected')
         # Portal identity comes only from the student session, never a submitted student_id.
         owner.post('portal_access',page='students',student_id=sid,access='enable')
-        student=Browser(base,'student.php');student.post('request_otp',email='student@example.test')
+        student=Browser(base,'student.php');master_student=Master(student);step_student=master_student.otp_start('student@example.test')
         for f in sorted(mail.glob('*.eml'),key=lambda p:p.stat().st_mtime_ns,reverse=True):
             msg=email.message_from_bytes(f.read_bytes(),policy=policy.default)
             if 'student@example.test' in msg['To']:
                 code=re.search(r'code is: (\d{6})',msg.get_body(preferencelist=('plain',)).get_content()).group(1);break
-        student.post('verify_otp',code=code)
+        master_student.otp_verify(step_student,code)
         check('No published results yet' in student.get('student.php?page=results'),'draft marks hidden from student')
         check('Changes saved' in owner.post('exam_publish',page='exams',exam_id=xid,version='2',state='Published',reason='Approved by office'),'complete assessment published')
         check('95.50' in student.get('student.php?page=results') and 'Pharmacology &lt;script&gt;' in student.html,'student sees escaped own published marks')

@@ -10,26 +10,7 @@ require_once __DIR__.'/online-payments.php';
 function handleAction(): string {
     $action = input('action', 40);
     if (!hash_equals($_SESSION['csrf'], input('csrf', 128))) fail('Your form expired. Refresh the page and try again.');
-    if ($action==='request_otp') return requestOtp();
-    if ($action==='verify_otp') return verifyOtp();
-    if ($action === 'login') {
-        if (otpEnabled()) fail('Password login is disabled. Request an email sign-in code.');
-        $email = emailInput();
-        $password = input('password', 72);
-        $identity = hash('sha256', $email);
-        $ip = hash('sha256', 'ip:' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
-        query('DELETE FROM login_attempts WHERE attempted_at < ?', [time()-900]);
-        if ((int)query('SELECT COUNT(*) FROM login_attempts WHERE identity_hash IN (?,?)', [$identity,$ip])->fetchColumn() >= 10) fail('Too many attempts. Please try again in 15 minutes.');
-        $u = one('SELECT * FROM users WHERE email = ? AND active = 1', [$email]);
-        $valid = password_verify($password, $u['password_hash'] ?? '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.');
-        if (!$u || !$valid) {
-            foreach ([$identity,$ip] as $hash) query('INSERT INTO login_attempts (identity_hash,attempted_at) VALUES (?,?)', [$hash,time()]);
-            fail('Email or password is incorrect.');
-        }
-        session_regenerate_id(true); $_SESSION['uid'] = (int)$u['id']; $_SESSION['staff_stamp']=staffStamp($u); $_SESSION['csrf'] = bin2hex(random_bytes(32));
-        query('DELETE FROM login_attempts WHERE identity_hash = ?', [$identity]);
-        audit('login','users',(int)$u['id']); return 'dashboard';
-    }
+    if (in_array($action, ['login','request_otp','verify_otp'], true)) { header('Location: index.php?page=login'); exit; }
     $u = requireRole(['owner','admin','counsellor']);
     if ($action === 'logout') { $_SESSION = []; session_regenerate_id(true); return 'login'; }
     if ($action === 'password') {

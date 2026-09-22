@@ -17,6 +17,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from master import Master, LOGIN, MASTER_MARK
 ROOT=Path(__file__).resolve().parents[1];PHP=shlex.split(os.environ.get('PHP_BIN','php'));checks=0
 
 def check(ok,msg):
@@ -35,7 +36,7 @@ class Browser:
     def token(self,page='dashboard'):
         self.get(self.endpoint+'?page='+page);return re.search(r'name="csrf" value="([^"]+)"',self.html).group(1)
     def post(self,action,page='dashboard',**fields):return self.get(self.endpoint+'?page='+page,dict(action=action,csrf=self.token(page),**fields))
-    def login(self,address,password='Test-Owner-Password!'):return self.post('login',email=address,password=password)
+    def login(self,address,password='Test-Owner-Password!'):master=Master(self);return master.password_login(master.otp_start(address),address,password)
 
 with tempfile.TemporaryDirectory(prefix='northstar-applications-') as temp:
     temp=Path(temp);database=temp/'db.sqlite';cfg=temp/'config.php';mail=temp/'mail'
@@ -75,9 +76,10 @@ with tempfile.TemporaryDirectory(prefix='northstar-applications-') as temp:
         check('changed in another window' in owner.post('admission_listing',page='applications',**listing),'stale listing edit rejected')
         check('Diploma in Pharmacy' in visitor.get() and 'Medical Lab Technology' not in visitor.html,'only explicitly open courses are public')
         check('Study pharmacy &lt;script&gt;' in visitor.get('apply.php?page=course&course='+str(cid)),'course description is escaped')
-        check('If applications are open' in visitor.post('request_code',page='login',email='applicant@example.test'),'applicant email code request accepts eligible new account')
+        master_visitor=Master(visitor);step_v=master_visitor.applicant_start('applicant@example.test')
+        check('If applications are open' in step_v,'applicant email code request accepts eligible new account')
         check(scalar('SELECT COUNT(*) FROM applicant_accounts')==0,'requesting OTP does not create applicant account')
-        check('Please wait 60 seconds' in visitor.post('request_code',page='login',email='applicant@example.test'),'applicant resend cooldown enforced')
+        check('Please wait 60 seconds' in master_visitor.applicant_start('applicant@example.test'),'applicant resend cooldown enforced')
         def code_for(address):
             for f in sorted(mail.glob('*.eml'),key=lambda p:p.stat().st_mtime_ns,reverse=True):
                 msg=email.message_from_bytes(f.read_bytes(),policy=policy.default)
@@ -87,13 +89,14 @@ with tempfile.TemporaryDirectory(prefix='northstar-applications-') as temp:
         code=code_for('applicant@example.test')
         check(code not in visitor.html,'OTP not exposed in applicant browser response')
         check(scalar('SELECT code_hash FROM applicant_codes ORDER BY expires_at DESC LIMIT 1')!=code,'applicant OTP not stored as plaintext')
-        stranger=Browser(base,'apply.php');check('Request an applicant code first' in stranger.post('verify_code',page='login',code=code),'code cannot authenticate another browser')
-        check('Invalid, expired' in visitor.post('verify_code',page='login',code='000000'),'incorrect applicant code rejected')
-        check('My applications' in visitor.post('verify_code',page='login',code=code) and 'Your email is verified' in visitor.html,'verified email creates isolated applicant account')
+        stranger=Browser(base,'apply.php');check('Your session expired' in Master(stranger).applicant_verify(Master(stranger).page(),code),'code cannot authenticate another browser')
+        wrong_v=master_visitor.applicant_verify(visitor.html,'000000')
+        check('Invalid, expired' in wrong_v,'incorrect applicant code rejected')
+        check('My applications' in master_visitor.applicant_verify(wrong_v,code) and 'Your email is verified' in visitor.html,'verified email creates isolated applicant account')
         check(scalar('SELECT COUNT(*) FROM applicant_accounts')==1,'one applicant account created after verification')
-        check('Request an applicant code first' in visitor.post('verify_code',page='login',code=code),'used applicant code cannot be replayed')
-        visitor.get('office.php');check('Your workspace awaits' in visitor.html,'applicant session cannot authenticate to staff CRM')
-        visitor.get('student.php');check('Your student space awaits' in visitor.html,'applicant session cannot authenticate to student portal')
+        check('Your session expired' in master_visitor.applicant_verify(master_visitor.page(),code),'used applicant code cannot be replayed')
+        visitor.get('office.php');check(MASTER_MARK in visitor.html,'applicant session cannot authenticate to staff CRM')
+        visitor.get('student.php');check(MASTER_MARK in visitor.html,'applicant session cannot authenticate to student portal')
         for forbidden in ['application_admit','payment','portal_access']:
             check('cannot perform' in visitor.post(forbidden,page='dashboard',student_id=sid),'applicant cannot invoke '+forbidden)
         fields=dict(name='Online Applicant <script>',phone='9000000000',city='Baharampur',qualification='Higher secondary science',completion_year='2025',note='Please explain the next steps.',consent='yes')
@@ -119,7 +122,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-applications-') as temp:
         check('already have an active' in submit(visitor),'one active application limit enforced')
         check('must request corrections' in visitor.post('revise_application',page='dashboard',application_id=appid,version='1',**fields),'applicant cannot edit a submitted record without correction request')
         execute('DELETE FROM auth_events')
-        other=Browser(base,'apply.php');other.post('request_code',page='login',email='other-applicant@example.test');other.post('verify_code',page='login',code=code_for('other-applicant@example.test'))
+        other=Browser(base,'apply.php');master_other=Master(other);master_other.applicant_verify(master_other.applicant_start('other-applicant@example.test'),code_for('other-applicant@example.test'))
         other.get('apply.php?page=application&id='+str(appid));check(other.status==403 and 'Online Applicant' not in other.html,'other applicant cannot read application by ID')
         check('Application not accessible' in other.post('withdraw_application',page='dashboard',application_id=appid,version='1',reason='Attack'),'other applicant cannot withdraw application')
         owner.post('staff',page='staff',institute_id=other_iid,name='Beta Admin',email='beta@example.test',role='admin',password='Staff-Test-Password!')
@@ -154,7 +157,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-applications-') as temp:
         check('Your admission has been approved' in visitor.get('apply.php?page=application&id='+str(appid)),'applicant sees approved status and portal next step')
         check('closed to applicant changes' in visitor.post('withdraw_application',page='dashboard',application_id=appid,version='4',reason='Cancel'),'applicant cannot self-cancel an admitted student record')
         execute('DELETE FROM auth_events')
-        student=Browser(base,'student.php');student.post('request_otp',email='applicant@example.test');student.post('verify_otp',code=code_for('applicant@example.test'))
+        student=Browser(base,'student.php');master_student=Master(student);master_student.otp_verify(master_student.otp_start('applicant@example.test'),code_for('applicant@example.test'))
         check('₹85,000.00' in student.get('student.php?page=payments'),'approved applicant can log in to own student portal')
         doc=scalar('SELECT id FROM documents WHERE student_id=?',(new_sid,));student.get('student.php?document='+str(doc));check(student.raw.startswith(b'%PDF'),'approved student can download actual admission PDF')
         for url in ['applications','applications&tab=listings','applications&listing='+str(cid),'applications&application='+str(appid)]:
@@ -175,37 +178,38 @@ with tempfile.TemporaryDirectory(prefix='northstar-applications-') as temp:
         check('Eligibility not met.' in other.get('apply.php?page=application&id='+str(third_id)),'applicant can read rejection explanation')
         check('closed to applicant changes' in other.post('revise_application',page='dashboard',application_id=third_id,version='2',**fields),'rejected application cannot be edited')
         owner.post('applicant_toggle',page='applications',application_id=third_id)
-        check('Verify your email' in other.get('apply.php?page=dashboard'),'owner suspension revokes applicant session')
+        check(MASTER_MARK in other.get('apply.php?page=dashboard'),'owner suspension revokes applicant session')
         owner.post('applicant_toggle',page='applications',application_id=third_id)
-        check('Verify your email' in other.get('apply.php?page=dashboard'),'restoring account does not revive old applicant session')
+        check(MASTER_MARK in other.get('apply.php?page=dashboard'),'restoring account does not revive old applicant session')
         # Applicant OTP protections and return-to-course flow for a third browser.
         execute('DELETE FROM auth_events')
-        fresh=Browser(base,'apply.php');fresh.get('apply.php?page=apply&course='+str(cid))
-        check('Verify your email' in fresh.html,'new applicants must verify before seeing submission form')
-        fresh.get('apply.php?page=login',dict(action='request_code',csrf='bad',email='fresh@example.test'))
+        fresh=Browser(base,'apply.php');master_fresh=Master(fresh);fresh.get('apply.php?page=apply&course='+str(cid))
+        check('id="modal-applicant" data-open="1"' in fresh.html,'new applicants must verify before seeing submission form')
+        master_fresh.raw(LOGIN,dict(action='applicant_start',csrf='bad',email='fresh@example.test'))
         check('form expired' in fresh.html,'applicant OTP requests require CSRF')
-        fresh.post('request_code',page='login',email='fresh@example.test');expired_code=code_for('fresh@example.test')
+        step_fresh=master_fresh.applicant_start('fresh@example.test');expired_code=code_for('fresh@example.test')
         execute('UPDATE applicant_codes SET expires_at=1 WHERE email_hash=?',(__import__('hashlib').sha256(b'applicant:fresh@example.test').hexdigest(),))
-        check('Invalid, expired' in fresh.post('verify_code',page='login',code=expired_code),'expired applicant code rejected')
-        execute('DELETE FROM auth_events');fresh.post('request_code',page='login',email='fresh@example.test');exhausted_code=code_for('fresh@example.test')
-        for _ in range(5):fresh.post('verify_code',page='login',code='000000')
-        check('Invalid, expired' in fresh.post('verify_code',page='login',code=exhausted_code),'applicant code locks after five wrong attempts')
-        execute('DELETE FROM auth_events');fresh.post('request_code',page='login',email='fresh@example.test');latest=code_for('fresh@example.test')
-        check('Invalid, expired' in fresh.post('verify_code',page='login',code=exhausted_code),'resend invalidates previous applicant code')
-        check('APPLICATION FORM' in fresh.post('verify_code',page='login',code=latest),'email verification returns applicant to selected course')
+        check('Invalid, expired' in master_fresh.applicant_verify(step_fresh,expired_code),'expired applicant code rejected')
+        execute('DELETE FROM auth_events');step_lock=master_fresh.applicant_start('fresh@example.test');exhausted_code=code_for('fresh@example.test')
+        for _ in range(5):step_lock=master_fresh.applicant_verify(step_lock,'000000')
+        check('Invalid, expired' in master_fresh.applicant_verify(step_lock,exhausted_code),'applicant code locks after five wrong attempts')
+        execute('DELETE FROM auth_events');step_new=master_fresh.applicant_start('fresh@example.test');latest=code_for('fresh@example.test')
+        stale_new=master_fresh.applicant_verify(step_new,exhausted_code)
+        check('Invalid, expired' in stale_new,'resend invalidates previous applicant code')
+        check('APPLICATION FORM' in master_fresh.applicant_verify(stale_new,latest),'email verification returns applicant to selected course')
         check('form expired' in fresh.get('apply.php?page=apply&course='+str(cid),dict(action='submit_application',csrf='bad')),'application submission requires CSRF')
         check('Unable to submit' in submit(fresh,website='bot'),'submission honeypot rejects obvious automated form filling')
         # Same browser can hold independent staff and applicant cookies without privilege sharing.
-        execute('DELETE FROM auth_events');owner.get('apply.php?page=login');owner.endpoint='apply.php';owner.post('request_code',page='login',email='other-applicant@example.test');owner.post('verify_code',page='login',code=code_for('other-applicant@example.test'))
+        execute('DELETE FROM auth_events');owner.endpoint='apply.php';master_owner2=Master(owner);master_owner2.applicant_verify(master_owner2.applicant_start('other-applicant@example.test'),code_for('other-applicant@example.test'))
         check('My applications' in owner.get('apply.php?page=dashboard'),'existing enabled applicant can sign in again')
         owner.post('logout',page='dashboard');owner.endpoint='office.php';check('Hello, Owner' in owner.get(),'applicant logout preserves separate staff session')
         # Suspend pending codes, not only authenticated sessions.
-        execute('DELETE FROM auth_events');pending=Browser(base,'apply.php');pending.post('request_code',page='login',email='other-applicant@example.test');pending_code=code_for('other-applicant@example.test')
+        execute('DELETE FROM auth_events');pending=Browser(base,'apply.php');master_pending=Master(pending);step_pending=master_pending.applicant_start('other-applicant@example.test');pending_code=code_for('other-applicant@example.test')
         owner.post('applicant_toggle',page='applications',application_id=third_id);owner.post('applicant_toggle',page='applications',application_id=third_id)
-        check('Invalid, expired' in pending.post('verify_code',page='login',code=pending_code),'disable and restore cannot revive previously issued applicant OTP')
+        check('Invalid, expired' in master_pending.applicant_verify(step_pending,pending_code),'disable and restore cannot revive previously issued applicant OTP')
         owner.post('student_email',page='students',student_id=new_sid,email='corrected-student@example.test')
-        check(scalar('SELECT active FROM applicant_accounts WHERE id=?',(aid,))==0 and 'Verify your email' in visitor.get('apply.php?page=dashboard'),'student email correction suspends linked applicant access')
-        visitor.post('logout',page='dashboard');visitor.get('apply.php?page=application&id='+str(appid));check('Verify your email' in visitor.html,'applicant logout removes access to private application')
+        check(scalar('SELECT active FROM applicant_accounts WHERE id=?',(aid,))==0 and MASTER_MARK in visitor.get('apply.php?page=dashboard'),'student email correction suspends linked applicant access')
+        visitor.post('logout',page='dashboard');visitor.get('apply.php?page=application&id='+str(appid));check(MASTER_MARK in visitor.html,'applicant logout removes access to private application')
         print(f'\n{checks} public admissions checks passed. No real emails sent.');con.close()
     finally:
         server.terminate()

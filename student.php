@@ -20,14 +20,10 @@ try {
     else {
         if ($_SERVER['REQUEST_METHOD']==='POST') {
             requireCookies();
+            if (in_array(input('action',40),['request_otp','verify_otp','register_request','register_verify'],true)) { header('Location: index.php?page=login'); exit; }
             if (!hash_equals($_SESSION['csrf'],input('csrf',128))) fail('Your form expired. Refresh and try again.');
             $action=input('action',40);
-            if (in_array($action,['register_request','register_verify'],true) && portalStudent()) { header('Location: student.php');exit; }
-            if ($action==='request_otp') $next=requestOtp('student');
-            elseif ($action==='verify_otp') $next=verifyOtp('student');
-            elseif ($action==='register_request') $next=requestStudentUserCode();
-            elseif ($action==='register_verify') $next=verifyStudentUserCode();
-            elseif (in_array($action,['support_create','support_reply'],true)) $next=studentSupportAction($action);
+            if (in_array($action,['support_create','support_reply'],true)) $next=studentSupportAction($action);
             elseif ($action==='online_order') {
                 $s=portalStudent();if(!$s)fail('Please sign in to pay online.');
                 $oid=beginOnlineOrder($s,input('amount',12));
@@ -44,7 +40,7 @@ try {
             }
             elseif ($action==='logout') {
                 $s=portalStudent(); if($s) portalEvent((int)$s['id'],'logout');
-                $_SESSION=[];session_regenerate_id(true);$next='login';
+                $_SESSION=[];session_regenerate_id(true);header('Location: index.php?page=login');exit;
             } else fail('Students cannot perform this action.');
             header('Location: student.php?page='.$next);exit;
         }
@@ -58,13 +54,13 @@ try {
             $pdf=renderDocument($document); portalEvent((int)$student['id'],'document_download',(int)$document['id']);
             ob_clean();header('Content-Type: application/pdf');header('Content-Disposition: attachment; filename="'.documentFilename($document).'"');header('Content-Length: '.strlen($pdf));echo $pdf;exit;
         }
-        if (!$student && !$portalUser) $page=$page==='register'?'register':'login';
+        if (!$student && !$portalUser) { header('Location: index.php?page=login'.($page==='register'?'&show=create':'')); exit; }
         elseif ($portalUser && !$student) $page='account';
         elseif ($page==='login'||$page==='register') { header('Location: student.php');exit; }
         elseif (!in_array($page,['dashboard','payments','documents','profile','academics','results','announcements','support'],true)) { http_response_code(404);$page='notfound'; }
         if($student && $page==='support' && isset($_GET['ticket']) && servicesReady()) ticketForStudent($student,(int)$_GET['ticket']);
     }
-} catch(DomainException $e) { $error=$e->getMessage();if($page==='support' && isset($_GET['ticket'])){unset($_GET['ticket']);if($_SERVER['REQUEST_METHOD']==='GET')http_response_code(403);}$student=$ready?portalStudent():null;$portalUser=$ready?currentStudentUser():null;if(!$student)$page=$portalUser?'account':($page==='register'?'register':'login'); }
+} catch(DomainException $e) { $error=$e->getMessage();if($page==='support' && isset($_GET['ticket'])){unset($_GET['ticket']);if($_SERVER['REQUEST_METHOD']==='GET')http_response_code(403);}$student=$ready?portalStudent():null;$portalUser=$ready?currentStudentUser():null;if(!$student && !$portalUser){ header('Location: index.php?page=login'); exit; } if(!$student)$page='account'; }
 catch(Throwable $e) { http_response_code(503);$error='Your portal is temporarily unavailable. Please contact your institute.';$page='unavailable';error_log('Northstar student portal operation failed.'); }
 $flash=$_SESSION['flash'] ?? null;unset($_SESSION['flash']);
 require __DIR__.'/app/student-views.php';

@@ -17,6 +17,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from master import Master, MASTER_MARK
 
 ROOT = Path(__file__).resolve().parents[1]
 PHP = shlex.split(os.environ.get('PHP_BIN', 'php'))
@@ -54,8 +55,20 @@ class Browser:
         token = re.search(r'name="csrf" value="([^"]+)"', self.html).group(1)
         return self.request(page, dict(action=action, csrf=token, **fields))
 
+    def get(self, path, data=None):
+        url = self.base + '/' + path
+        body = urllib.parse.urlencode(data).encode() if data is not None else None
+        try:
+            response = self.client.open(url, body, timeout=20)
+        except urllib.error.HTTPError as e:
+            response = e
+        self.status = response.status
+        self.html = response.read().decode()
+        return self.html
+
     def login(self, email, password):
-        return self.post('login', email=email, password=password)
+        master = Master(self)
+        return master.password_login(master.otp_start(email), email, password)
 
 
 with tempfile.TemporaryDirectory(prefix='northstar-test-') as temp:
@@ -86,7 +99,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-test-') as temp:
             except (OSError, urllib.error.URLError):
                 time.sleep(.1)
         owner = Browser(base)
-        check('Your workspace awaits' in owner.request(), 'unauthenticated requests show login')
+        check(MASTER_MARK in owner.request(), 'unauthenticated requests redirect to the master login')
         check('incorrect' in owner.login('owner@example.test', 'wrong-password'), 'bad credentials rejected')
         check('Hello, Test' in owner.login('owner@example.test', 'Test-Owner-Password!'), 'owner can sign in')
         check('expired' in owner.request(data=dict(action='institute', csrf='invalid', name='Bad')),
@@ -167,12 +180,12 @@ with tempfile.TemporaryDirectory(prefix='northstar-test-') as temp:
             owner.request(page+'&edit=new')
             check(owner.status == 200 and ('Save record' in owner.html or 'Schedule follow-up' in owner.html), f'{page} create form renders')
         check('Changes saved' in owner.post('staff_toggle',page='staff',id=ac), 'owner disables staff account')
-        check('Your workspace awaits' in counsellor.request(), 'disabled staff session loses access immediately')
+        check(MASTER_MARK in counsellor.request(), 'disabled staff session loses access immediately')
         check('current password' in admin.post('password',page='settings',current_password='bad',password='New-Test-Password!',confirm_password='New-Test-Password!').lower(), 'password change requires current password')
         check('Changes saved' in admin.post('password',page='settings',current_password='Staff-Test-Password!',password='New-Test-Password!',confirm_password='New-Test-Password!'), 'password change succeeds')
         check(first("SELECT COUNT(*) FROM audit_log WHERE action='admitted'") == 1, 'admission is audited once')
         check(first("SELECT password_hash FROM users WHERE email='admin@example.test'") != 'New-Test-Password!', 'passwords are stored hashed')
-        check('Your workspace awaits' in owner.post('logout'), 'logout removes authenticated access')
+        check(MASTER_MARK in owner.post('logout'), 'logout removes authenticated access')
         print(f'\n{checks} checks passed.')
         conn.close()
     finally:

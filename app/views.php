@@ -33,33 +33,12 @@ function options(array $data,string $label='name'): array { $o=[]; foreach($data
 function editLink(string $page,int $id): string { return '<a class="text-link" href="?page='.$page.'&edit='.$id.'">View / edit ↗</a>'; }
 function scoped(string $alias=''): array { global $scope; return $scope ? [($alias ? $alias.'.':'').'institute_id = ?',[$scope]] : ['1=1',[]]; }
 function url(array $overrides=[]): string { return '?'.http_build_query(array_merge($_GET,$overrides)); }
-function loginPrefill(): string { $v=is_string($_GET['email'] ?? null)?trim(substr($_GET['email'],0,200)):''; return filter_var($v,FILTER_VALIDATE_EMAIL)?$v:''; }
 ?>
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Northstar · Institute CRM</title><?php if($user): ?><link rel="stylesheet" href="assets/app.css"><?php endif; ?><link rel="stylesheet" href="assets/university.css"><link rel="stylesheet" href="assets/theme.css"><?php if($user): ?><script src="assets/app.js" defer></script><?php endif; ?><script src="assets/theme.js" defer></script></head><body>
 <?php if(!$user):
-[$obBrand,$obKind,$obCity,$obAddr,$obPhone]=siteBrand();
+// Master sign-in lives on the website now; office.php redirects logged-out visitors.
+header('Location: index.php?page=login'); exit;
 ?>
-<?=siteHeader($obBrand,$obKind,'','<a class="u-btn ghost" href="student.php">Student sign-in</a><a class="u-btn ghost" href="apply.php">Admissions</a>'.siteToggle().siteBackLink())?>
-<main class="u-auth-wrap"><div class="u-card"><div class="u-eyebrow">WELCOME BACK</div><h1>Your workspace awaits</h1><p class="u-muted">Sign in to manage your institute community.</p>
-<?php if($error): ?><div class="u-alert error" role="alert"><?=e($error)?></div><?php endif; ?>
-<?php if($flash): ?><div class="u-alert" role="status"><?=e($flash)?></div><?php endif; ?>
-<?php if(otpEnabled()): ?>
-<p><strong>&#9993; &nbsp; Secure email-code sign in</strong></p>
-<?php if(($config['environment'] ?? '')==='local' && ($config['mail']['transport'] ?? '')==='log'): ?><p class="u-small">Local test mode: no real emails are sent. The server operator can read the code in the private <code>storage/mail/</code> capture files.</p><?php endif; ?>
-<?php if(isset($_SESSION['otp'])): ?>
-<p class="u-small">Enter the six-digit code for <strong><?=e($_SESSION['otp']['email'])?></strong>. Use this browser; the code expires in 5 minutes.</p>
-<form method="post" class="u-form"><?=csrf()?><input type="hidden" name="action" value="verify_otp"><label>One-time code<input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="000000" required class="u-code"></label><button class="u-btn solid" type="submit">Verify &amp; sign in →</button></form>
-<hr class="u-rule">
-<?php endif; ?>
-<form method="post" class="u-form"><?=csrf()?><input type="hidden" name="action" value="request_otp"><?php field('Staff email address','email',$_SESSION['otp']['email'] ?? loginPrefill(),'email'); ?><button class="u-btn solid" type="submit"><?=isset($_SESSION['otp'])?'Send a new code':'Send sign-in code'?> →</button></form>
-<p class="u-small">No password needed. Codes are sent only to existing, active staff accounts. Wait 60 seconds before resending.</p>
-<?php else: ?>
-<form method="post" class="u-form"><?=csrf()?><input type="hidden" name="action" value="login"><?php field('Email address','email',loginPrefill(),'email'); field('Password','password','','password'); ?><button class="u-btn solid" type="submit">Sign in to workspace →</button></form>
-<?php endif; ?>
-<p class="u-small">Need an account? Contact your institute administrator. First time setting up? Follow the README installation guide.</p>
-<div class="u-auth-links"><a href="student.php">Student? Open your student portal →</a><a href="apply.php">New applicant? Browse courses &amp; apply →</a></div>
-</div></main>
-<?=siteFooter($obBrand,$obKind,$obCity,$obAddr,$obPhone)?>
 <?php else:
 try {
 $admin=in_array($user['role'],['owner','admin'],true);

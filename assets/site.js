@@ -1,5 +1,5 @@
 "use strict";
-/* Northstar front-site helpers: popup dialogs for student signup, recovery and enquiries. */
+/* Northstar front-site helpers: popup dialogs for student signup, recovery, enquiries and applicant tracking. */
 (function () {
   function close(modal) {
     modal.removeAttribute("data-open");

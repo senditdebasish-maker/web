@@ -13,6 +13,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from master import Master, MASTER_MARK
 ROOT = Path(__file__).resolve().parents[1]
 PHP = shlex.split(os.environ.get('PHP_BIN', 'php'))
 checks = 0
@@ -54,7 +55,8 @@ class Browser:
                          dict(action=action, csrf=self.token(page), **fields))
 
     def login(self, address, password='Test-Owner-Password!'):
-        return self.post('login', email=address, password=password)
+        master = Master(self)
+        return master.password_login(master.otp_start(address), address, password)
 
 
 with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
@@ -149,8 +151,11 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
         login_html = uni.get('index.php?page=login')
         check('ONE SIGN-IN FOR EVERYONE' in login_html and 'id="modal-create"' in login_html
               and 'id="modal-inquiry"' in login_html and 'id="modal-recovery"' in login_html
+              and 'id="modal-applicant"' in login_html
               and 'Create Student Account' in login_html and 'Admission Inquiry' in login_html
-              and 'Forgot password?' in login_html, 'unified sign-in page offers OTP, signup, inquiry and recovery')
+              and 'Forgot password?' in login_html and 'Track application' in login_html
+              and 'u-login-links' not in login_html,
+              'unified sign-in page offers OTP, signup, inquiry, recovery and applicant tracking with no side logins')
         check('data-open="1"' in uni.get('index.php?page=login&show=create'),
               'signup popup opens directly without JavaScript')
 
@@ -165,13 +170,22 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
                     return matched.group(1)
             raise AssertionError('no OTP mail found')
 
-        check('Staff password sign-in' in uni.post('otp_start', page='login', email='owner@example.test')
-              and 'office.php?email=owner' in uni.html,
-              'staff email in password mode leads to office login')
+        staff_step = uni.post('otp_start', page='login', email='owner@example.test')
+        check('Staff password sign-in' in staff_step and 'password_login' in uni.html
+              and 'Sign in to office' in uni.html and 'office.php?email=' not in uni.html,
+              'staff email in password mode leads to the inline password step')
+        check('incorrect' in Master(uni).password_login(staff_step, 'owner@example.test', 'wrong-password'),
+              'master password step rejects bad credentials')
+        staff = Browser(base)
+        master_staff = Master(staff)
+        check('Hello, Owner' in master_staff.password_login(
+            master_staff.otp_start('owner@example.test'), 'owner@example.test', 'Test-Owner-Password!'),
+              'master password step signs staff into the office dashboard')
         check('valid email address' in uni.post('otp_start', page='login', email='bad'),
               'invalid email is rejected')
         check('No account found' in uni.post('otp_start', page='login', email='nobody@example.test')
-              and 'Choose how to continue' in uni.html, 'unknown email offers signup or inquiry')
+              and 'Choose how to continue' in uni.html and 'I applied — track my application' in uni.html,
+              'unknown email offers signup, inquiry or applicant tracking')
 
         execute("UPDATE students SET email='linkme@example.test' WHERE id=?", (sid,))
         execute("INSERT INTO portal_accounts (student_id,email,created_at) VALUES (?,?,'2026-01-01 00:00:00')",
@@ -231,22 +245,36 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
         check(row and row[0] == 'website' and 'D.Pharm fees?' in row[1] and '7 Lake Road' in row[1],
               'the inquiry reaches the office with message and address')
 
-        check('value="owner@example.test"' in owner.get('office.php?email=owner@example.test'),
-              'office sign-in prefills the detected email')
+        time.sleep(4)
+        applicant = Browser(base)
+        master_app = Master(applicant)
+        step_app = master_app.applicant_start('uni-applicant@example.test')
+        check('Your verification code' in step_app, 'applicant tracking sends a code from the master login')
+        master_app.applicant_verify(step_app, newest_code())
+        check('apply.php' in applicant.url and 'dashboard' in applicant.url,
+              'verified applicant lands in the application workspace')
+        check('My applications' in applicant.html, 'master applicant login opens the workspace directly')
+
+        check(MASTER_MARK in owner.get('office.php?email=owner@example.test')
+              and 'page=login' in owner.url,
+              'office address redirects to the master sign-in')
         portal = Browser(base, 'student.php')
-        check('value="linkme@example.test"' in portal.get('student.php?email=linkme@example.test'),
-              'student sign-in prefills the detected email')
+        check(MASTER_MARK in portal.get('student.php?email=linkme@example.test')
+              and 'page=login' in portal.url,
+              'student address redirects to the master sign-in')
+        check('data-open="1"' in uni.get('index.php?page=login&show=applicant'),
+              'applicant tracking opens directly without JavaScript')
         apply = uni.get('apply.php')
         check('<a class="u-brand" href="/index.php"' in apply and '← Back to website' in apply,
               'admissions brand and back button return to the university site')
         check('university.css' in apply and 'My applications' in apply,
               'admissions page uses the university theme and keeps its navigation')
         home = owner.get('office.php')
-        check('Your workspace awaits' in home and '← Back to website' in home and 'university.css' in home,
-              'office homepage shares the university theme with a way back')
+        check(MASTER_MARK in home and 'university.css' in home and 'page=login' in owner.url,
+              'office address shares the themed master sign-in')
         spot = portal.get('student.php')
-        check('<a class="u-brand" href="/index.php"' in spot and '← Back to website' in spot,
-              'student portal brand and back button return to the university site')
+        check(MASTER_MARK in spot and 'u-brand' in spot,
+              'student address lands on the branded master sign-in')
         owner.login('owner@example.test')
         dash = owner.get('office.php?page=dashboard')
         check('nav-link site-back' in dash and 'university.css' in dash,

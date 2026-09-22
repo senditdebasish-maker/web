@@ -8,6 +8,13 @@ function siteSession(string $name): void {
     if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
     ini_set('session.use_strict_mode', '1');
     session_name($name);
+    // PHP keeps the previous session id in memory across name switches, so a
+    // second session_start() would reuse it instead of reading this session's
+    // own cookie (staff/applicant handshakes resumed an empty session and every
+    // code step failed with "session expired"). Rebind explicitly: an unknown
+    // or missing id safely starts a fresh session under strict mode.
+    $cookie = $_COOKIE[$name] ?? '';
+    session_id(is_string($cookie) ? $cookie : '');
     session_set_cookie_params(sessionCookieParams());
     session_start();
     $_SESSION['last_seen'] = time();
@@ -15,9 +22,9 @@ function siteSession(string $name): void {
 }
 // Resume whichever portal session holds a pending OTP handshake (login or creation).
 function siteResumePending(): string {
-    foreach (['northstar_student', 'northstar_session'] as $name) {
+    foreach (['northstar_student', 'northstar_session', 'northstar_applicant'] as $name) {
         siteSession($name);
-        if (isset($_SESSION['otp']) || isset($_SESSION['suid_pending']) || isset($_SESSION['site_recovery'])) return $name;
+        if (isset($_SESSION['otp']) || isset($_SESSION['suid_pending']) || isset($_SESSION['site_recovery']) || isset($_SESSION['applicant_pending'])) return $name;
     }
     fail('Your session expired. Start again.');
 }
@@ -30,7 +37,7 @@ function siteCsrfCheck(): void {
 // Start actions may be posted from a page rendered under any of our sessions
 // (site or portal handshake). Accept the token whichever session issued it.
 function siteCsrfCheckAny(): void {
-    foreach (['northstar_site', 'northstar_student', 'northstar_session'] as $name) {
+    foreach (['northstar_site', 'northstar_student', 'northstar_session', 'northstar_applicant'] as $name) {
         siteSession($name);
         if (hash_equals($_SESSION['site_csrf'] ?? '', (string)($_POST['csrf'] ?? ''))) return;
     }
@@ -143,6 +150,32 @@ function siteRecoveryVerify(): void {
         portalEvent((int)$portal['student_id'], 'login');
     }
     $_SESSION['flash'] = 'Gmail verified. Welcome back.';
+}
+// Staff password sign-in on the master login page (password-mode institutes only).
+// Same protections as the former office login: throttled attempts, dummy hash,
+// fresh session, audit. Runs under the staff session.
+function sitePasswordLogin(): void {
+    if (otpEnabled()) fail('Password login is disabled. Request an email sign-in code.');
+    $email = emailInput();
+    $password = input('password', 72);
+    $identity = hash('sha256', $email);
+    $ip = hash('sha256', 'ip:' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+    query('DELETE FROM login_attempts WHERE attempted_at < ?', [time() - 900]);
+    if ((int)query('SELECT COUNT(*) FROM login_attempts WHERE identity_hash IN (?,?)', [$identity, $ip])->fetchColumn() >= 10) fail('Too many attempts. Please try again in 15 minutes.');
+    $u = one('SELECT * FROM users WHERE email = ? AND active = 1', [$email]);
+    $valid = password_verify($password, $u['password_hash'] ?? '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.');
+    if (!$u || !$valid) {
+        foreach ([$identity, $ip] as $hash) query('INSERT INTO login_attempts (identity_hash,attempted_at) VALUES (?,?)', [$hash, time()]);
+        fail('Email or password is incorrect.');
+    }
+    session_regenerate_id(true);
+    $_SESSION['uid'] = (int)$u['id'];
+    $_SESSION['staff_stamp'] = staffStamp($u);
+    $_SESSION['csrf'] = bin2hex(random_bytes(32));
+    $_SESSION['last_seen'] = time();
+    query('DELETE FROM login_attempts WHERE identity_hash = ?', [$identity]);
+    audit('login', 'users', (int)$u['id']);
+    $_SESSION['flash'] = 'Welcome back. Your workspace is ready.';
 }
 function siteCourseOptions(): array {
     return rows('SELECT c.id,c.name,i.name iname FROM courses c JOIN institutes i ON i.id=c.institute_id WHERE c.active=1 ORDER BY i.name,c.name');

@@ -25,7 +25,7 @@ Public applications now support **status email alerts, certificate uploads, owne
 
 **Do not rerun setup.php.** Back up your database and private files, replace application files from the updated ZIP while preserving `config.php` and `storage/`, then sign in as group owner and open **`upgrade.php`**. See **[Operations upgrade guide](docs/OPERATIONS.md)** or open `UPGRADE.html` from the package.
 
-Then use **Students → Enable student access** and share **`student.php`**. Students use email OTP to see only their own admission, fee balance, payments, profile and PDF documents. Each student needs a unique personal email. No access is granted automatically. Changing the student's email or disabling access revokes their sessions; staff must re-enable a corrected address.
+Then use **Students → Enable student access** and share the master sign-in page **`index.php?page=login`**. Students use email OTP to see only their own admission, fee balance, payments, profile and PDF documents. Each student needs a unique personal email. No access is granted automatically. Changing the student's email or disabling access revokes their sessions; staff must re-enable a corrected address.
 
 ## Easiest installation: open the setup page
 
@@ -136,9 +136,9 @@ Optional: add `--demo` on the first install for fictional sample institutes/stud
 
 ### 5. Open and sign in
 
-Visit **`http://localhost/institute-crm/`**.
+Visit **`http://localhost/institute-crm/index.php?page=login`** (the master sign-in; the homepage **Sign In** button leads here, and every portal redirects here when signed out).
 
-Enter the registered staff email, click **Send sign-in code**, then enter the six-digit code in the same browser. Check spam if necessary. Codes expire after **5 minutes**, allow **5 verification attempts**, and can be used only once. Wait **60 seconds** before resending. A new code invalidates older ones for that address. Login does not create a new account.
+Enter the registered staff email, click **Send sign-in code**, then enter the six-digit code in the same browser. On password-mode institutes the same page asks for the staff password instead and opens the office dashboard. Check spam if necessary. Codes expire after **5 minutes**, allow **5 verification attempts**, and can be used only once. Wait **60 seconds** before resending. A new code invalidates older ones for that address. Login does not create a new account.
 
 The email-address request response is intentionally generic for active, unknown and disabled addresses. If email sending fails, login does not bypass verification. Administrators should verify SMTP with the CLI test command.
 
@@ -315,7 +315,7 @@ app/finance.php             Payment entry and communication actions
 app/documents.php           Immutable document snapshots and PDF rendering
 app/notifications.php       Claim/retry/deliver notification batches
 app/migrations.php          Additive email/payment schema changes
-app/views.php               CRM screens and OTP login
+app/views.php               CRM screens (sign-in lives on the website)
 app/communication-views.php Payments, document and notification screens
 office.php            HTTP entry point, session and security policy
 setup.php            Guided setup page

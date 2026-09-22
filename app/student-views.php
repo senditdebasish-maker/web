@@ -4,31 +4,19 @@ require_once __DIR__.'/site-chrome.php';
 function spMoney(int $n): string { return '₹'.number_format($n/100,2); }
 function spNumber(int $n): string { return 'ST-'.str_pad((string)$n,5,'0',STR_PAD_LEFT); }
 function spForm(string $action): string { return '<form method="post">'.csrf().'<input type="hidden" name="action" value="'.e($action).'">'; }
-function spPrefillEmail(): string { $v=is_string($_GET['email'] ?? null)?trim(substr($_GET['email'],0,200)):''; return filter_var($v,FILTER_VALIDATE_EMAIL)?$v:''; }
 [$spBrand,$spKind,$spCity,$spAddr,$spPhone]=siteBrand();
 $spButtons=siteToggle();
 if($student||$portalUser) $spButtons.=spForm('logout').'<button class="u-btn ghost" type="submit">Sign out ↗</button></form>';
-else $spButtons.='<a class="u-btn ghost" href="student.php?page=register">Create account ↗</a><a class="u-btn ghost" href="apply.php">Apply for admission ↗</a><a class="u-btn ghost" href="office.php">Staff login ↗</a>';
+else $spButtons.='<a class="u-btn ghost" href="index.php?page=login">Sign in ↗</a><a class="u-btn ghost" href="index.php?page=login&show=create">Create account ↗</a><a class="u-btn ghost" href="apply.php">Apply for admission ↗</a>';
 ?>
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Student portal · Northstar</title><link rel="stylesheet" href="assets/university.css"><link rel="stylesheet" href="assets/theme.css"><script src="assets/theme.js" defer></script><script src="assets/razorpay-checkout.js" defer></script></head><body>
 <?=siteHeader($spBrand,$spKind,'',$spButtons)?>
-<?php if((!$student && !$portalUser) || $page==='unavailable'): ?>
-<main class="u-auth-wrap"><div class="u-card"><div class="u-eyebrow">WELCOME TO NORTHSTAR</div><h1><?= $page==='unavailable'?'Portal not ready yet':'Your student space awaits' ?></h1>
+<?php if($page==='unavailable'): ?>
+<main class="u-auth-wrap"><div class="u-card"><div class="u-eyebrow">WELCOME TO NORTHSTAR</div><h1>Portal not ready yet</h1>
 <?php if($error): ?><div class="u-alert error" role="alert"><?=e($error)?></div><?php endif; ?>
-<?php if($page==='unavailable'): ?><p>Your institute needs to finish the portal upgrade, or resolve a server issue. Contact the office; your existing records are not changed.</p>
-<?php elseif($page==='register'): ?><p>Create your free student account. Verify your email, then apply for admission — after the office approves you, this same account opens your full portal.</p>
-<?php if($flash): ?><div class="u-alert" role="status"><?=e($flash)?></div><?php endif; ?>
-<?php if(!studentUsersReady()): ?><p>Registration is not ready yet. The institute must run the upgrade first. Admitted students can still sign in below.</p><p><a href="student.php">Back to sign-in →</a></p>
-<?php else: ?>
-<?php if(isset($_SESSION['suid_pending'])): ?><p class="u-small">Code sent to <?=e($_SESSION['suid_pending']['email'])?>. Use this browser within five minutes. Already registered with this email? The same code signs you in.</p><?=spForm('register_verify')?><div class="u-form"><label>Six-digit verification code<input name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required class="u-code"></label><button class="u-btn solid">Verify &amp; continue →</button></div></form><hr class="u-rule"><?php endif; ?>
-<?=spForm('register_request')?><div class="u-form"><label>Full name<input name="name" maxlength="120" value="<?=e($_SESSION['suid_pending']['name'] ?? '')?>" autocomplete="name" required></label><label>Email address<input type="email" name="email" maxlength="200" value="<?=e($_SESSION['suid_pending']['email'] ?? '')?>" autocomplete="email" required></label><label>Contact phone<input name="phone" maxlength="30" value="<?=e($_SESSION['suid_pending']['phone'] ?? '')?>" autocomplete="tel" required></label><div class="u-trap" aria-hidden="true"><label>Leave this blank<input name="website" tabindex="-1" autocomplete="off"></label></div><button class="u-btn solid">Send verification code →</button></div></form><p class="u-small">Use your own email address. Wait 60 seconds before resending. <a href="student.php">Already admitted? Sign in →</a></p>
-<?php endif; ?>
-<?php else: ?><p>Sign in with a code sent to your registered student email.</p>
-<?php if($flash): ?><div class="u-alert" role="status"><?=e($flash)?></div><?php endif; ?>
-<?php if(($config['environment'] ?? '')==='local' && ($config['mail']['transport'] ?? '')==='log'): ?><div class="u-alert">Local demo: email is captured privately in storage/mail/. No real email is sent.</div><?php endif; ?>
-<?php if(isset($_SESSION['otp'])): ?><p class="u-small">Code requested for <?=e($_SESSION['otp']['email'])?>. Use this browser within five minutes.</p><?=spForm('verify_otp')?><div class="u-form"><label>Six-digit sign-in code<input name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required class="u-code"></label><button class="u-btn solid">Verify &amp; sign in →</button></div></form><hr class="u-rule"><?php endif; ?>
-<?=spForm('request_otp')?><div class="u-form"><label>Registered student email<input type="email" name="email" value="<?=e($_SESSION['otp']['email'] ?? spPrefillEmail())?>" autocomplete="email" maxlength="200" required></label><button class="u-btn solid"><?=isset($_SESSION['otp'])?'Send a new code':'Send sign-in code'?> →</button></div></form><p class="u-small">Ask your institute to enable your portal first. Only admitted students with enabled access can sign in. Wait 60 seconds before resending.</p><hr class="u-rule"><h3>New student?</h3><p>Create your free account with email verification, then apply for admission. After approval, the same account opens your full portal.</p><p><a class="u-btn solid" href="student.php?page=register">Create student account →</a></p>
-<?php endif; ?></div></main>
+<p>Your institute needs to finish the portal upgrade, or resolve a server issue. Contact the office; your existing records are not changed.</p>
+<p><a class="u-btn solid" href="index.php?page=login">Back to sign in →</a></p>
+</div></main>
 <?php elseif($portalUser && !$student):
 $appRef=null;$appStatus=null;
 try{ $acc=one('SELECT id FROM applicant_accounts WHERE email=?',[$portalUser['email']]); if($acc){ $r=one('SELECT reference,status FROM admission_applications WHERE applicant_id=? ORDER BY id DESC LIMIT 1',[$acc['id']]); if($r){ $appRef=$r['reference']; $appStatus=$r['status']; } } }catch(Throwable $ignored){}

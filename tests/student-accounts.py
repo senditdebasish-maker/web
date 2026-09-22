@@ -15,6 +15,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from master import Master, MASTER_MARK
 ROOT=Path(__file__).resolve().parents[1];PHP=shlex.split(os.environ.get('PHP_BIN','php'));checks=0
 
 def check(ok,msg):
@@ -33,7 +34,7 @@ class Browser:
     def token(self,page='dashboard'):
         self.get(self.endpoint+'?page='+page);return re.search(r'name="csrf" value="([^"]+)"',self.html).group(1)
     def post(self,action,page='dashboard',**fields):return self.get(self.endpoint+'?page='+page,dict(action=action,csrf=self.token(page),**fields))
-    def login(self,address,password='Test-Owner-Password!'):return self.post('login',email=address,password=password)
+    def login(self,address,password='Test-Owner-Password!'):master=Master(self);return master.password_login(master.otp_start(address),address,password)
 
 with tempfile.TemporaryDirectory(prefix='northstar-student-accounts-') as temp:
     temp=Path(temp);database=temp/'db.sqlite';cfg=temp/'config.php';mail=temp/'mail'
@@ -55,18 +56,20 @@ with tempfile.TemporaryDirectory(prefix='northstar-student-accounts-') as temp:
         for _ in range(100):
             try:urllib.request.urlopen(base+'/office.php',timeout=.5);break
             except OSError:time.sleep(.1)
-        owner=Browser(base);s=Browser(base,'student.php')
+        owner=Browser(base);s=Browser(base,'student.php');master_s=Master(s)
         check('Registration is not ready yet' in s.get('student.php?page=register'),'pre-upgrade registration fails safely')
         owner.login('owner@example.test')
         owner.get('upgrade.php');token=re.search(r'name="csrf" value="([^"]+)"',owner.html).group(1)
         check('Upgrade complete' in owner.get('upgrade.php',dict(csrf=token,backup='yes')),'owner upgrade adds student account tables')
         check('Send verification code' in s.get('student.php?page=register'),'registration form appears after upgrade')
-        check('Create student account' in s.get('student.php'),'portal sign-in links student registration')
-        check('valid contact phone' in s.post('register_request',page='register',name='New Student',email='newstudent@example.test',phone='bad',website=''),'invalid phone rejected')
-        check('Unable to process' in s.post('register_request',page='register',name='New Student',email='newstudent@example.test',phone='9000000001',website='bot'),'honeypot rejects automated signup')
-        check('verification code has been sent' in s.post('register_request',page='register',name='New Student',email='newstudent@example.test',phone='9000000001',website=''),'registration code request accepted')
+        check('Create Student Account' in s.get('student.php'),'master sign-in links student registration')
+        newbie=dict(name='New Student',email='newstudent@example.test',phone='9000000001',address='Test Address',website='')
+        check('valid contact phone' in master_s.create_start(**dict(newbie,phone='bad')),'invalid phone rejected')
+        check('Unable to process' in master_s.create_start(**dict(newbie,website='bot')),'honeypot rejects automated signup')
+        step_new=master_s.create_start(**newbie)
+        check('verification code has been sent' in step_new,'registration code request accepted')
         check(scalar('SELECT COUNT(*) FROM student_users')==0,'requesting a code does not create the account')
-        check('Please wait 60 seconds' in s.post('register_request',page='register',name='New Student',email='newstudent@example.test',phone='9000000001',website=''),'registration resend cooldown enforced')
+        check('Please wait 60 seconds' in master_s.create_start(**newbie),'registration resend cooldown enforced')
         def code_for(address):
             for f in sorted(mail.glob('*.eml'),key=lambda p:p.stat().st_mtime_ns,reverse=True):
                 msg=email.message_from_bytes(f.read_bytes(),policy=policy.default)
@@ -76,29 +79,31 @@ with tempfile.TemporaryDirectory(prefix='northstar-student-accounts-') as temp:
         code=code_for('newstudent@example.test')
         check(code not in s.html,'verification code not exposed in browser response')
         check(scalar('SELECT code_hash FROM student_user_codes ORDER BY expires_at DESC LIMIT 1')!=code,'verification code not stored as plaintext')
-        check('Invalid, expired' in s.post('register_verify',page='register',code='000000'),'incorrect verification code rejected')
-        check('STUDENT ACCOUNT' in s.post('register_verify',page='register',code=code) and 'Apply for admission' in s.html,'verified email creates the student account')
+        check('Invalid, expired' in master_s.create_verify(step_new,'000000'),'incorrect verification code rejected')
+        check('STUDENT ACCOUNT' in master_s.create_verify(step_new,code) and 'Apply for admission' in s.html,'verified email creates the student account')
         check(scalar('SELECT COUNT(*) FROM student_users')==1,'one student account created after verification')
-        check('Request a verification code first' in s.post('register_verify',page='register',code=code),'used verification code cannot be replayed')
-        t=Browser(base,'student.php');clear_limits()
-        check('verification code has been sent' in t.post('register_request',page='register',name='Other Name',email='newstudent@example.test',phone='9000000002',website=''),'existing email can request a sign-in code')
-        check('STUDENT ACCOUNT' in t.post('register_verify',page='register',code=code_for('newstudent@example.test')),'existing email signs in with a fresh code')
+        check('Your session expired' in master_s.create_verify(master_s.page(),code),'used verification code cannot be replayed')
+        t=Browser(base,'student.php');master_t=Master(t);clear_limits()
+        step_t=master_t.create_start(name='Other Name',email='newstudent@example.test',phone='9000000002',address='Other Address',website='')
+        check('verification code has been sent' in step_t,'existing email can request a sign-in code')
+        check('STUDENT ACCOUNT' in master_t.create_verify(step_t,code_for('newstudent@example.test')),'existing email signs in with a fresh code')
         check(scalar('SELECT COUNT(*) FROM student_users')==1,'sign-in creates no duplicate account')
         check('Student accounts' in owner.get('office.php?page=student-accounts') and 'newstudent@example.test' in owner.html,'staff can list self-registered accounts')
         check('Not admitted' in owner.html and 'student_user_toggle' in owner.html,'unlinked account shows status and access control')
         uid=scalar('SELECT id FROM student_users')
         check('Changes saved' in owner.post('student_user_toggle',page='student-accounts',user_id=uid),'staff can disable a student account')
-        check('STUDENT ACCOUNT' not in s.get('student.php') and 'Your student space awaits' in s.html,'disabled account loses access immediately')
+        check('STUDENT ACCOUNT' not in s.get('student.php') and MASTER_MARK in s.html,'disabled account loses access immediately')
         check('Changes saved' in owner.post('student_user_toggle',page='student-accounts',user_id=uid),'staff can restore a student account')
         clear_limits()
-        check('verification code has been sent' in s.post('register_request',page='register',name='New Student',email='newstudent@example.test',phone='9000000001',website=''),'restored account can sign in again')
-        check('STUDENT ACCOUNT' in s.post('register_verify',page='register',code=code_for('newstudent@example.test')),'restored account verified')
+        step_back=master_s.create_start(**newbie)
+        check('verification code has been sent' in step_back,'restored account can sign in again')
+        check('STUDENT ACCOUNT' in master_s.create_verify(step_back,code_for('newstudent@example.test')),'restored account verified')
         check('Student email saved' in owner.post('student_email',page='students',student_id=sid,email='newstudent@example.test'),'office records the admitted student email')
         check('access enabled' in owner.post('portal_access',page='students',student_id=sid,access='enable'),'office enables portal access for the verified email')
         check('Enrolled' in s.get('student.php') and 'STUDENT ACCOUNT' not in s.html,'verified account links automatically to the full student portal')
         check('Linked' in owner.get('office.php?page=student-accounts'),'staff list shows the portal link')
         s.get('student.php',dict(action='logout',csrf=re.search(r'name="csrf" value="([^"]+)"',s.get('student.php')).group(1)))
-        check('Your student space awaits' in s.get('student.php'),'student logout returns to sign-in')
+        check(MASTER_MARK in s.get('student.php'),'student logout returns to sign-in')
     finally:
         server.terminate()
         try:server.wait(timeout=10)
