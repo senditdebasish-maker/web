@@ -47,30 +47,39 @@ include it.
 
 ## Homepage design and starter showcase content
 
-The homepage follows a classic university layout: navy crest header, scrolling
+The homepage follows a college layout: a navy utility bar (approvals line,
+Student/Faculty/Admin login links, dark-mode toggle, working **EN | हिन्दी**
+toggle), a crest + college-name header with Enquiry, Download, Download
+Brochure and Apply Now buttons, a dropdown nav with program search, a scrolling
 announcement ticker (built live from CRM admission dates and closing dates), a
-campus hero banner (`assets/campus-hero.jpg` — replace this file with a
-photo of your own campus to rebrand instantly), accreditation badges, a stats
-band, a Vice-Chancellor feature, featured programs, notices, and a sidebar with
-mini badges, the Vice-Chancellor's card, a program showcase grid, recruiters and
-a contact card. The header carries a working **EN | हिन्दी** toggle: the site
-chrome (navigation, buttons, ticker, headings, footer) is genuinely bilingual via
-a sessionless `?lang=` + cookie switch, while CRM records stay in their
-entered language.
+campus hero slider (`assets/college-hero.jpg` — replace this file with a
+photo of your own campus to rebrand instantly), feature highlights,
+accreditation badges, a welcome + quote + Latest Updates trio, program cards
+with photos (`assets/program-dpharm.jpg`, `program-bpharm.jpg`,
+`program-mpharm.jpg`, `program-phd.jpg`, matched from the live course name),
+a live stats band, campus-life tiles, a Vice-Chancellor feature, a program
+showcase grid, recruiters, a trust strip and a full college footer. The chrome
+is genuinely bilingual via a sessionless `?lang=` + cookie switch, while CRM
+records stay in their entered language.
 
 Almost everything is live CRM data. The only starter template pieces are the
-hero headline, the accreditation badges, the showcase program names, the
-recruiter tiles and the welcome message — edit `siteAccreditations()`,
-`siteShowcasePrograms()`, `siteRecruiters()` and `siteVcMessage()` in
-`app/site-chrome.php` to put your institute's real approvals, programs,
-recruiters and message. A future Website Settings page in the office workspace
-will make these editable without touching code.
+hero headline, the highlights, badges, showcase names, recruiter tiles, quote
+and welcome text — edit `collegeHighlights()`, `collegeTrustBadges()` in
+`app/college-chrome.php` and `siteAccreditations()`, `siteShowcasePrograms()`,
+`siteRecruiters()`, `siteVcMessage()` in `app/site-chrome.php` to put your
+institute's real approvals, programs, recruiters and message. A future Website
+Settings page in the office workspace will make these editable without
+touching code. The **?page=brochure** page and its PDF download are generated
+from live brand and program records; the nav search filters **?page=courses**
+by typed text without changing the default listing.
 
 ## One theme, no dead ends
 
-The root site and every portal page share one theme (`app/site-chrome.php` +
-`assets/university.css`): the same header, navigation, footer, buttons and
-dark-mode toggle. On every page the brand links back to the university front page,
+The root site wears a college theme (`app/college-chrome.php` +
+`assets/college.css` on top of `assets/university.css`); every portal page keeps
+the shared theme (`app/site-chrome.php` + `assets/university.css`). Buttons,
+form controls and the dark-mode toggle stay consistent everywhere. On every
+page the brand links back to the university front page,
 and every portal (admissions, student, office homepage and office workspace) shows
 an explicit **← Back to website** link, so the Admissions button never strands the
 visitor: click the brand or the back button to return. The one-time installer and
