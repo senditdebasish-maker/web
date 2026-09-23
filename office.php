@@ -15,7 +15,7 @@ session_start();
 if (isset($_SESSION['last_seen']) && time()-$_SESSION['last_seen']>1800) { $_SESSION=[]; session_regenerate_id(true); }
 $_SESSION['last_seen']=time();
 $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
-if (!currentUser()) { header('Location: index.php?page=login'); exit; }
+if (!currentUser() && !defined('CRM_DOCUMENT_REQUEST') && !isset($_GET['certificate'])) { header('Location: index.php?page=login'); exit; }
 require __DIR__ . '/app/actions.php';
 $page=is_string($_GET['page'] ?? null) ? $_GET['page'] : 'dashboard';
 $error=null;

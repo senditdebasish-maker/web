@@ -6,13 +6,8 @@ function apForm(string $action): string{return '<form method="post">'.csrf().'<i
 function apUploadForm(string $action): string{return '<form method="post" enctype="multipart/form-data">'.csrf().'<input type="hidden" name="action" value="'.e($action).'">';}
 [$apBrand,$apKind,$apCity,$apAddr,$apPhone]=siteBrand();
 $apButtons=siteToggle();
-<<<<<<< HEAD
-if($actor) $apButtons.=apForm('logout').'<button class="u-btn ghost" type="submit">Sign out</button></form>';
-else $apButtons.='<a class="u-btn ghost" href="index.php?page=login&show=applicant">Track application ↗</a>';
-=======
 if($actor) {$apButtons.=siteProfileBox(['name'=>$actor['email'],'role'=>'Applicant','url'=>'apply.php?page=dashboard']).apForm('logout').'<button class="u-btn ghost" type="submit">Sign out</button></form>';}
-else {$siteProfile=siteProfile();siteSession('northstar_applicant');$apButtons.=$siteProfile?siteProfileBox($siteProfile):'<a class="u-btn ghost" href="apply.php?page=login">Applicant sign-in ↗</a>';}
->>>>>>> main
+else $apButtons.='<a class="u-btn ghost" href="index.php?page=login&show=applicant">Track application ↗</a>';
 $apButtons.='<a class="u-btn ghost" href="student.php">Enrolled student portal ↗</a>';
 ?>
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admissions & applications · Northstar</title><link rel="stylesheet" href="assets/university.css"><link rel="stylesheet" href="assets/theme.css"><script src="assets/theme.js" defer></script></head><body>

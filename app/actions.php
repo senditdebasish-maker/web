@@ -46,6 +46,7 @@ function handleAction(): string {
             'approve_application' => approveApplicationAction(),
             'reject_application' => rejectApplicationAction(),
             'request_application_revision' => requestApplicationRevisionAction(),
+            'cancel_application' => cancelApplicationAction(),
             'applicant_toggle' => toggleApplicant(),
             'exam_create' => createExam(),
             'exam_grade' => gradeExam(),

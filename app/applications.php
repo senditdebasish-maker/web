@@ -165,6 +165,11 @@ function requestApplicationRevisionAction(): string {
     if((int)input('version')!==(int)$r['version'])fail('Application changed in another window. Reload.');if(in_array($r['status'],['Approved','Admitted','Rejected','Withdrawn'],true))fail('This application is already closed.');
     $message=input('message',1500);query("UPDATE admission_applications SET status='Revision',revision_notes=?,version=version+1,updated_at=? WHERE id=?",[$message,date('Y-m-d H:i:s'),$r['id']]);applicationEvent((int)$r['id'],'Office',(int)$u['id'],'Revision requested: '.$message,['before_status'=>$r['status'],'after_status'=>'Revision','revision_notes'=>$message]);audit('application_revision_requested','admission_applications',(int)$r['id']);return 'applications';
 }
+function cancelApplicationAction(): string {
+    $u=applicationStaff();$r=one('SELECT * FROM admission_applications WHERE id=?'.lockSuffix(),[(int)input('application_id')]);if(!$r)fail('Application not found.');instituteAccess((int)$r['institute_id']);
+    if((int)input('version')!==(int)$r['version'])fail('Application changed in another window. Reload.');if(in_array($r['status'],['Approved','Admitted','Rejected','Withdrawn'],true))fail('This application is already closed.');
+    $message=input('message',1500);query("UPDATE admission_applications SET status='Withdrawn',version=version+1,updated_at=? WHERE id=?",[date('Y-m-d H:i:s'),$r['id']]);applicationEvent((int)$r['id'],'Office',(int)$u['id'],'Application cancelled by the office: '.$message,['before_status'=>$r['status'],'after_status'=>'Withdrawn']);audit('application_cancelled','admission_applications',(int)$r['id']);return 'applications';
+}
 function toggleApplicant(): string {
     requireRole(['owner']);$r=staffApplication((int)input('application_id'));$a=one('SELECT * FROM applicant_accounts WHERE id=?'.lockSuffix(),[$r['applicant_id']]);
     query('UPDATE applicant_accounts SET active=?,version=version+1 WHERE id=?',[$a['active']?0:1,$a['id']]);query('UPDATE applicant_codes SET consumed=1 WHERE email_hash=?',[hash('sha256','applicant:'.$a['email'])]);audit('applicant_access_changed','applicant_accounts',(int)$a['id']);return 'applications';

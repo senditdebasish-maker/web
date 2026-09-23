@@ -22,11 +22,7 @@ function siteSession(string $name): void {
 }
 // Resume whichever portal session holds a pending OTP handshake (login or creation).
 function siteResumePending(): string {
-<<<<<<< HEAD
-    foreach (['northstar_student', 'northstar_session', 'northstar_applicant'] as $name) {
-=======
-    foreach (['northstar_auth', 'northstar_site', 'northstar_student', 'northstar_session'] as $name) {
->>>>>>> main
+    foreach (['northstar_auth', 'northstar_site', 'northstar_student', 'northstar_session', 'northstar_applicant'] as $name) {
         siteSession($name);
         if (isset($_SESSION['otp']) || isset($_SESSION['suid_pending']) || isset($_SESSION['site_recovery']) || isset($_SESSION['applicant_pending'])) return $name;
     }
@@ -90,11 +86,7 @@ function siteCsrfCheck(): void {
 // Start actions may be posted from a page rendered under any of our sessions
 // (site or portal handshake). Accept the token whichever session issued it.
 function siteCsrfCheckAny(): void {
-<<<<<<< HEAD
-    foreach (['northstar_site', 'northstar_student', 'northstar_session', 'northstar_applicant'] as $name) {
-=======
-    foreach (['northstar_site', 'northstar_auth', 'northstar_student', 'northstar_session'] as $name) {
->>>>>>> main
+    foreach (['northstar_site', 'northstar_auth', 'northstar_student', 'northstar_session', 'northstar_applicant'] as $name) {
         siteSession($name);
         if (hash_equals($_SESSION['site_csrf'] ?? '', (string)($_POST['csrf'] ?? ''))) return;
     }
@@ -112,6 +104,7 @@ function siteDetectAccount(string $email): ?string {
     if (one('SELECT a.id FROM portal_accounts a JOIN students s ON s.id=a.student_id WHERE LOWER(a.email)=? AND a.active=1 AND LOWER(s.email)=LOWER(a.email)', [$email])) return 'student';
     if (one('SELECT id FROM student_users WHERE LOWER(email)=? AND active=1', [$email])) return 'student';
     if (function_exists('applicationsReady') && applicationsReady() && one('SELECT id FROM applicant_accounts WHERE LOWER(email)=? AND active=1', [$email])) return 'student';
+    if (one('SELECT id FROM students WHERE LOWER(email)=?', [$email])) return 'student';
     return null;
 }
 // "Forgot password" for students: Gmail OTP proof, then sign in (student accounts

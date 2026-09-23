@@ -165,7 +165,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-automation-') as temp:
         cert2=scalar('SELECT id FROM certificates WHERE application_id=?',(app2,))
         owner.post('certificate_scan',page='applications',certificate_id=cert2,version='2',scan_state='Clean',scan_note='Scanned.',offline_scan='yes')
         owner.post('certificate_review',page='applications',certificate_id=cert2,version='3',review_state='Verified',review_note='Verified but low marks.',qualification_code='12TH-SCI',percentage='40',birth_date='2005-06-01',authenticity='yes')
-        check(scalar('SELECT status FROM admission_applications WHERE id=?',(app2,))=='Submitted','low marks stay manual')
+        check(scalar('SELECT status FROM admission_applications WHERE id=?',(app2,))=='Pending Review','low marks stay manual')
         check(scalar("SELECT result FROM eligibility_runs WHERE application_id=? ORDER BY id DESC LIMIT 1",(app2,))=='Manual review','non-matching run records Manual review')
         # Online payments: student order, hold, reconcile, webhook, capture logic.
         student_browser=Browser(base,'student.php')

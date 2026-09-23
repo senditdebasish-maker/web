@@ -40,7 +40,7 @@ function requestOtp(string $audience='staff'): string {
             error_log('Northstar: OTP delivery failed. Check SMTP configuration and server connectivity.');
         }
     }
-    $_SESSION['flash']='If this email is registered, a verification code has been sent. Check your inbox and spam folder. It expires in 5 minutes.';
+    $_SESSION['flash']='If this email belongs to an active '.($student?'student portal':'staff').' account, a code has been sent. Check your inbox and spam folder. It expires in 5 minutes.';
     return 'login';
 }
 function verifyOtp(string $audience='staff'): string {

@@ -1,5 +1,6 @@
 # Northstar Institute CRM: the project folder IS the web root (copy institute-crm/ into htdocs as-is).
 DirectoryIndex index.php
+Options -Indexes
 <IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteRule ^(?:app|bin|storage|tests|vendor|docs|releases|\.git)(?:/|$) - [F,L,NC]

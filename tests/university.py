@@ -210,14 +210,14 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
         signup.get('index.php?page=login')
         signup.get('index.php?page=login', {'action': 'create_start', 'csrf': form_token(signup.html),
                                             'name': 'Mira Sen', 'address': '3 Park Street',
-                                            'phone': '+919000055555', 'email': 'mira@example.test',
+                                            'phone': '9000055555', 'email': 'mira@example.test',
                                             'website': ''})
         check('Your verification code' in signup.html, 'student signup sends a Gmail code')
         signup.get('index.php?page=login', {'action': 'create_verify', 'csrf': form_token(signup.html),
                                             'code': newest_code()})
         check('student.php' in signup.url, 'verified signup lands in the student portal')
         row = con.execute("SELECT name,phone,address FROM student_users WHERE email='mira@example.test'").fetchone()
-        check(row == ('Mira Sen', '+919000055555', '3 Park Street'),
+        check(row == ('Mira Sen', '9000055555', '3 Park Street'),
               'signup stores the name, mobile and home address')
         check('Sign out' in signup.get('student.php'),
               'the new account session opens the dashboard')

@@ -25,11 +25,7 @@ Public applications now support **status email alerts, certificate uploads, owne
 
 **Do not rerun setup.php.** Back up your database and private files, replace application files from the updated ZIP while preserving `config.php` and `storage/`, then sign in as group owner and open **`upgrade.php`**. See **[Operations upgrade guide](docs/OPERATIONS.md)** or open `UPGRADE.html` from the package.
 
-<<<<<<< HEAD
-Then use **Students → Enable student access** and share the master sign-in page **`index.php?page=login`**. Students use email OTP to see only their own admission, fee balance, payments, profile and PDF documents. Each student needs a unique personal email. No access is granted automatically. Changing the student's email or disabling access revokes their sessions; staff must re-enable a corrected address.
-=======
-Students sign in through the main homepage login. The secure admissions portal is **`student.php?page=admissions`**. Their dashboard includes open courses, applications, profile updates and enquiry help. After approval, the same dashboard expands to the student's admission, fee balance, payments, academic services and PDF documents. Existing admitted records still use **Students → Enable student access**; each student needs a unique personal email, and changing the student's email or disabling access revokes enrolled-student sessions.
->>>>>>> main
+Then use **Students → Enable student access** and share the master sign-in page **`index.php?page=login`**. Students use email OTP to see only their own admission, fee balance, payments, profile and PDF documents. Each student needs a unique personal email. No access is granted automatically. Changing the student's email or disabling access revokes their sessions; staff must re-enable a corrected address. Verified student accounts can also apply through the secure admissions portal at **`student.php?page=admissions`**.
 
 ## Easiest installation: open the setup page
 

@@ -10,49 +10,43 @@ $error=null; $student=null; $portalUser=null; $applicant=null; $ready=portalRead
 try {
     if(!$ready){http_response_code(503);$page='unavailable';}
     else {
-<<<<<<< HEAD
-        if ($_SERVER['REQUEST_METHOD']==='POST') {
+        $student=portalStudent(); $portalUser=currentStudentUser(); $applicant=currentApplicant();
+        if(isset($_SESSION['suid'])&&!$portalUser){unset($_SESSION['applicant_id'],$_SESSION['applicant_version'],$_SESSION['applicant_email'],$_SESSION['applicant_site']);$applicant=null;}
+        if($portalUser&&!$student){linkStudentUser($portalUser);$student=portalStudent();}
+        if($portalUser)syncStudentApplicant($portalUser);
+        if (isset($_GET['document'])) {
+            if (!$student) { http_response_code(401); exit('Please sign in to your student portal.'); }
+            $document=one('SELECT * FROM documents WHERE id=? AND student_id=? AND institute_id=?',[(int)$_GET['document'],$student['id'],$student['institute_id']]);
+            if (!$document) { http_response_code(404); exit('Document not found.'); }
+            $pdf=renderDocument($document); portalEvent((int)$student['id'],'document_download',(int)$document['id']);
+            ob_clean();header('Content-Type: application/pdf');header('Content-Disposition: attachment; filename="'.documentFilename($document).'"');header('Content-Length: '.strlen($pdf));echo $pdf;exit;
+        }
+        if(!$student&&!$portalUser&&!$applicant){header('Location: index.php?page=login');exit;}
+        if($_SERVER['REQUEST_METHOD']==='POST'){
             requireCookies();
-            if (in_array(input('action',40),['request_otp','verify_otp','register_request','register_verify'],true)) { header('Location: index.php?page=login'); exit; }
-            if (!hash_equals($_SESSION['csrf'],input('csrf',128))) fail('Your form expired. Refresh and try again.');
+            if(in_array(input('action',40),['request_otp','verify_otp','register_request','register_verify'],true)){header('Location: index.php?page=login');exit;}
+            if(!hash_equals($_SESSION['csrf'],input('csrf',128)))fail('Your form expired. Refresh and try again.');
             $action=input('action',40);
-            if (in_array($action,['support_create','support_reply'],true)) $next=studentSupportAction($action);
-            elseif ($action==='online_order') {
+            if(in_array($action,['support_create','support_reply'],true))$next=studentSupportAction($action);
+            elseif($action==='profile_update')$next=updateStudentProfile();
+            elseif(in_array($action,['submit_application','save_application_draft','revise_application','withdraw_application'],true)){$next='applications';applicantMutation($action);}
+            elseif($action==='upload_certificate'){$applicationId=uploadCertificate();header('Location: student.php?page=application&id='.$applicationId);exit;}
+            elseif($action==='online_order'){
                 $s=portalStudent();if(!$s)fail('Please sign in to pay online.');
                 $oid=beginOnlineOrder($s,input('amount',12));
                 $o=one('SELECT * FROM online_orders WHERE id=?',[$oid]);
                 $_SESSION['flash']=$o['state']==='Uncertain'?'Order saved but gateway confirmation failed. Do not pay again; ask the office to reconcile receipt '.$o['receipt'].'.':'Online order prepared. Complete payment, then use Check payment status. Do not create another order while one is pending.';
                 header('Location: student.php?page=payments&order='.$oid);exit;
             }
-            elseif ($action==='online_sync') {
+            elseif($action==='online_sync'){
                 $s=portalStudent();if(!$s)fail('Please sign in to verify payment.');
                 $oid=(int)input('order_id');$o=one('SELECT * FROM online_orders WHERE id=? AND student_id=?',[$oid,$s['id']]);if(!$o)fail('Order not accessible.');
                 $result=synchronizeOnlineOrder($oid,null,false);
                 $_SESSION['flash']='Payment verification result: '.$result.'. Only Credited/Test results are final; Pending means no captured payment was found yet.';
                 header('Location: student.php?page=payments&order='.$oid);exit;
             }
-            elseif ($action==='logout') {
-                $s=portalStudent(); if($s) portalEvent((int)$s['id'],'logout');
-                $_SESSION=[];session_regenerate_id(true);header('Location: index.php?page=login');exit;
-            } else fail('Students cannot perform this action.');
-=======
-        $student=portalStudent(); $portalUser=currentStudentUser(); $applicant=currentApplicant();
-        if($portalUser&&!$student){linkStudentUser($portalUser);$student=portalStudent();}
-        if($portalUser)syncStudentApplicant($portalUser);
-        if(!$student&&!$portalUser&&!$applicant){header('Location: index.php?page=login');exit;}
-        if($_SERVER['REQUEST_METHOD']==='POST'){
-            requireCookies(); if(!hash_equals($_SESSION['csrf'],input('csrf',128)))fail('Your form expired. Refresh the page and try again.');
-            $action=input('action',40);
-            if($action==='request_otp')$next=requestOtp('student');
-            elseif($action==='verify_otp')$next=verifyOtp('student');
-            elseif(in_array($action,['register_request','register_verify'],true)){header('Location: index.php?page=create-account');exit;}
-            elseif(in_array($action,['support_create','support_reply'],true))$next=studentSupportAction($action);
-            elseif($action==='profile_update')$next=updateStudentProfile();
-            elseif(in_array($action,['submit_application','save_application_draft','revise_application','withdraw_application'],true)){$next='applications';applicantMutation($action);}
-            elseif($action==='upload_certificate'){$applicationId=uploadCertificate();header('Location: student.php?page=application&id='.$applicationId);exit;}
-            elseif($action==='logout'){if(function_exists('clearSiteIdentity'))clearSiteIdentity();$_SESSION=[];session_regenerate_id(true);$next='login';}
+            elseif($action==='logout'){$s=portalStudent();if($s)portalEvent((int)$s['id'],'logout');if(function_exists('clearSiteIdentity'))clearSiteIdentity();$_SESSION=[];session_regenerate_id(true);header('Location: index.php?page=login');exit;}
             else fail('Students cannot perform this action.');
->>>>>>> main
             header('Location: student.php?page='.$next);exit;
         }
         if(isset($_GET['certificate']) && $applicant){
@@ -61,24 +55,13 @@ try {
             if(!$certificate)fail('Certificate not found.');
             serveCertificateFile($certificate);
         }
-<<<<<<< HEAD
-        if (!$student && !$portalUser) { header('Location: index.php?page=login'.($page==='register'?'&show=create':'')); exit; }
-        elseif ($portalUser && !$student) $page='account';
-        elseif ($page==='login'||$page==='register') { header('Location: student.php');exit; }
-        elseif (!in_array($page,['dashboard','payments','documents','profile','academics','results','announcements','support'],true)) { http_response_code(404);$page='notfound'; }
+        if(!$student&&!$portalUser&&!$applicant){header('Location: index.php?page=login'.($page==='register'?'&show=create':''));exit;}
+        elseif(!$student&&($portalUser||$applicant)&&!in_array($page,['dashboard','courses','admissions','course','apply','applications','application','profile','inquiries'],true))$page='dashboard';
+        elseif($page==='login'||$page==='register'){header('Location: student.php');exit;}
+        elseif(!in_array($page,['dashboard','courses','admissions','course','apply','applications','application','payments','documents','profile','academics','results','announcements','support','inquiries'],true)){http_response_code(404);$page='notfound';}
         if($student && $page==='support' && isset($_GET['ticket']) && servicesReady()) ticketForStudent($student,(int)$_GET['ticket']);
     }
-} catch(DomainException $e) { $error=$e->getMessage();if($page==='support' && isset($_GET['ticket'])){unset($_GET['ticket']);if($_SERVER['REQUEST_METHOD']==='GET')http_response_code(403);}$student=$ready?portalStudent():null;$portalUser=$ready?currentStudentUser():null;if(!$student && !$portalUser){ header('Location: index.php?page=login'); exit; } if(!$student)$page='account'; }
+} catch(DomainException $e) { $error=$e->getMessage();if($page==='support' && isset($_GET['ticket'])){unset($_GET['ticket']);if($_SERVER['REQUEST_METHOD']==='GET')http_response_code(403);}$student=$ready?portalStudent():null;$portalUser=$ready?currentStudentUser():null;$applicant=$ready?currentApplicant():null;if(!$student&&!$portalUser&&!$applicant){header('Location: index.php?page=login');exit;}if(!$student&&!in_array($page,['dashboard','courses','admissions','course','apply','applications','application','profile','inquiries'],true))$page='dashboard'; }
 catch(Throwable $e) { http_response_code(503);$error='Your portal is temporarily unavailable. Please contact your institute.';$page='unavailable';error_log('Northstar student portal operation failed.'); }
 $flash=$_SESSION['flash'] ?? null;unset($_SESSION['flash']);
 require __DIR__.'/app/student-views.php';
-=======
-        if(!$student&&!$portalUser&&!$applicant && $page!=='login'){$page='login';}
-        elseif(!$student&&($portalUser||$applicant) && !in_array($page,['dashboard','courses','admissions','course','apply','applications','application','profile','inquiries'],true))$page='dashboard';
-        elseif($page==='login'||$page==='register'){header('Location: student.php');exit;}
-        elseif(!in_array($page,['dashboard','courses','admissions','course','apply','applications','application','payments','documents','profile','academics','results','announcements','support'],true)){http_response_code(404);$page='notfound';}
-    }
-} catch(DomainException $e){$error=$e->getMessage();$student=$ready?portalStudent():null;$portalUser=$ready?currentStudentUser():null;$applicant=$ready?currentApplicant():null;if(!$student)$page=($portalUser||$applicant)?'dashboard':'login';}
-catch(Throwable $e){http_response_code(503);$error='Your portal is temporarily unavailable. Please contact your institute.';$page='unavailable';error_log('Student portal entry point failed.');}
-$flash=$_SESSION['flash']??null; unset($_SESSION['flash']); require __DIR__.'/app/student-views.php';
->>>>>>> main

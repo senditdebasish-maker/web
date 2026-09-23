@@ -140,7 +140,7 @@ function reviewCertificate(): string {
 }
 function evaluateAutomaticAdmission(int $id): string {
     $a=one('SELECT * FROM admission_applications WHERE id=?'.lockSuffix(),[$id]);$p=one('SELECT * FROM eligibility_policies WHERE id=?'.lockSuffix(),[$a['course_id']]);
-    if(!$p||!$p['enabled']||!in_array($a['status'],['Submitted','Under review'],true))return 'Not enabled or not ready';
+    if(!$p||!$p['enabled']||!in_array($a['status'],['Pending Review','Submitted','Under review'],true))return 'Not enabled or not ready';
     $c=one("SELECT * FROM certificates WHERE application_id=? AND review_state='Verified' AND scan_state='Clean' AND application_version=? AND policy_version=? ORDER BY id DESC LIMIT 1",[$id,$a['version'],$p['version']]);
     $owner=one("SELECT id FROM users WHERE id=? AND role='owner' AND active=1",[$p['authorized_by']]);$reason='Evidence is missing or stale';$passed=false;
     if($c && $owner){certificatePath($c);$birth=new DateTimeImmutable($c['birth_date']);$cutoff=new DateTimeImmutable($p['cutoff_on']);$age=$birth<=$cutoff?$birth->diff($cutoff)->y:-1;$passed=$c['qualification_code']===$p['qualification_code'] && (int)$c['percentage_minor']>=(int)$p['minimum_percentage'] && $age>=(int)$p['minimum_age'] && $age<=(int)$p['maximum_age'];$reason=$passed?'Verified evidence matches configured rules':'Qualification, percentage or age does not match configured rules';}

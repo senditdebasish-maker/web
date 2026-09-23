@@ -39,12 +39,6 @@ function url(array $overrides=[]): string { return '?'.http_build_query(array_me
 // Master sign-in lives on the website now; office.php redirects logged-out visitors.
 header('Location: index.php?page=login'); exit;
 ?>
-<<<<<<< HEAD
-=======
-<?=siteHeader($obBrand,$obKind,'','<a class="u-btn ghost" href="index.php?page=login">Sign in</a><a class="u-btn ghost" href="apply.php">Admissions</a>'.siteToggle().siteBackLink())?>
-<main class="u-auth-wrap"><div class="u-card"><div class="u-eyebrow">MASTER SIGN-IN</div><h1>Use the main sign-in</h1><p class="u-muted">All staff and student access starts at the public master login.</p><p><a class="u-btn solid" href="index.php?page=login">Open master sign-in →</a></p></div></main>
-<?=siteFooter($obBrand,$obKind,$obCity,$obAddr,$obPhone)?>
->>>>>>> main
 <?php else:
 try {
 $admin=in_array($user['role'],['owner','admin'],true);
