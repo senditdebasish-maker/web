@@ -52,6 +52,15 @@ function collegeDegreeLine(string $name): string {
     if (str_contains($n, 'ph.d') || str_contains($n, 'phd')) return '(Doctor of Philosophy)';
     return '';
 }
+// Degree short code for program cards, e.g. "Diploma in Pharmacy" -> "D.Pharm".
+function collegeDegreeShort(string $name): string {
+    $n = strtolower($name);
+    if (str_contains($n, 'd.pharm') || str_contains($n, 'd pharm')) return 'D.Pharm';
+    if (str_contains($n, 'b.pharm') || str_contains($n, 'b pharm')) return 'B.Pharm';
+    if (str_contains($n, 'm.pharm') || str_contains($n, 'm pharm')) return 'M.Pharm';
+    if (str_contains($n, 'ph.d') || str_contains($n, 'phd')) return 'Ph.D.';
+    return '';
+}
 // Homepage showcase stats (starter template numbers; the About page keeps live CRM counts).
 function collegeSpotStats(): array {
     return [
@@ -95,47 +104,73 @@ function collegeNav(string $active): string {
         ['Notices', $home . '?page=notices', 'notices', []],
         ['Contact', $home . '?page=contact', 'contact', []],
     ];
-    $h = '<nav class="c-nav" aria-label="College"><div class="c-wrap"><ul>';
+    $h = '<nav class="nav"><div class="container nav-inner"><ul class="nav-list" id="navList">';
     foreach ($items as [$label, $url, $slug, $kids]) {
-        $cur = ($slug !== '' && $slug === $key) ? ' aria-current="page"' : '';
-        $prefix = $label === 'Home' ? '<span class="c-nav-ico">' . collegeIcon('home') . '</span> ' : '';
-        $h .= '<li' . ($kids ? ' class="c-has-kids"' : '') . '><a href="' . e($url) . '"' . $cur . '>' . $prefix . e($label) . ($kids ? ' <span class="c-caret" aria-hidden="true">▾</span>' : '') . '</a>';
+        $act = ($slug !== '' && $slug === $key) ? ' active' : '';
+        $prefix = $label === 'Home' ? '<i class="fa-solid fa-house"></i> ' : '';
+        $h .= '<li class="nav-item' . $act . '"><a href="' . e($url) . '" class="nav-link">' . $prefix . e(tr($label)) . ($kids ? ' <i class="fa-solid fa-chevron-down"></i>' : '') . '</a>';
         if ($kids) {
-            $h .= '<ul class="c-drop">';
-            foreach ($kids as [$klabel, $kurl]) $h .= '<li><a href="' . e($kurl) . '">' . e($klabel) . '</a></li>';
-            $h .= '</ul>';
+            $h .= '<div class="dropdown">';
+            foreach ($kids as [$klabel, $kurl]) $h .= '<a href="' . e($kurl) . '">' . e(tr($klabel)) . '</a>';
+            $h .= '</div>';
         }
         $h .= '</li>';
     }
     $h .= '</ul></div></nav>';
     return $h;
 }
+// Scrolling "LATEST UPDATES" ticker; items are live CRM admission dates.
+function nimitaTicker(array $items): string {
+    if (!$items) return '';
+    $track = '';
+    foreach ([$items, $items] as $dup) foreach ($dup as $t) $track .= '<div class="ticker-item">' . e((string)$t) . '</div>';
+    return '<div class="ticker"><div class="container ticker-inner"><div class="ticker-title"><i class="fa-solid fa-bullhorn"></i> ' . e(tr('LATEST UPDATES')) . '</div><div class="ticker-content"><div class="ticker-track">' . $track . '</div></div></div></div>';
+}
 function collegeHeader(string $brand, string $kindLine, string $page, string $headerAction, array $ticker): string {
     $home = siteHomeUrl();
-    $h = '<div class="c-topbar"><div class="c-wrap c-topbar-in"><span class="c-approvals">Approved by AICTE | PCI | Affiliated to MAKAUT, WB</span><span class="c-top-links">';
+    $tagline = 'Education | Research | Healthcare | A Better Tomorrow';
+    $h = '<div class="topbar"><div class="container topbar-inner"><div class="top-left">';
+    $h .= '<span><i class="fa-solid fa-circle-check"></i> ' . e(tr('Approved by AICTE')) . '</span>';
+    $h .= '<span><i class="fa-solid fa-shield-halved"></i> ' . e(tr('PCI Approved')) . '</span>';
+    $h .= '<span><i class="fa-solid fa-building-columns"></i> ' . e(tr('Affiliated to MAKAUT, WB')) . '</span>';
+    $h .= '</div><div class="top-right">';
     if (str_contains($headerAction, 'u-profile-box')) $h .= $headerAction;
-    else $h .= '<a href="' . e($home . '?page=login') . '">Student Login</a><a href="' . e($home . '?page=login') . '">Faculty Login</a><a href="' . e($home . '?page=login') . '">Admin Login</a>';
-    $h .= '<a class="c-top-search" href="' . e($home . '?page=courses') . '" aria-label="Search programs">' . collegeIcon('search') . '</a>' . siteToggle() . siteLangToggle($page) . '</span></div></div>';
-    $h .= '<header class="c-head"><div class="c-wrap c-head-in"><a class="c-brand u-brand" href="' . e($home) . '" title="Back to the college homepage"><span class="c-crest">' . siteCrest() . '</span><span><strong>' . e($brand) . '</strong><small>' . e($kindLine) . '</small></span></a>';
-    $h .= '<span class="c-head-btns"><a href="' . e($home . '?page=login&show=inquiry') . '">' . collegeIcon('user') . '<span>Enquiry</span></a><a href="' . e($home . '?page=notices') . '">' . collegeIcon('down') . '<span>Download</span></a><a href="' . e($home . '?page=brochure') . '">' . collegeIcon('doc') . '<span>Download Brochure</span></a><a class="c-apply" href="' . e(sitePublicUrl('student.php?page=admissions')) . '">' . collegeIcon('userplus') . '<span>' . e(tr('Apply Now')) . '</span></a></span></div></header>';
-    $h .= collegeNav($page) . siteTicker($ticker);
+    else $h .= '<a href="' . e($home . '?page=login') . '"><i class="fa-solid fa-user-graduate"></i> ' . e(tr('Student Login')) . '</a><a href="' . e($home . '?page=login') . '"><i class="fa-solid fa-chalkboard-user"></i> ' . e(tr('Faculty Login')) . '</a><a href="' . e($home . '?page=login') . '"><i class="fa-solid fa-user-shield"></i> ' . e(tr('Admin Login')) . '</a>';
+    $h .= siteToggle() . siteLangToggle($page) . '</div></div></div>';
+    $h .= '<header class="header"><div class="container header-main">';
+    $h .= '<a href="' . e($home) . '" class="brand"><div class="logo"><i class="fa-solid fa-book-open-reader"></i></div><div class="brand-text"><h1>' . e($brand) . '</h1><p>' . e($tagline) . '</p></div></a>';
+    $h .= '<div class="header-actions">';
+    $h .= '<a href="' . e($home . '?page=login&show=inquiry') . '" class="header-action"><i class="fa-solid fa-circle-question"></i>' . e(tr('Enquiry')) . '</a>';
+    $h .= '<a href="' . e($home . '?page=notices') . '" class="header-action"><i class="fa-solid fa-download"></i>' . e(tr('Download')) . '</a>';
+    $h .= '<a href="' . e($home . '?page=brochure') . '" class="header-action"><i class="fa-solid fa-file-pdf"></i>' . e(tr('Prospectus')) . '</a>';
+    $h .= '<a href="' . e(sitePublicUrl('apply.php')) . '" class="apply-btn"><i class="fa-solid fa-user-plus"></i>' . e(tr('Apply Now')) . '</a>';
+    $h .= '<button class="menu-toggle" id="menuToggle" aria-label="Open Menu"><i class="fa-solid fa-bars"></i></button>';
+    $h .= '</div></div>';
+    $h .= collegeNav($page) . '</header>' . nimitaTicker($ticker);
     return $h;
 }
 function collegeFooter(string $brand, string $kind, string $city = '', string $address = '', string $phone = ''): string {
     $home = siteHomeUrl();
-    $h = '<footer class="c-footer"><div class="c-wrap c-foot-grid">';
-    $h .= '<div><a class="c-brand light" href="' . e($home) . '"><span class="c-crest">' . siteCrest() . '</span><span><strong>' . e($brand) . '</strong><small>Education | Research | Healthcare | A Better Tomorrow</small></span></a></div>';
-    $h .= '<div><h4>' . e(tr('Quick Links')) . '</h4><nav aria-label="Quick links"><a href="' . e($home) . '">Home</a><a href="' . e($home . '?page=about') . '">About Us</a><a href="' . e($home . '?page=admissions') . '">Admissions</a><a href="' . e($home . '?page=courses') . '">Programs</a><a href="' . e($home . '?page=notices') . '">Notices</a></nav></div>';
-    $h .= '<div><h4>Student Corner</h4><nav aria-label="Student corner"><a href="' . e($home . '?page=login') . '">Student Login</a><a href="' . e(sitePublicUrl('apply.php')) . '">Apply online</a><a href="' . e($home . '?page=login&show=create') . '">Create account</a><a href="' . e($home . '?page=notices') . '">Downloads</a><a href="' . e($home . '?page=login&show=inquiry') . '">Grievance</a></nav></div>';
-    $h .= '<div><h4>Contact Us</h4>';
-    if (trim($address . $city . $phone) === '') $h .= '<p class="u-muted">Contact details will appear here soon.</p>';
+    $h = '<footer class="footer"><div class="footer-main"><div class="container"><div class="footer-grid">';
+    $h .= '<div class="footer-brand"><div class="logo" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#72efae;margin-bottom:15px;"><i class="fa-solid fa-book-open-reader"></i></div>';
+    $h .= '<h2>' . e($brand) . '</h2><p>Education | Research | Healthcare | A Better Tomorrow. Building knowledgeable, skilled and responsible pharmacy professionals.</p>';
+    $h .= '<div class="socials"><a href="#" class="social" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a><a href="#" class="social" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a><a href="#" class="social" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a><a href="#" class="social" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a></div></div>';
+    $h .= '<div><h3>' . e(tr('Quick Links')) . '</h3><ul class="footer-links">';
+    $h .= '<li><a href="' . e($home) . '">' . e(tr('Home')) . '</a></li><li><a href="' . e($home . '?page=about') . '">' . e(tr('About Us')) . '</a></li><li><a href="' . e($home . '?page=admissions') . '">' . e(tr('Admissions')) . '</a></li><li><a href="' . e($home . '?page=courses') . '">' . e(tr('Programs')) . '</a></li><li><a href="' . e($home . '?page=notices') . '">' . e(tr('Notices')) . '</a></li><li><a href="' . e($home . '?page=contact') . '">' . e(tr('Contact')) . '</a></li>';
+    $h .= '</ul></div>';
+    $h .= '<div><h3>' . e(tr('Student Corner')) . '</h3><ul class="footer-links">';
+    $h .= '<li><a href="' . e($home . '?page=login') . '">' . e(tr('Student Login')) . '</a></li><li><a href="' . e($home . '?page=notices') . '">' . e(tr('Downloads')) . '</a></li><li><a href="' . e($home . '?page=notices') . '">' . e(tr('Examination')) . '</a></li><li><a href="' . e($home . '?page=notices') . '">' . e(tr('Results')) . '</a></li><li><a href="' . e($home . '?page=notices') . '">' . e(tr('Scholarships')) . '</a></li><li><a href="' . e($home . '?page=login&show=inquiry') . '">' . e(tr('Grievance')) . '</a></li>';
+    $h .= '</ul></div>';
+    $h .= '<div><h3>' . e(tr('Contact Us')) . '</h3>';
+    if (trim($address . $city . $phone) === '') $h .= '<div class="contact-line"><i class="fa-solid fa-location-dot"></i><span>' . e(tr('Contact details will appear here soon.')) . '</span></div>';
     else {
-        if (trim($address) !== '') $h .= '<p>📍 ' . e($address) . ($city !== '' ? ', ' . e($city) : '') . '</p>';
-        elseif ($city !== '') $h .= '<p>📍 ' . e($city) . '</p>';
-        if ($phone !== '') $h .= '<p>☎ ' . e($phone) . '</p>';
+        $loc = trim($address) !== '' ? $address . ($city !== '' ? ', ' . $city : '') : $city;
+        if ($loc !== '') $h .= '<div class="contact-line"><i class="fa-solid fa-location-dot"></i><span>' . e($loc) . '</span></div>';
+        if ($phone !== '') $h .= '<div class="contact-line"><i class="fa-solid fa-phone"></i><span>' . e($phone) . '</span></div>';
     }
-    $h .= '</div>';
-    $h .= '<div><h4>' . e(tr('Follow Us')) . '</h4>' . collegeSocial() . '<p class="c-script">Pharmacy for<br>a Healthier Tomorrow</p></div>';
-    $h .= '</div><div class="c-foot-bottom"><div class="c-wrap"><span>© ' . date('Y') . ' ' . e($brand) . '. ' . e(tr('All rights reserved.')) . '</span><span class="c-legal"><a href="#">Privacy Policy</a> | <a href="#">Terms of Use</a> | <a href="#">Sitemap</a></span><span>Designed for Knowledge. Driven by Care.</span></div></div></footer>';
+    $h .= '<div class="contact-line"><i class="fa-solid fa-clock"></i><span>Mon - Sat: 10:00 AM - 5:00 PM</span></div>';
+    $h .= '</div></div></div></div>';
+    $h .= '<div class="footer-bottom"><div class="container footer-bottom-inner"><div>© ' . date('Y') . ' ' . e($brand) . '. ' . e(tr('All Rights Reserved.')) . '</div><div>' . e(tr('Privacy Policy')) . ' | ' . e(tr('Terms of Use')) . ' | ' . e(tr('Sitemap')) . '</div></div></div></footer>';
+    $h .= '<button class="back-top" id="backTop" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>';
     return $h;
 }

@@ -47,36 +47,42 @@ include it.
 
 ## Homepage design and starter showcase content
 
-The homepage follows a college layout: a navy utility bar (approvals line,
-search icon, Student/Faculty/Admin login links, dark-mode toggle, working
-**EN | हिन्दी** toggle), a crest + college-name header with stacked-icon
-Enquiry, Download, Download Brochure and Apply Now buttons, a dropdown nav
-(Home carries a house icon; Placement opens admissions), a scrolling
-announcement ticker (built live from CRM admission dates and closing dates),
-a full-bleed campus photo hero ("Shaping Healthcare Leaders for a Healthier
-Tomorrow" over `assets/college-hero.jpg` — replace this file with a photo of
-your own campus to rebrand instantly), feature highlights, a welcome + quote
-+ Latest Updates trio, photo program cards with degree subtitles
-(`assets/program-dpharm.jpg`, `program-bpharm.jpg`, `program-mpharm.jpg`,
-`program-phd.jpg`, matched from the live course name), a showcase stats band,
-campus-life photo cards, a Message from the Principal, a trust strip and a
-full college footer. The chrome is genuinely bilingual via a sessionless
-`?lang=` + cookie switch, while CRM records stay in their entered language.
+The homepage follows the Nimita-style pharmacy college design
+(`assets/nimita.css` + `assets/nimita.js`, scoped under `body.college` so
+portal styles never collide): a navy utility bar (AICTE / PCI / MAKAUT
+approvals, Student/Faculty/Admin login links, dark-mode toggle, working
+**EN | हिन्दी** toggle), a logo + college-name header with Enquiry,
+Download, Prospectus and Apply Now buttons, a dropdown nav (Home carries a
+house icon), a scrolling LATEST UPDATES ticker (built live from CRM
+admission dates and closing dates), a full-width campus photo hero
+("Shaping Healthcare Leaders for a Healthier Tomorrow" over
+`assets/college-hero.jpg` — replace this file with a photo of your own
+campus to rebrand instantly), six quick-feature tiles, a welcome + quote +
+Latest Updates section (updates are live CRM notices with date badges),
+photo program cards (`assets/program-dpharm.jpg`, `program-bpharm.jpg`,
+`program-mpharm.jpg`, `program-phd.jpg`, matched from the live course name,
+with degree short codes via `collegeDegreeShort()`), an animated stats band,
+a campus gallery + Message from the Principal side by side, a facilities
+strip, an admission call-to-action band and a full college footer with
+contact lines and social icons. Icons use Font Awesome and headings use
+Inter/Playfair Display from CDNs (allowed in the page CSP; system fonts
+take over offline). Inner pages (about, courses, admissions, notices,
+faculty, contact, brochure, login) share the same header/ticker/footer but
+keep their existing content styled by the theme/university stylesheets.
+The chrome is genuinely bilingual via a sessionless `?lang=` + cookie
+switch, while CRM records stay in their entered language.
 
-Almost everything is live CRM data. The only starter template pieces are the
-hero headline, the highlights, the showcase stats, the quote and the welcome
-text — edit `collegeHighlights()`, `collegeTrustBadges()`,
-`collegeSpotStats()` in `app/college-chrome.php` to put your institute's real
-figures and message. Dropping `assets/principal-photo.jpg` and
-`assets/quote-photo.jpg` into place shows real portraits automatically.
-(`siteAccreditations()`, `siteShowcasePrograms()`, `siteRecruiters()` and
-`siteVcMessage()` in `app/site-chrome.php` are kept for backwards
-compatibility but no longer render on the homepage.) A future Website
+Almost everything is live CRM data. The only starter template pieces are
+the hero headline, the feature tiles, the stats numbers, the quote and the
+welcome text. Dropping `assets/principal-photo.jpg` into place shows a real
+portrait in the principal box automatically. (`collegeHighlights()`,
+`collegeTrustBadges()`, `collegeSpotStats()`, `siteAccreditations()`,
+`siteShowcasePrograms()`, `siteRecruiters()` and `siteVcMessage()` are kept
+for backwards compatibility but no longer render.) A future Website
 Settings page in the office workspace will make these editable without
-touching code. The **?page=brochure** page and its PDF download are generated
-from live brand and program records; the topbar search icon opens
-**?page=courses**, which filters by typed text without changing the default
-listing.
+touching code. The **?page=brochure** page and its PDF download are
+generated from live brand and program records; **?page=courses** filters by
+typed text without changing the default listing.
 
 ## One theme, no dead ends
 
