@@ -48,30 +48,35 @@ include it.
 ## Homepage design and starter showcase content
 
 The homepage follows a college layout: a navy utility bar (approvals line,
-Student/Faculty/Admin login links, dark-mode toggle, working **EN | हिन्दी**
-toggle), a crest + college-name header with Enquiry, Download, Download
-Brochure and Apply Now buttons, a dropdown nav with program search, a scrolling
-announcement ticker (built live from CRM admission dates and closing dates), a
-campus hero slider (`assets/college-hero.jpg` — replace this file with a
-photo of your own campus to rebrand instantly), feature highlights,
-accreditation badges, a welcome + quote + Latest Updates trio, program cards
-with photos (`assets/program-dpharm.jpg`, `program-bpharm.jpg`,
-`program-mpharm.jpg`, `program-phd.jpg`, matched from the live course name),
-a live stats band, campus-life tiles, a Vice-Chancellor feature, a program
-showcase grid, recruiters, a trust strip and a full college footer. The chrome
-is genuinely bilingual via a sessionless `?lang=` + cookie switch, while CRM
-records stay in their entered language.
+search icon, Student/Faculty/Admin login links, dark-mode toggle, working
+**EN | हिन्दी** toggle), a crest + college-name header with stacked-icon
+Enquiry, Download, Download Brochure and Apply Now buttons, a dropdown nav
+(Home carries a house icon; Placement opens admissions), a scrolling
+announcement ticker (built live from CRM admission dates and closing dates),
+a full-bleed campus photo hero ("Shaping Healthcare Leaders for a Healthier
+Tomorrow" over `assets/college-hero.jpg` — replace this file with a photo of
+your own campus to rebrand instantly), feature highlights, a welcome + quote
++ Latest Updates trio, photo program cards with degree subtitles
+(`assets/program-dpharm.jpg`, `program-bpharm.jpg`, `program-mpharm.jpg`,
+`program-phd.jpg`, matched from the live course name), a showcase stats band,
+campus-life photo cards, a Message from the Principal, a trust strip and a
+full college footer. The chrome is genuinely bilingual via a sessionless
+`?lang=` + cookie switch, while CRM records stay in their entered language.
 
 Almost everything is live CRM data. The only starter template pieces are the
-hero headline, the highlights, badges, showcase names, recruiter tiles, quote
-and welcome text — edit `collegeHighlights()`, `collegeTrustBadges()` in
-`app/college-chrome.php` and `siteAccreditations()`, `siteShowcasePrograms()`,
-`siteRecruiters()`, `siteVcMessage()` in `app/site-chrome.php` to put your
-institute's real approvals, programs, recruiters and message. A future Website
+hero headline, the highlights, the showcase stats, the quote and the welcome
+text — edit `collegeHighlights()`, `collegeTrustBadges()`,
+`collegeSpotStats()` in `app/college-chrome.php` to put your institute's real
+figures and message. Dropping `assets/principal-photo.jpg` and
+`assets/quote-photo.jpg` into place shows real portraits automatically.
+(`siteAccreditations()`, `siteShowcasePrograms()`, `siteRecruiters()` and
+`siteVcMessage()` in `app/site-chrome.php` are kept for backwards
+compatibility but no longer render on the homepage.) A future Website
 Settings page in the office workspace will make these editable without
 touching code. The **?page=brochure** page and its PDF download are generated
-from live brand and program records; the nav search filters **?page=courses**
-by typed text without changing the default listing.
+from live brand and program records; the topbar search icon opens
+**?page=courses**, which filters by typed text without changing the default
+listing.
 
 ## One theme, no dead ends
 
