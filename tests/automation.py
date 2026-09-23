@@ -48,6 +48,16 @@ class Browser:
         parts.append(('--'+boundary+'--\r\n').encode())
         body=b''.join(parts)
         return self.get(path,body,{'Content-Type':'multipart/form-data; boundary='+boundary})
+    def upload_many(self,path,fields,files):
+        boundary='----Northstar'+os.urandom(8).hex()
+        parts=[]
+        for k,v in fields.items():
+            parts.append(('--'+boundary+'\r\nContent-Disposition: form-data; name="'+k+'"\r\n\r\n'+str(v)+'\r\n').encode())
+        for field,filename,content,mime in files:
+            parts.append(('--'+boundary+'\r\nContent-Disposition: form-data; name="'+field+'"; filename="'+filename+'"\r\nContent-Type: '+mime+'\r\n\r\n').encode()+content+b'\r\n')
+        parts.append(('--'+boundary+'--\r\n').encode())
+        body=b''.join(parts)
+        return self.get(path,body,{'Content-Type':'multipart/form-data; boundary='+boundary})
 PDF=b'%PDF-1.4\n1 0 obj\n<<>>\nendobj\ntrailer\n<<>>\n%%EOF'
 PNG=__import__('base64').b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==')
 JPG=__import__('base64').b64decode('/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////2wBDAf//////////////////////////////////////////////////////////////////////////////////////wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAAAP/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AK//Z')
@@ -88,12 +98,20 @@ with tempfile.TemporaryDirectory(prefix='northstar-automation-') as temp:
                     if m:return m.group(1)
             raise AssertionError('No code for '+address)
         master_visitor.applicant_verify(step_auto,code_for('auto-applicant@example.test'))
-        fields=dict(name='Auto Applicant',phone='9000000000',city='Kolkata',qualification='Higher secondary science',completion_year='2025',note='',consent='yes')
-        def submit(browser):
+        fields=dict(name='Auto Applicant',phone='9000000000',city='Kolkata',qualification='Higher secondary science',completion_year='2025',note='',consent='yes',father_name='Father Auto',mother_name='Mother Auto',date_of_birth='2005-06-01',gender='Male',category='OBC-A',nationality='Indian',board_10='W.B.B.S.E.',year_10='2021',roll_10='A10',total_10='800',obtained_10='680',board_12='W.B.C.H.S.E.',year_12='2023',stream_12='Science',roll_12='A12',total_12='500',obtained_12='410')
+        def submit(browser,files=None):
             browser.get('apply.php?page=apply&course='+str(cid));token=re.search(r'name="csrf" value="([^"]+)"',browser.html).group(1);nonce=re.search(r'name="request_key" value="([^"]+)"',browser.html).group(1);offer=re.search(r'name="offer_token" value="([^"]+)"',browser.html).group(1)
-            return browser.get('apply.php?page=apply&course='+str(cid),dict(action='submit_application',csrf=token,request_key=nonce,offer_token=offer,course_id=cid,**fields))
-        check('Application saved' in submit(visitor),'automation applicant submits')
+            params=dict(action='submit_application',csrf=token,request_key=nonce,offer_token=offer,course_id=cid,**fields)
+            if files:return browser.upload_many('apply.php?page=apply&course='+str(cid),params,files)
+            return browser.get('apply.php?page=apply&course='+str(cid),params)
+        check('Application saved' in submit(visitor,[('doc_photo','photo.jpg',JPG,'image/jpeg'),('doc_marksheet10','marksheet10.pdf',PDF,'application/pdf')]),'automation applicant submits with wizard documents')
+        check(scalar("SELECT COUNT(*) FROM certificates WHERE application_id=? AND doc_type LIKE 'doc_%'",(scalar('SELECT id FROM admission_applications'),))==2,'wizard files attach to fresh submission')
         appid=scalar('SELECT id FROM admission_applications')
+        check(scalar("SELECT doc_type FROM certificates WHERE application_id=? ORDER BY id LIMIT 1",(appid,))=='doc_photo','photo keeps its document type')
+        check(scalar("SELECT json_extract(data_json,'$.percentage_10') FROM admission_applications WHERE id=?",(appid,))=='85.00','automation stores computed board percentage')
+        staff_view=owner.get('office.php?page=applications&application='+str(appid))
+        check('Uploaded documents' in staff_view and 'Photograph' in staff_view and 'Class 10 marksheet' in staff_view,'staff review lists attached wizard documents')
+        check('name="doc_photo"' in visitor.get('apply.php?page=apply&course='+str(cid)) and '2 MB per file' in visitor.html,'wizard shows document slots when storage is on')
         # Application mail queue: submission creates exactly one queued alert.
         check(scalar('SELECT COUNT(*) FROM application_mail WHERE application_id=?',(appid,))==1,'submission queues applicant status email')
         check(scalar("SELECT status FROM application_mail WHERE application_id=?",(appid,))=='pending','queued alert starts pending')
@@ -127,11 +145,13 @@ with tempfile.TemporaryDirectory(prefix='northstar-automation-') as temp:
         check('Changes saved' in owner.post('certificate_scan',page='applications',certificate_id=cert1,version='2',scan_state='Clean',scan_note='Scanned offline with updated AV.',offline_scan='yes'),'staff records Clean scan')
         check(scalar("SELECT scan_state FROM certificates WHERE id=?",(cert1,))=='Clean','scan state persists')
         # Download authorization.
-        visitor.get(f'apply.php?certificate={cert1}');check(visitor.status==200 and visitor.raw.startswith(b'%PDF'),'applicant can download own upload')
+        visitor.get(f'apply.php?certificate={cert1}');check(visitor.status==200 and visitor.raw.startswith(b'\xff\xd8\xff'),'applicant can download own photo upload')
+        sheet=scalar("SELECT id FROM certificates WHERE application_id=? AND doc_type='doc_marksheet10'",(appid,))
+        visitor.get(f'apply.php?certificate={sheet}');check(visitor.status==200 and visitor.raw.startswith(b'%PDF'),'applicant can download own marksheet upload')
         execute('DELETE FROM auth_events')
         other=Browser(base,'apply.php');master_other=Master(other);master_other.applicant_verify(master_other.applicant_start('other-auto@example.test'),code_for('other-auto@example.test'))
         other.get(f'apply.php?certificate={cert1}');check(other.status==404,'other applicant cannot download upload')
-        owner.get(f'office.php?certificate={cert1}');check(owner.status==200 and owner.raw.startswith(b'%PDF'),'staff can download institute upload')
+        owner.get(f'office.php?certificate={cert1}');check(owner.status==200 and owner.raw.startswith(b'\xff\xd8\xff'),'staff can download institute upload')
         owner.post('staff',page='staff',institute_id=other_iid,name='Other Admin',email='other-admin@example.test',role='admin',password='Staff-Test-Password!')
         admin=Browser(base);admin.login('other-admin@example.test','Staff-Test-Password!')
         admin.get(f'office.php?certificate={cert1}');check(admin.status==403,'cross-institute staff cannot download upload')
@@ -158,6 +178,9 @@ with tempfile.TemporaryDirectory(prefix='northstar-automation-') as temp:
         # Second applicant with non-matching evidence stays manual.
         execute('DELETE FROM auth_events')
         second=Browser(base,'apply.php');master_second=Master(second);master_second.applicant_verify(master_second.applicant_start('second-auto@example.test'),code_for('second-auto@example.test'))
+        check('between 8 bytes and 2 MB' in submit(second,[('doc_photo','huge.pdf',b'%PDF-'+b'0'*(2*1024*1024),'application/pdf')]),'wizard rejects oversized document')
+        check('matching PDF, JPEG or PNG' in submit(second,[('doc_signature','note.txt',b'plain text file content here!!','text/plain')]),'wizard rejects non-document file')
+        check('matching PDF, JPEG or PNG' in submit(second,[('doc_marksheet10','fake.pdf',PNG,'image/png')]),'wizard rejects mismatched document content')
         second.get('apply.php?page=apply&course='+str(cid));t2=re.search(r'name="csrf" value="([^"]+)"',second.html).group(1);n2=re.search(r'name="request_key" value="([^"]+)"',second.html).group(1);o2=re.search(r'name="offer_token" value="([^"]+)"',second.html).group(1)
         second.get('apply.php?page=apply&course='+str(cid),dict(action='submit_application',csrf=t2,request_key=n2,offer_token=o2,course_id=cid,**dict(fields,name='Second Auto')))
         app2=scalar('SELECT MAX(id) FROM admission_applications')

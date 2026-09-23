@@ -83,20 +83,40 @@ function staffApplication(int $id): array {applicationStaff();$r=one('SELECT * F
 function applicationEvent(int $id,string $actor,?int $uid,string $message,array $snapshot,bool $notify=true): void {query('INSERT INTO application_events (application_id,actor,staff_id,message,snapshot_json,created_at) VALUES (?,?,?,?,?,?)',[$id,$actor,$uid,$message,json_encode($snapshot,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE),date('Y-m-d H:i:s')]);if($notify&&function_exists('queueApplicationMail'))queueApplicationMail((int)db()->lastInsertId(),$id);}
 function applicationFields(): array {
     $year=input('completion_year',4);if(!ctype_digit($year)||(int)$year<1950||(int)$year>(int)date('Y'))fail('Enter a valid completed qualification year.');
-    $phone=input('phone',30);if(!preg_match('/^[+0-9 ()\-]{7,30}$/D',$phone))fail('Enter a valid contact phone number.');
+    $phone=input('phone',30);if(!preg_match('/^[+0-9 ()\\-]{7,30}$/D',$phone))fail('Enter a valid contact phone number.');
     if(input('consent',3,false)!=='yes')fail('Confirm the application declaration and privacy notice.');
+    $father=input('father_name',120,false);if($father==='')fail("Enter your father's name.");
+    $mother=input('mother_name',120,false);if($mother==='')fail("Enter your mother's name.");
+    $dob=input('date_of_birth',10,false);if(!preg_match('/^\\d{4}-\\d{2}-\\d{2}$/D',$dob)||$dob>date('Y-m-d'))fail('Enter a valid date of birth.');
+    $gender=input('gender',30,false);if(!in_array($gender,['Male','Female','Other'],true))fail('Select your gender.');
+    $category=input('category',40,false);if(!in_array($category,['General','EWS','OBC-A','OBC-B','SC','ST','Other'],true))fail('Select your category.');
+    $nationality=input('nationality',60,false);if(!in_array($nationality,['Indian','Other'],true))fail('Select your nationality.');
+    $aadhaar=input('aadhaar',12,false);if($aadhaar!==''&&!preg_match('/^\\d{12}$/D',$aadhaar))fail('Enter a valid 12-digit Aadhaar number, or leave it blank.');
+    $religion=input('religion',30,false);if(!in_array($religion,['','Hinduism','Islam','Christianity','Sikhism','Buddhism','Jainism','Other'],true))fail('Select a valid religion.');
+    $blood=input('blood_group',10,false);if(!in_array($blood,['','A+','A-','B+','B-','AB+','AB-','O+','O-'],true))fail('Select a valid blood group.');
+    $academic=[];
+    foreach(['10','12'] as $level){
+        $label=$level==='10'?'Class 10':'Class 12';
+        $board=input('board_'.$level,120,false);if($board==='')fail('Enter your '.$label.' board.');
+        $y=input('year_'.$level,4,false);if(!ctype_digit($y)||(int)$y<1950||(int)$y>(int)date('Y'))fail('Enter a valid '.$label.' passing year.');
+        $roll=input('roll_'.$level,60,false);if($roll==='')fail('Enter your '.$label.' roll number.');
+        $total=input('total_'.$level,7,false);$obtained=input('obtained_'.$level,7,false);
+        if(!ctype_digit($total)||(int)$total<=0)fail('Enter valid '.$label.' total marks.');
+        if(!preg_match('/^\\d{1,7}$/D',$obtained)||(int)$obtained>(int)$total)fail('Enter valid '.$label.' obtained marks (not above the total).');
+        $academic+=['board_'.$level=>$board,'year_'.$level=>$y,'roll_'.$level=>$roll,'total_'.$level=>(string)(int)$total,'obtained_'.$level=>(string)(int)$obtained,'percentage_'.$level=>number_format(((int)$obtained/(int)$total)*100,2,'.','')];
+        if($level==='12'){$stream=input('stream_12',60,false);if($stream==='')fail('Enter your Class 12 stream.');$academic['stream_12']=$stream;}
+    }
     $optional=[];
-    foreach(['gender'=>30,'date_of_birth'=>10,'nationality'=>60,'category'=>40,'father_name'=>120,'mother_name'=>120,'guardian_name'=>120,'address'=>300,'state'=>100,'pincode'=>10,'board_university'=>160,'percentage'=>20,'entrance_exam'=>100,'entrance_rank'=>30] as $key=>$max) $optional[$key]=input($key,$max,false);
-    if($optional['date_of_birth']!=='' && (!preg_match('/^\d{4}-\d{2}-\d{2}$/D',$optional['date_of_birth']) || $optional['date_of_birth']>date('Y-m-d'))) fail('Enter a valid date of birth.');
-    if($optional['pincode']!=='' && !preg_match('/^\d{6}$/D',$optional['pincode'])) fail('Enter a valid six-digit PIN code.');
-    return ['name'=>input('name',120),'phone'=>$phone,'city'=>input('city',100),'qualification'=>input('qualification',300),'completion_year'=>$year,...$optional,'note'=>input('note',1500,false)];
+    foreach(['guardian_name'=>120,'address'=>300,'state'=>100,'pincode'=>10,'board_university'=>160,'percentage'=>20,'entrance_exam'=>100,'entrance_rank'=>30] as $key=>$max) $optional[$key]=input($key,$max,false);
+    if($optional['pincode']!=='' && !preg_match('/^\\d{6}$/D',$optional['pincode'])) fail('Enter a valid six-digit PIN code.');
+    return ['name'=>input('name',120),'phone'=>$phone,'city'=>input('city',100),'qualification'=>input('qualification',300),'completion_year'=>$year,'father_name'=>$father,'mother_name'=>$mother,'date_of_birth'=>$dob,'gender'=>$gender,'category'=>$category,'nationality'=>$nationality,'aadhaar'=>$aadhaar,'religion'=>$religion,'blood_group'=>$blood]+$academic+$optional+['note'=>input('note',1500,false)];
 }
 function applicationDraftFields(): array {
-    $allowed=['name','phone','city','qualification','completion_year','gender','date_of_birth','nationality','category','father_name','mother_name','guardian_name','address','state','pincode','board_university','percentage','entrance_exam','entrance_rank','note'];
+    $allowed=['name','phone','city','qualification','completion_year','gender','date_of_birth','nationality','category','father_name','mother_name','guardian_name','address','state','pincode','board_university','percentage','entrance_exam','entrance_rank','note','aadhaar','religion','blood_group','board_10','year_10','roll_10','total_10','obtained_10','percentage_10','board_12','year_12','stream_12','roll_12','total_12','obtained_12','percentage_12'];
     $data=[];foreach($allowed as $key){$value=$_POST[$key]??'';if(!is_string($value))fail('Invalid application field.');$data[$key]=trim(substr($value,0,match($key){'name','father_name','mother_name','guardian_name'=>120,'phone'=>30,'city'=>100,'qualification'=>300,'note'=>1500,'address'=>300,default=>200}));}return $data;
 }
 function applicantMutation(string $action): int {
-    $actor=currentApplicant();if(!$actor)fail('Verify your applicant email first.');
+    $actor=currentApplicant();if(!$actor)fail('Verify your applicant email first.');$wizardPaths=[];
     if($action==='submit_application' && ($_POST['submit_action'] ?? 'submit_final')==='save_draft') $action='save_application_draft';
     writeTransaction();try{
         $locked=one('SELECT * FROM applicant_accounts WHERE id=?'.lockSuffix(),[$actor['id']]);if(!$locked['active']||(int)$locked['version']!==(int)$_SESSION['applicant_version'])fail('Applicant access is no longer active.');
@@ -113,17 +133,17 @@ function applicantMutation(string $action): int {
             $data=($action==='save_application_draft'?applicationDraftFields():applicationFields())+['course_name'=>$course['name'],'institute_name'=>$course['institute_name'],'duration'=>$course['duration']];$now=date('Y-m-d H:i:s');$status=$action==='save_application_draft'?'Draft':'Pending Review';
             if($existing){$id=(int)$existing['id'];query('UPDATE admission_applications SET status=?,data_json=?,consent_notice=?,updated_at=?,revision_notes=\'\' WHERE id=?',[$status,json_encode($data,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE),$course['privacy_notice'],$now,$id]);}
             else {query('INSERT INTO admission_applications (applicant_id,institute_id,course_id,reference,request_key,status,fee_minor,data_json,consent_notice,consent_version,submitted_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',[$actor['id'],$course['institute_id'],$cid,'APP-'.strtoupper(bin2hex(random_bytes(8))),$key,$status,$course['fee_minor'],json_encode($data,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE),$course['privacy_notice'],'admission-application-v1',$now,$now]);$id=(int)db()->lastInsertId();}
-            applicationEvent($id,'Applicant',null,$action==='save_application_draft'?'Application draft saved.':'Application submitted for review.',['data'=>$data,'status'=>$status,'fee_minor'=>(int)$course['fee_minor'],$action=>$action],$action!=='save_application_draft');if($action==='submit_application')$_SESSION['application_nonce']=bin2hex(random_bytes(24));
+            applicationEvent($id,'Applicant',null,$action==='save_application_draft'?'Application draft saved.':'Application submitted for review.',['data'=>$data,'status'=>$status,'fee_minor'=>(int)$course['fee_minor'],$action=>$action],$action!=='save_application_draft');$wizardStored=attachWizardFiles($id);foreach($wizardStored as $stored)$wizardPaths[]=$stored['path'];if($wizardStored)applicationEvent($id,'Applicant',null,count($wizardStored).' document(s) attached with the application.',['files'=>array_column($wizardStored,'label')],false);if($action==='submit_application')$_SESSION['application_nonce']=bin2hex(random_bytes(24));
         }else{
             $r=ownApplication((int)input('application_id'),$actor);$r=one('SELECT * FROM admission_applications WHERE id=?'.lockSuffix(),[$r['id']]);$id=(int)$r['id'];
             if((int)input('version')!==(int)$r['version'])fail('Application changed in another window. Reload.');
             if(in_array($r['status'],['Admitted','Rejected','Withdrawn'],true))fail('This application is closed to applicant changes.');
             if($action==='withdraw_application'){$status='Withdrawn';$data=json_decode($r['data_json'],true,512,JSON_THROW_ON_ERROR);$message='Application withdrawn by applicant. '.input('reason',500);}
             else{if(!in_array($r['status'],['Changes requested','Revision'],true))fail('The office must request corrections before you edit a submitted application.');$data=array_replace(json_decode($r['data_json'],true,512,JSON_THROW_ON_ERROR),applicationFields());$status='Pending Review';$message='Corrected application resubmitted.';}
-            query('UPDATE admission_applications SET status=?,data_json=?,version=version+1,updated_at=? WHERE id=?',[$status,json_encode($data,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE),date('Y-m-d H:i:s'),$id]);applicationEvent($id,'Applicant',null,$message,['before'=>json_decode($r['data_json'],true),'after'=>$data,'status'=>$status]);
+            query('UPDATE admission_applications SET status=?,data_json=?,version=version+1,updated_at=? WHERE id=?',[$status,json_encode($data,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE),date('Y-m-d H:i:s'),$id]);applicationEvent($id,'Applicant',null,$message,['before'=>json_decode($r['data_json'],true),'after'=>$data,'status'=>$status]);if($action!=='withdraw_application'){$wizardStored=attachWizardFiles($id);foreach($wizardStored as $stored)$wizardPaths[]=$stored['path'];if($wizardStored)applicationEvent($id,'Applicant',null,count($wizardStored).' document(s) attached with the corrected application.',['files'=>array_column($wizardStored,'label')],false);}
         }
         db()->commit();$_SESSION['flash']='Application saved. Updates are queued for email; check this page for the authoritative status.';return $id;
-    }catch(Throwable $e){if(db()->inTransaction())db()->rollBack();throw $e;}
+    }catch(Throwable $e){if(db()->inTransaction())db()->rollBack();foreach($wizardPaths as $path)if(is_file($path))unlink($path);throw $e;}
 }
 function reviewApplication(bool $admit=false): string {
     $u=applicationStaff();$r=staffApplication((int)input('application_id'));

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 ini_set('display_errors','0'); ob_start();
 require __DIR__.'/app/bootstrap.php';
-require_once __DIR__.'/app/applications.php'; require_once __DIR__.'/app/site-accounts.php';
+require_once __DIR__.'/app/applications.php'; require_once __DIR__.'/app/site-accounts.php'; require_once __DIR__.'/app/automation.php';
 header('Cache-Control: no-store'); header('X-Content-Type-Options: nosniff'); header('Referrer-Policy: same-origin');
 header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; form-action 'self'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'");
 ini_set('session.use_strict_mode','1'); session_name('northstar_applicant'); session_set_cookie_params(sessionCookieParams()); session_start();
