@@ -42,17 +42,6 @@ Opening a listing publishes its current course name, fee, duration and the insti
 
 The application detail page serves as an acknowledgement and is printable through the browser; print styling hides navigation/forms. This is **not** a newly generated official PDF. The official admission-letter PDF becomes available in the student portal after approval.
 
-### Application form (four steps)
-
-There is no registration step: the form opens only after email verification, on `apply.php` and inside the student portal. It is one form with client-side steps and a single final POST:
-
-1. **Personal Details** — full name, father's and mother's names, date of birth, gender, category, nationality, optional Aadhaar (12 digits), religion and blood group, plus contact and family details.
-2. **Academic Details** — Class 10 board/year/roll/total/obtained, Class 12 board/year/stream/roll/total/obtained, highest qualification, completion year and optional entrance details. Both percentages are auto-calculated in the browser and recomputed on the server from the marks.
-3. **Upload Documents** — photograph, signature, Class 10 and 12 marksheets, caste, disability, domicile and other documents (PDF/JPG/PNG, 2 MB each). Documents are optional here and can also be added later from the application page. This step appears only when certificate storage is configured; otherwise the form says uploads are not enabled yet.
-4. **Preview & Submit** — read-only preview with photograph, declaration checkbox, privacy notice, **Save draft** and **Submit Application**.
-
-Saving a draft keeps typed details and any attached documents (re-attaching an identical file is skipped). Without JavaScript all steps display at once and the form still submits. Correction/resubmission reuses the same four steps with existing answers prefilled. Staff see the entered marks and the **Uploaded documents** table on the review page; at most ten uploads per application are kept (2 MB each inside the form, 5 MB each for later top-ups).
-
 ### Submission rules
 
 - One active or admitted application per applicant account across all institutes. The supported model is a unique personal email, not shared family email or multiple portal enrolments under one email.

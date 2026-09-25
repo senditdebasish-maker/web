@@ -4,7 +4,7 @@ declare(strict_types=1);
 <<<<<<< HEAD
 ini_set('display_errors','0'); ob_start();
 require __DIR__.'/app/bootstrap.php';
-require_once __DIR__.'/app/applications.php'; require_once __DIR__.'/app/site-accounts.php'; require_once __DIR__.'/app/automation.php';
+require_once __DIR__.'/app/applications.php'; require_once __DIR__.'/app/site-accounts.php';
 header('Cache-Control: no-store'); header('X-Content-Type-Options: nosniff'); header('Referrer-Policy: same-origin');
 =======
 ini_set('display_errors','0');ob_start();

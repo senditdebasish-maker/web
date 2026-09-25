@@ -4,7 +4,6 @@ require_once __DIR__.'/site-chrome.php';
 function spMoney(int $n): string { return '₹'.number_format($n/100,2); }
 function spNumber(int $n): string { return 'ST-'.str_pad((string)$n,5,'0',STR_PAD_LEFT); }
 function spForm(string $action): string { return '<form method="post">'.csrf().'<input type="hidden" name="action" value="'.e($action).'">'; }
-function spUploadForm(string $action): string { return '<form method="post" enctype="multipart/form-data">'.csrf().'<input type="hidden" name="action" value="'.e($action).'">'; }
 [$spBrand,$spKind,$spCity,$spAddr,$spPhone]=siteBrand();
 $spButtons=siteToggle();
 <<<<<<< HEAD
@@ -20,7 +19,7 @@ if($student||$portalUser) $spButtons.=spForm('logout').'<button class="u-btn gho
 else $spButtons.='<a class="u-btn ghost" href="student.php?page=register">Create account ↗</a><a class="u-btn ghost" href="apply.php">Apply for admission ↗</a><a class="u-btn ghost" href="office.php">Staff login ↗</a>';
 >>>>>>> parent of 549483e (new)
 ?>
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Student portal · Northstar</title><link rel="stylesheet" href="assets/university.css"><link rel="stylesheet" href="assets/theme.css"><script src="assets/theme.js" defer></script><script src="assets/wizard.js" defer></script><script src="assets/razorpay-checkout.js" defer></script></head><body>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Student portal · Northstar</title><link rel="stylesheet" href="assets/university.css"><link rel="stylesheet" href="assets/theme.css"><script src="assets/theme.js" defer></script><script src="assets/razorpay-checkout.js" defer></script></head><body>
 <?=siteHeader($spBrand,$spKind,'',$spButtons)?>
 <<<<<<< HEAD
 <?php if(in_array($page,['admissions','courses','course','apply','applications','application'],true)&&($student||$portalUser||$applicant)){require __DIR__.'/student-admissions-view.php';return;} ?>
