@@ -70,6 +70,7 @@ function collegeDegreeLine(string $name): string {
     return '';
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 // Degree short code for program cards, e.g. "Diploma in Pharmacy" -> "D.Pharm".
 function collegeDegreeShort(string $name): string {
     $n = strtolower($name);
@@ -79,6 +80,8 @@ function collegeDegreeShort(string $name): string {
     if (str_contains($n, 'ph.d') || str_contains($n, 'phd')) return 'Ph.D.';
     return '';
 }
+=======
+>>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
 =======
 >>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
 // Homepage showcase stats (starter template numbers; the About page keeps live CRM counts).
@@ -157,6 +160,7 @@ function collegeNavItems(): array {
         ['label' => 'Contact', 'url' => $pu . 'contact', 'slug' => 'contact', 'icon' => 'phone', 'kids' => []],
     ];
 <<<<<<< HEAD
+<<<<<<< HEAD
 }
 function collegeNav(string $active): string {
     $key = $active === 'course' ? 'courses' : $active;
@@ -169,6 +173,8 @@ function collegeNav(string $active): string {
             foreach ($it['kids'] as [$kl, $ku]) $h .= '<a role="menuitem" href="' . e($ku) . '">' . e(tr($kl)) . '</a>';
             $h .= '</div>';
 =======
+=======
+>>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
     $h = '<nav class="c-nav" aria-label="College"><div class="c-wrap"><ul>';
     foreach ($items as [$label, $url, $slug, $kids]) {
         $cur = ($slug !== '' && $slug === $key) ? ' aria-current="page"' : '';
@@ -178,12 +184,16 @@ function collegeNav(string $active): string {
             $h .= '<ul class="c-drop">';
             foreach ($kids as [$klabel, $kurl]) $h .= '<li><a href="' . e($kurl) . '">' . e($klabel) . '</a></li>';
             $h .= '</ul>';
+<<<<<<< HEAD
+>>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
+=======
 >>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
         }
         $h .= '</li>';
     }
     return $h . '</ul></div></nav>';
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 // Scrolling "LATEST UPDATES" ticker; items are live CRM admission dates. Empty = hidden.
 function nimitaTicker(array $items): string {
@@ -243,6 +253,8 @@ function collegeHeader(string $brand, string $kind, string $city, string $phone,
         . '<a data-nav="notices" href="' . e($pu . 'notices') . '">' . collegeIcon('bell') . '<span>' . e(tr('Notices')) . '</span></a>'
         . '<a data-nav="account" href="' . e($acct) . '">' . collegeIcon('user') . '<span>' . e(tr('Account')) . '</span></a></nav>';
 =======
+=======
+>>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
 function collegeHeader(string $brand, string $kindLine, string $page, string $headerAction, array $ticker): string {
     $home = siteHomeUrl();
     $h = '<div class="c-topbar"><div class="c-wrap c-topbar-in"><span class="c-approvals">Approved by AICTE | PCI | Affiliated to MAKAUT, WB</span><span class="c-top-links">';
@@ -252,11 +264,15 @@ function collegeHeader(string $brand, string $kindLine, string $page, string $he
     $h .= '<header class="c-head"><div class="c-wrap c-head-in"><a class="c-brand u-brand" href="' . e($home) . '" title="Back to the college homepage"><span class="c-crest">' . siteCrest() . '</span><span><strong>' . e($brand) . '</strong><small>' . e($kindLine) . '</small></span></a>';
     $h .= '<span class="c-head-btns"><a href="' . e($home . '?page=login&show=inquiry') . '">' . collegeIcon('user') . '<span>Enquiry</span></a><a href="' . e($home . '?page=notices') . '">' . collegeIcon('down') . '<span>Download</span></a><a href="' . e($home . '?page=brochure') . '">' . collegeIcon('doc') . '<span>Download Brochure</span></a><a class="c-apply" href="' . e(sitePublicUrl('student.php?page=admissions')) . '">' . collegeIcon('userplus') . '<span>' . e(tr('Apply Now')) . '</span></a></span></div></header>';
     $h .= collegeNav($page) . siteTicker($ticker);
+<<<<<<< HEAD
+>>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
+=======
 >>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
     return $h;
 }
 function collegeFooter(string $brand, string $kind, string $city = '', string $address = '', string $phone = ''): string {
     $home = siteHomeUrl();
+<<<<<<< HEAD
 <<<<<<< HEAD
     $pu = $home . '?page=';
     $student = sitePublicUrl('student.php');
@@ -282,6 +298,22 @@ function collegeFooter(string $brand, string $kind, string $city = '', string $a
     $h .= '<li>' . collegeIcon('clock') . '<span>' . e(tr('Mon - Sat: 10:00 AM - 5:00 PM')) . '</span></li></ul></div>';
     $h .= '</div><div class="f-foot-bottom"><div>&copy; ' . date('Y') . ' ' . e($brand) . '. ' . e(tr('All Rights Reserved.')) . '</div><div>' . e(tr('Privacy Policy')) . ' &middot; ' . e(tr('Terms of Use')) . ' &middot; ' . e(tr('Sitemap')) . '</div></div></div></footer>';
     $h .= '<button class="f-backtop" data-backtop type="button" aria-label="' . e(tr('Back to top')) . '">' . collegeIcon('arrow') . '</button>';
+=======
+    $h = '<footer class="c-footer"><div class="c-wrap c-foot-grid">';
+    $h .= '<div><a class="c-brand light" href="' . e($home) . '"><span class="c-crest">' . siteCrest() . '</span><span><strong>' . e($brand) . '</strong><small>Education | Research | Healthcare | A Better Tomorrow</small></span></a></div>';
+    $h .= '<div><h4>' . e(tr('Quick Links')) . '</h4><nav aria-label="Quick links"><a href="' . e($home) . '">Home</a><a href="' . e($home . '?page=about') . '">About Us</a><a href="' . e($home . '?page=admissions') . '">Admissions</a><a href="' . e($home . '?page=courses') . '">Programs</a><a href="' . e($home . '?page=notices') . '">Notices</a></nav></div>';
+    $h .= '<div><h4>Student Corner</h4><nav aria-label="Student corner"><a href="' . e($home . '?page=login') . '">Student Login</a><a href="' . e(sitePublicUrl('apply.php')) . '">Apply online</a><a href="' . e($home . '?page=login&show=create') . '">Create account</a><a href="' . e($home . '?page=notices') . '">Downloads</a><a href="' . e($home . '?page=login&show=inquiry') . '">Grievance</a></nav></div>';
+    $h .= '<div><h4>Contact Us</h4>';
+    if (trim($address . $city . $phone) === '') $h .= '<p class="u-muted">Contact details will appear here soon.</p>';
+    else {
+        if (trim($address) !== '') $h .= '<p>📍 ' . e($address) . ($city !== '' ? ', ' . e($city) : '') . '</p>';
+        elseif ($city !== '') $h .= '<p>📍 ' . e($city) . '</p>';
+        if ($phone !== '') $h .= '<p>☎ ' . e($phone) . '</p>';
+    }
+    $h .= '</div>';
+    $h .= '<div><h4>' . e(tr('Follow Us')) . '</h4>' . collegeSocial() . '<p class="c-script">Pharmacy for<br>a Healthier Tomorrow</p></div>';
+    $h .= '</div><div class="c-foot-bottom"><div class="c-wrap"><span>© ' . date('Y') . ' ' . e($brand) . '. ' . e(tr('All rights reserved.')) . '</span><span class="c-legal"><a href="#">Privacy Policy</a> | <a href="#">Terms of Use</a> | <a href="#">Sitemap</a></span><span>Designed for Knowledge. Driven by Care.</span></div></div></footer>';
+>>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
 =======
     $h = '<footer class="c-footer"><div class="c-wrap c-foot-grid">';
     $h .= '<div><a class="c-brand light" href="' . e($home) . '"><span class="c-crest">' . siteCrest() . '</span><span><strong>' . e($brand) . '</strong><small>Education | Research | Healthcare | A Better Tomorrow</small></span></a></div>';
