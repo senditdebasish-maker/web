@@ -63,20 +63,20 @@ function collegeTrustBadges(): array {
 // Degree full-form subtitle for program cards (starter template wording).
 function collegeDegreeLine(string $name): string {
     $n = strtolower($name);
-    if (str_contains($n, 'd.pharm') || str_contains($n, 'd pharm') || str_contains($n, 'diploma')) return '(Diploma in Pharmacy)';
-    if (str_contains($n, 'b.pharm') || str_contains($n, 'b pharm') || str_contains($n, 'bachelor')) return '(Bachelor of Pharmacy)';
-    if (str_contains($n, 'm.pharm') || str_contains($n, 'm pharm') || str_contains($n, 'master')) return '(Master of Pharmacy)';
-    if (str_contains($n, 'ph.d') || str_contains($n, 'phd') || str_contains($n, 'doctor')) return '(Doctor of Philosophy)';
+    if (str_contains($n, 'd.pharm') || str_contains($n, 'd pharm')) return '(Diploma in Pharmacy)';
+    if (str_contains($n, 'b.pharm') || str_contains($n, 'b pharm')) return '(Bachelor of Pharmacy)';
+    if (str_contains($n, 'm.pharm') || str_contains($n, 'm pharm')) return '(Master of Pharmacy)';
+    if (str_contains($n, 'ph.d') || str_contains($n, 'phd')) return '(Doctor of Philosophy)';
     return '';
 }
 <<<<<<< HEAD
 // Degree short code for program cards, e.g. "Diploma in Pharmacy" -> "D.Pharm".
 function collegeDegreeShort(string $name): string {
     $n = strtolower($name);
-    if (str_contains($n, 'd.pharm') || str_contains($n, 'd pharm') || str_contains($n, 'diploma')) return 'D.Pharm';
-    if (str_contains($n, 'b.pharm') || str_contains($n, 'b pharm') || str_contains($n, 'bachelor')) return 'B.Pharm';
-    if (str_contains($n, 'm.pharm') || str_contains($n, 'm pharm') || str_contains($n, 'master')) return 'M.Pharm';
-    if (str_contains($n, 'ph.d') || str_contains($n, 'phd') || str_contains($n, 'doctor')) return 'Ph.D.';
+    if (str_contains($n, 'd.pharm') || str_contains($n, 'd pharm')) return 'D.Pharm';
+    if (str_contains($n, 'b.pharm') || str_contains($n, 'b pharm')) return 'B.Pharm';
+    if (str_contains($n, 'm.pharm') || str_contains($n, 'm pharm')) return 'M.Pharm';
+    if (str_contains($n, 'ph.d') || str_contains($n, 'phd')) return 'Ph.D.';
     return '';
 }
 =======
