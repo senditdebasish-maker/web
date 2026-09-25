@@ -4,6 +4,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 - **New applicants:** `apply.php` — course catalogue, course detail/contact, application form, private tracking, correction/resubmission, withdrawal and application help. Email verification happens on the master sign-in (`index.php?page=login`), which returns here afterwards.
 - **Student-portal applicants:** `student.php?page=admissions` — the same journey inside the student portal for verified student accounts: secure course catalogue, course details, application form, private tracking, certificate uploads, withdrawal and application help.
 =======
@@ -12,6 +13,9 @@
 =======
 - **New applicants:** `apply.php` — course catalogue, course detail/contact, email verification, application form, private tracking, correction/resubmission, withdrawal and application help.
 >>>>>>> parent of 549483e (new)
+=======
+- **New applicants:** `apply.php` — course catalogue, course detail/contact, application form, private tracking, correction/resubmission, withdrawal and application help. Email verification happens on the master sign-in (`index.php?page=login`), which returns here afterwards.
+>>>>>>> parent of ba104b3 (new)
 - **Enrolled students:** `student.php` — admission/profile, fees/installments, PDFs, attendance, published results, notices and support.
 - **Staff:** `office.php?page=applications` — public listing controls and institute-scoped review queue. Each application opens an organized review page showing every entered form field with four decision buttons (Approve, Reject, Revert back, Cancel). Approved applications collect under the **Accepted applications** subtab.
 

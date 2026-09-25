@@ -20,6 +20,7 @@ try {
     else {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         $student=portalStudent(); $portalUser=currentStudentUser(); $applicant=currentApplicant();
         if(isset($_SESSION['suid'])&&!$portalUser){unset($_SESSION['applicant_id'],$_SESSION['applicant_version'],$_SESSION['applicant_email'],$_SESSION['applicant_site']);$applicant=null;}
         if($portalUser&&!$student){linkStudentUser($portalUser);$student=portalStudent();}
@@ -43,6 +44,8 @@ try {
             elseif($action==='upload_certificate'){$applicationId=uploadCertificate();header('Location: student.php?page=application&id='.$applicationId);exit;}
             elseif($action==='online_order'){
 =======
+=======
+>>>>>>> parent of ba104b3 (new)
         if ($_SERVER['REQUEST_METHOD']==='POST') {
             requireCookies();
             if (!hash_equals($_SESSION['csrf'],input('csrf',128))) fail('Your form expired. Refresh and try again.');
@@ -97,9 +100,12 @@ try {
                 $_SESSION=[];session_regenerate_id(true);$next='login';
             } else fail('Students cannot perform this action.');
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> parent of 549483e (new)
 =======
 >>>>>>> parent of 549483e (new)
+=======
+>>>>>>> parent of ba104b3 (new)
             header('Location: student.php?page='.$next);exit;
         }
         $student=portalStudent();
@@ -114,6 +120,7 @@ try {
         }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         if(!$student&&!$portalUser&&!$applicant){header('Location: index.php?page=login'.($page==='register'?'&show=create':''));exit;}
         elseif(!$student&&($portalUser||$applicant)&&!in_array($page,['dashboard','courses','admissions','course','apply','applications','application','profile','inquiries'],true))$page='dashboard';
         elseif($page==='login'||$page==='register'){header('Location: student.php');exit;}
@@ -123,6 +130,9 @@ try {
 } catch(DomainException $e) { $error=$e->getMessage();if($page==='support' && isset($_GET['ticket'])){unset($_GET['ticket']);if($_SERVER['REQUEST_METHOD']==='GET')http_response_code(403);}$student=$ready?portalStudent():null;$portalUser=$ready?currentStudentUser():null;$applicant=$ready?currentApplicant():null;if(!$student&&!$portalUser&&!$applicant){header('Location: index.php?page=login');exit;}if(!$student&&!in_array($page,['dashboard','courses','admissions','course','apply','applications','application','profile','inquiries'],true))$page='dashboard'; }
 =======
         if (!$student && !$portalUser) $page=$page==='register'?'register':'login';
+=======
+        if (!$student && !$portalUser) { header('Location: index.php?page=login'.($page==='register'?'&show=create':'')); exit; }
+>>>>>>> parent of ba104b3 (new)
         elseif ($portalUser && !$student) $page='account';
         elseif ($page==='login'||$page==='register') { header('Location: student.php');exit; }
         elseif (!in_array($page,['dashboard','payments','documents','profile','academics','results','announcements','support'],true)) { http_response_code(404);$page='notfound'; }

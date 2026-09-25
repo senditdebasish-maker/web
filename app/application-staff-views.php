@@ -7,6 +7,7 @@ $applicantSections=['Personal details'=>['name'=>'Full legal name','date_of_birt
 ?>
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 <section class="panel"><div class="panel-heading"><div><h2><?=e($r['reference'])?> · <?=e($r['status'])?></h2><p>Version <?=(int)$r['version']?> · Submitted <?=e($r['submitted_at'])?> · Updated <?=e($r['updated_at'])?></p></div><a href="?page=applications">All applications →</a></div><div class="settings-body">
 <?php foreach($applicantSections as $heading=>$fields):?><h3><?=e($heading)?></h3><dl><?php foreach($fields as $k=>$label):?><dt><strong><?=e($label)?></strong></dt><dd><?=e((string)($data[$k]??''))?></dd><?php endforeach;?></dl><?php endforeach;?>
 <h3>Submission</h3><dl><dt><strong>Verified applicant email</strong></dt><dd><?=e($account['email'])?></dd><dt><strong>Additional information from applicant</strong></dt><dd><?=e((string)($data['note']??''))?></dd></dl>
@@ -21,6 +22,8 @@ formStart('approve_application');?><input type="hidden" name="application_id" va
 =======
 =======
 >>>>>>> parent of 549483e (new)
+=======
+>>>>>>> parent of ba104b3 (new)
 <section class="panel"><div class="panel-heading"><div><h2><?=e($r['reference'])?> · <?=e($r['status'])?></h2><p>Version <?=(int)$r['version']?> · <?=e($r['submitted_at'])?></p></div><a href="?page=applications">All applications →</a></div><div class="settings-body"><dl><?php foreach(['name'=>'Applicant','institute_name'=>'Institute at submission','course_name'=>'Course at submission','phone'=>'Phone','city'=>'City','qualification'=>'Qualification','completion_year'=>'Completion year','note'=>'Applicant note'] as $k=>$label):?><dt><strong><?=e($label)?></strong></dt><dd><?=e($data[$k])?></dd><?php endforeach;?></dl><p>Verified email: <?=e($account['email'])?> · Applicant access: <?=$account['active']?'Enabled':'Suspended'?></p><p><strong>Quoted fee: <?=money((int)$r['fee_minor'])?></strong>. Approval uses this application fee snapshot, not a subsequently changed course price. Confirm eligibility, documents, fee terms and any legally required guardian consent offline.</p><details><summary>Privacy notice accepted</summary><p><?=nl2br(e($r['consent_notice']))?></p><small><?=e($r['consent_version'])?></small></details>
 <?php if(!in_array($r['status'],['Admitted','Rejected','Withdrawn'],true)):
 formStart('application_review');?><input type="hidden" name="application_id" value="<?=(int)$r['id']?>"><input type="hidden" name="version" value="<?=(int)$r['version']?>"><?php selectField('Review decision','status',['Under review'=>'Under review','Changes requested'=>'Request corrections','Rejected'=>'Reject application']);textArea('Message visible to the applicant','message','',true);formEnd('Save review decision');?><hr>
@@ -58,9 +61,12 @@ $pn=min(100000,max(1,(int)($_GET['p']??1)));$offset=($pn-1)*20;$tab=is_string($_
 $pn=min(100000,max(1,(int)($_GET['p']??1)));$offset=($pn-1)*20;$tab=is_string($_GET['tab']??null)?$_GET['tab']:'';if(!in_array($tab,['listings','eligibility','mail'],true))$tab='queue';?>
 <section class="panel"><div class="panel-heading"><div><h2>Online admission desk</h2><p>Applicants verify email and submit online. Status updates are queued for email; check this queue regularly as delivery depends on the mail worker.</p></div><a class="button secondary" href="apply.php">Open public admissions ↗</a></div><div class="list-toolbar"><a class="button secondary" href="<?=e(url(['tab'=>'queue','p'=>1]))?>">Application queue</a> <a class="button secondary" href="<?=e(url(['tab'=>'listings','p'=>1]))?>">Manage public course listings</a> <a class="button secondary" href="<?=e(url(['tab'=>'eligibility','p'=>1]))?>">Eligibility automation</a> <a class="button secondary" href="<?=e(url(['tab'=>'mail','p'=>1]))?>">Email alerts</a></div>
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> parent of 549483e (new)
 =======
 >>>>>>> parent of 549483e (new)
+=======
+>>>>>>> parent of ba104b3 (new)
 <?php if($tab==='listings'):
 $list=rows('SELECT c.*,l.accepting,l.opens_on,l.closes_on FROM courses c LEFT JOIN admission_listings l ON l.id=c.id WHERE '.($scope?'c.institute_id=?':'1=1').' ORDER BY c.id DESC LIMIT 21 OFFSET '.$offset,$args);$more=count($list)>20;$list=array_slice($list,0,20);
 table(['Course','Course active','Listing setting','Dates',''],$list,fn($c)=>[e($c['name']),badge($c['active']?'Active':'Archived'),badge($c['accepting']?'Open in window':'Closed'),e(($c['opens_on']??'—').' → '.($c['closes_on']??'—')),'<a href="?page=applications&listing='.$c['id'].'">Configure public listing →</a>']);

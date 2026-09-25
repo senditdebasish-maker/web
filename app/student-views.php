@@ -8,7 +8,11 @@ function spForm(string $action): string { return '<form method="post">'.csrf().'
 $spButtons=siteToggle();
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 if($student||$portalUser||$applicant) {$spProfile=$student?['name'=>$student['name'],'role'=>'Student','url'=>'student.php']:($portalUser?['name'=>$portalUser['name'],'role'=>'Student','url'=>'student.php']:['name'=>$applicant['email']??'Applicant','role'=>'Applicant','url'=>'student.php?page=applications']);$spButtons.=siteProfileBox($spProfile).spForm('logout').'<button class="u-btn ghost" type="submit">Sign out ↗</button></form>';}
+=======
+if($student||$portalUser) $spButtons.=spForm('logout').'<button class="u-btn ghost" type="submit">Sign out ↗</button></form>';
+>>>>>>> parent of ba104b3 (new)
 else $spButtons.='<a class="u-btn ghost" href="index.php?page=login">Sign in ↗</a><a class="u-btn ghost" href="index.php?page=login&show=create">Create account ↗</a><a class="u-btn ghost" href="apply.php">Apply for admission ↗</a>';
 =======
 if($student||$portalUser) $spButtons.=spForm('logout').'<button class="u-btn ghost" type="submit">Sign out ↗</button></form>';
@@ -55,6 +59,7 @@ if(!$portalUser&&$applicant)$portalUser=['name'=>$applicant['email'],'email'=>$a
 $appRef=null;$appStatus=null;
 try{ $acc=one('SELECT id FROM applicant_accounts WHERE email=?',[$portalUser['email']]); if($acc){ $r=one('SELECT reference,status FROM admission_applications WHERE applicant_id=? ORDER BY id DESC LIMIT 1',[$acc['id']]); if($r){ $appRef=$r['reference']; $appStatus=$r['status']; } } }catch(Throwable $ignored){}
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> parent of 549483e (new)
 ?>
 <main class="u-page u-page-narrow">
@@ -70,14 +75,22 @@ try{ $acc=one('SELECT id FROM applicant_accounts WHERE email=?',[$portalUser['em
 <main class="u-page u-page-narrow">
 <?php if($error): ?><div class="u-alert error" role="alert"><?=e($error)?></div><?php endif; ?><?php if($flash): ?><div class="u-alert" role="status"><?=e($flash)?></div><?php endif; ?>
 >>>>>>> parent of 549483e (new)
+=======
+?>
+<main class="u-page u-page-narrow">
+<?php if($error): ?><div class="u-alert error" role="alert"><?=e($error)?></div><?php endif; ?><?php if($flash): ?><div class="u-alert" role="status"><?=e($flash)?></div><?php endif; ?>
+>>>>>>> parent of ba104b3 (new)
 <section class="u-card"><div class="u-eyebrow">STUDENT ACCOUNT</div><h1>Hello, <?=e(explode(' ',$portalUser['name'])[0])?>.</h1><p>Verified email: <strong><?=e($portalUser['email'])?></strong></p>
 <?php if($appRef): ?><p>Your latest application <strong><?=e($appRef)?></strong> is: <strong><?=e($appStatus)?></strong>.</p><?php if($appStatus==='Admitted'): ?><p>Your admission is approved. If the office has enabled your portal, <a href="student.php">refresh this page</a> to open your full student portal.</p><?php else: ?><p><a class="u-btn solid" href="apply.php?page=dashboard">Track your application &rarr;</a></p><?php endif; ?>
 <?php else: ?><p>You have not applied for admission yet. Your full portal &mdash; fees, payments, documents and results &mdash; opens after the office approves your application.</p><p><a class="u-btn solid" href="apply.php">Apply for admission &rarr;</a></p><?php endif; ?>
 <p class="u-small">If the office just enabled your access, refresh this page. For help, contact your institute office.</p></section>
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> parent of 549483e (new)
 =======
 >>>>>>> parent of 549483e (new)
+=======
+>>>>>>> parent of ba104b3 (new)
 </main>
 <?php else:
 $labels=['dashboard'=>'Overview','payments'=>'My payments','documents'=>'My documents','profile'=>'My profile','academics'=>'Academic record','results'=>'My results','announcements'=>'Announcements','support'=>'Support'];

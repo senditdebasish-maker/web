@@ -60,7 +60,11 @@ function portalControl(array $student): string {
     if (!portalReady()) return '<small>Student portal upgrade required.</small><a class="text-link" href="upgrade.php">Upgrade instructions ↗</a>';
     $account=one('SELECT * FROM portal_accounts WHERE student_id=?',[$student['id']]);
     $enabled=$account && $account['active'] && $account['email']===strtolower($student['email']);
+<<<<<<< HEAD
     return '<div class="portal-access"><small>Portal: '.($enabled?'Enabled':'Disabled').'</small><form method="post">'.csrf().'<input type="hidden" name="action" value="portal_access"><input type="hidden" name="student_id" value="'.$student['id'].'"><input type="hidden" name="access" value="'.($enabled?'disable':'enable').'"><button class="text-button">'.($enabled?'Disable student access':'Enable student access').'</button></form><a class="text-link" href="student.php">Student sign-in ↗</a></div>';
+=======
+    return '<div class="portal-access"><small>Portal: '.($enabled?'Enabled':'Disabled').'</small><form method="post">'.csrf().'<input type="hidden" name="action" value="portal_access"><input type="hidden" name="student_id" value="'.$student['id'].'"><input type="hidden" name="access" value="'.($enabled?'disable':'enable').'"><button class="text-button">'.($enabled?'Disable student access':'Enable student access').'</button></form><a class="text-link" href="index.php?page=login">Student sign-in ↗</a></div>';
+>>>>>>> parent of ba104b3 (new)
 }
 function migrateStudentUsers(): void {
     $mysql=db()->getAttribute(PDO::ATTR_DRIVER_NAME)==='mysql';

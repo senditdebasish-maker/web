@@ -84,6 +84,7 @@ function applicationFields(): array {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     $father=input('father_name',120,false);if($father==='')fail("Enter your father's name.");
     $mother=input('mother_name',120,false);if($mother==='')fail("Enter your mother's name.");
     $dob=input('date_of_birth',10,false);if(!preg_match('/^\\d{4}-\\d{2}-\\d{2}$/D',$dob)||$dob>date('Y-m-d'))fail('Enter a valid date of birth.');
@@ -132,6 +133,12 @@ function applicantMutation(string $action): int {
 function applicantMutation(string $action): int {
     $actor=currentApplicant();if(!$actor)fail('Verify your applicant email first.');
 >>>>>>> parent of 549483e (new)
+=======
+    return ['name'=>input('name',120),'phone'=>$phone,'city'=>input('city',100),'qualification'=>input('qualification',300),'completion_year'=>$year,'note'=>input('note',1500,false)];
+}
+function applicantMutation(string $action): int {
+    $actor=currentApplicant();if(!$actor)fail('Verify your applicant email first.');
+>>>>>>> parent of ba104b3 (new)
     writeTransaction();try{
         $locked=one('SELECT * FROM applicant_accounts WHERE id=?'.lockSuffix(),[$actor['id']]);if(!$locked['active']||(int)$locked['version']!==(int)$_SESSION['applicant_version'])fail('Applicant access is no longer active.');
         if($action==='submit_application'){
@@ -144,6 +151,7 @@ function applicantMutation(string $action): int {
             if((int)query('SELECT COUNT(*) FROM admission_applications WHERE applicant_id=? AND submitted_at>=?',[$actor['id'],date('Y-m-d H:i:s',time()-86400)])->fetchColumn()>=5)fail('Application submission limit reached. Try again tomorrow.');
             $cid=(int)input('course_id');one('SELECT id FROM courses WHERE id=?'.lockSuffix(),[$cid]);one('SELECT id FROM admission_listings WHERE id=?'.lockSuffix(),[$cid]);$course=publicCourses(0,$cid)[0]??null;if(!$course)fail('This course is not currently accepting applications.');
             if(!hash_equals(hash('sha256',json_encode($course,JSON_THROW_ON_ERROR)),input('offer_token',64)))fail('Course details or fee changed. Reload and review the offer before applying.');
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
             $data=($action==='save_application_draft'?applicationDraftFields():applicationFields())+['course_name'=>$course['name'],'institute_name'=>$course['institute_name'],'duration'=>$course['duration']];$now=date('Y-m-d H:i:s');$status=$action==='save_application_draft'?'Draft':'Pending Review';
@@ -164,11 +172,17 @@ function applicantMutation(string $action): int {
 =======
             applicationEvent($id,'Applicant',null,$action==='save_application_draft'?'Application draft saved.':'Application submitted for review.',['data'=>$data,'status'=>$status,'fee_minor'=>(int)$course['fee_minor'],$action=>$action],$action!=='save_application_draft');if($action==='submit_application')$_SESSION['application_nonce']=bin2hex(random_bytes(24));
 >>>>>>> parent of 35cbb61 (Application form becomes a 4-step wizard (personal, academic, documents, preview))
+=======
+            $data=applicationFields()+['course_name'=>$course['name'],'institute_name'=>$course['institute_name'],'duration'=>$course['duration']];$now=date('Y-m-d H:i:s');
+            query('INSERT INTO admission_applications (applicant_id,institute_id,course_id,reference,request_key,fee_minor,data_json,consent_notice,consent_version,submitted_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)',[$actor['id'],$course['institute_id'],$cid,'APP-'.strtoupper(bin2hex(random_bytes(8))),$key,$course['fee_minor'],json_encode($data,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE),$course['privacy_notice'],'admission-application-v1',$now,$now]);$id=(int)db()->lastInsertId();
+            applicationEvent($id,'Applicant',null,'Application submitted.',['data'=>$data,'fee_minor'=>(int)$course['fee_minor']]);$_SESSION['application_nonce']=bin2hex(random_bytes(24));
+>>>>>>> parent of ba104b3 (new)
         }else{
             $r=ownApplication((int)input('application_id'),$actor);$r=one('SELECT * FROM admission_applications WHERE id=?'.lockSuffix(),[$r['id']]);$id=(int)$r['id'];
             if((int)input('version')!==(int)$r['version'])fail('Application changed in another window. Reload.');
             if(in_array($r['status'],['Admitted','Rejected','Withdrawn'],true))fail('This application is closed to applicant changes.');
             if($action==='withdraw_application'){$status='Withdrawn';$data=json_decode($r['data_json'],true,512,JSON_THROW_ON_ERROR);$message='Application withdrawn by applicant. '.input('reason',500);}
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
             else{if(!in_array($r['status'],['Changes requested','Revision'],true))fail('The office must request corrections before you edit a submitted application.');$data=array_replace(json_decode($r['data_json'],true,512,JSON_THROW_ON_ERROR),applicationFields());$status='Pending Review';$message='Corrected application resubmitted.';}
@@ -177,6 +191,8 @@ function applicantMutation(string $action): int {
 =======
 =======
 >>>>>>> parent of 549483e (new)
+=======
+>>>>>>> parent of ba104b3 (new)
             else{if($r['status']!=='Changes requested')fail('The office must request corrections before you edit a submitted application.');$data=array_replace(json_decode($r['data_json'],true,512,JSON_THROW_ON_ERROR),applicationFields());$status='Submitted';$message='Corrected application resubmitted.';}
             query('UPDATE admission_applications SET status=?,data_json=?,version=version+1,updated_at=? WHERE id=?',[$status,json_encode($data,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE),date('Y-m-d H:i:s'),$id]);applicationEvent($id,'Applicant',null,$message,['before'=>json_decode($r['data_json'],true),'after'=>$data,'status'=>$status]);
 >>>>>>> parent of 549483e (new)
@@ -205,6 +221,7 @@ function reviewApplication(bool $admit=false): string {
     query('UPDATE admission_applications SET status=?,student_id=?,version=version+1,updated_at=? WHERE id=?',[$status,$studentId,date('Y-m-d H:i:s'),$r['id']]);
     applicationEvent((int)$r['id'],'Office',(int)$u['id'],$message,['before_status'=>$r['status'],'after_status'=>$status,'student_id'=>$studentId]);audit('application_reviewed','admission_applications',(int)$r['id']);return 'applications';
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 function approveApplicationAction(): string {
@@ -238,6 +255,8 @@ function cancelApplicationAction(): string {
 >>>>>>> parent of 549483e (new)
 =======
 >>>>>>> parent of 549483e (new)
+=======
+>>>>>>> parent of ba104b3 (new)
 function toggleApplicant(): string {
     requireRole(['owner']);$r=staffApplication((int)input('application_id'));$a=one('SELECT * FROM applicant_accounts WHERE id=?'.lockSuffix(),[$r['applicant_id']]);
     query('UPDATE applicant_accounts SET active=?,version=version+1 WHERE id=?',[$a['active']?0:1,$a['id']]);query('UPDATE applicant_codes SET consumed=1 WHERE email_hash=?',[hash('sha256','applicant:'.$a['email'])]);audit('applicant_access_changed','applicant_accounts',(int)$a['id']);return 'applications';
