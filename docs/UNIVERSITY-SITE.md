@@ -8,10 +8,12 @@ the website changes immediately — no file editing.
 ## Pages (`?page=`)
 
 Home (hero, live stats, featured programs, notices), About (campuses), Programs
-(open listings with fee and closing date), Admissions (process, eligibility, dates),
-Notices (derived from live admission dates), Faculty (active teachers: name,
-qualification and institute only — personal email/phone are never shown), Contact
-(campus addresses and phones) and Sign in.
+(open listings with fee and closing date), Program detail, Admissions (process,
+eligibility, dates), Notices (derived from live admission dates, with search and
+Open/Closing-soon filters), Faculty (active teachers: name, qualification and
+institute only — personal email/phone are never shown), Campus Life (laboratories,
+library, hostel, transport, student activities), Contact (campus addresses and
+phones) and Sign in.
 
 ## One sign-in for everyone
 
@@ -47,48 +49,56 @@ include it.
 
 ## Homepage design and starter showcase content
 
-The homepage follows the Nimita-style pharmacy college design
-(`assets/nimita.css` + `assets/nimita.js`, scoped under `body.college` so
-portal styles never collide): a navy utility bar (AICTE / PCI / MAKAUT
-approvals, Student/Faculty/Admin login links, dark-mode toggle, working
-**EN | हिन्दी** toggle), a logo + college-name header with Enquiry,
-Download, Prospectus and Apply Now buttons, a dropdown nav (Home carries a
-house icon), a scrolling LATEST UPDATES ticker (built live from CRM
-admission dates and closing dates), a full-width campus photo hero
-("Shaping Healthcare Leaders for a Healthier Tomorrow" over
+The public site wears the future design system (`assets/future.css` +
+`assets/future.js`, scoped under `body.future` so portal styles never
+collide): a navy-to-royal utility bar (helpline, city, Student/Staff login
+links, dark-mode toggle, working **EN | हिन्दी** toggle), a sticky glass
+header with the college brand, icon dropdown nav (About, Academics,
+Admissions, Campus Life, Student Corner, Placement, Research, Notices,
+Contact), Enquire + Apply Online buttons, a slide-in mobile drawer and a
+mobile bottom nav (Home, Programs, Apply, Notices, Account). A scrolling
+LATEST UPDATES ticker (built live from CRM admission dates, closing dates
+and the helpline — it hides itself when there is nothing to announce) sits
+under the header, followed by a full-width campus photo hero ("Shaping
+Healthcare Leaders for a Healthier Tomorrow" over
 `assets/college-hero.jpg` — replace this file with a photo of your own
-campus to rebrand instantly), six quick-feature tiles, a welcome + quote +
-Latest Updates section (updates are live CRM notices with date badges),
-photo program cards (`assets/program-dpharm.jpg`, `program-bpharm.jpg`,
-`program-mpharm.jpg`, `program-phd.jpg`, matched from the live course name,
-with degree short codes via `collegeDegreeShort()`), an animated stats band,
-a campus gallery + Message from the Principal side by side, a facilities
-strip, an admission call-to-action band and a full college footer with
-contact lines and social icons. Icons use Font Awesome and headings use
-Inter/Playfair Display from CDNs (allowed in the page CSP; system fonts
-take over offline). Inner pages (about, courses, admissions, notices,
-faculty, contact, brochure, login) share the same header/ticker/footer but
-keep their existing content styled by the theme/university stylesheets.
-The chrome is genuinely bilingual via a sessionless `?lang=` + cookie
-switch, while CRM records stay in their entered language.
+campus to rebrand instantly) with a live academic-year admissions badge and
+animated CRM counters. Below come trust badges, "why choose us" cards, an
+about preview with the Principal's message, photo program cards
+(`assets/program-dpharm.jpg`, `program-bpharm.jpg`, `program-mpharm.jpg`,
+`program-phd.jpg`, matched from the live course name, with degree short
+codes via `collegeDegreeShort()`), a live-stats band, notices with date
+badges, a campus gallery and an admission call-to-action band, closed by a
+full footer (quick links, academics, admissions, student corner, contact —
+no fake social icons). All icons are inline SVG; headings use Inter/Playfair
+Display from Google Fonts (allowed in the page CSP; system fonts take over
+offline). Inner pages share the same header/ticker/footer/drawer/bottom-nav
+chrome; the sign-in page keeps its existing OTP forms and popups styled by
+the theme/university stylesheets. The chrome is genuinely bilingual via a
+sessionless `?lang=` + cookie switch, while CRM records stay in their
+entered language.
 
-Almost everything is live CRM data. The only starter template pieces are
-the hero headline, the feature tiles, the stats numbers, the quote and the
-welcome text. Dropping `assets/principal-photo.jpg` into place shows a real
-portrait in the principal box automatically. (`collegeHighlights()`,
-`collegeTrustBadges()`, `collegeSpotStats()`, `siteAccreditations()`,
-`siteShowcasePrograms()`, `siteRecruiters()` and `siteVcMessage()` are kept
-for backwards compatibility but no longer render.) A future Website
-Settings page in the office workspace will make these editable without
-touching code. The **?page=brochure** page and its PDF download are
-generated from live brand and program records; **?page=courses** filters by
-typed text without changing the default listing.
+Almost everything is live CRM data — counts, programs, dates, campuses,
+contacts and notices all come from the database, and obsolete hardcoded
+years were removed. The only starter template pieces are the hero headline,
+the feature cards, the quote and the welcome text. Dropping
+`assets/principal-photo.jpg` into place shows a real portrait in the
+principal card automatically. (`collegeHighlights()`, `collegeTrustBadges()`,
+`collegeSpotStats()`, `siteAccreditations()`, `siteShowcasePrograms()`,
+`siteRecruiters()` and `siteVcMessage()` are kept for backwards
+compatibility but no longer render.) A future Website Settings page in the
+office workspace will make these editable without touching code. The
+**?page=brochure** page and its PDF download are generated from live brand
+and program records; **?page=courses** filters by typed text without
+changing the default listing; **?page=notices** adds live search plus
+Open/Closing-soon filters.
 
 ## One theme, no dead ends
 
 The root site wears a college theme (`app/college-chrome.php` +
-`assets/college.css` on top of `assets/university.css`); every portal page keeps
-the shared theme (`app/site-chrome.php` + `assets/university.css`). Buttons,
+`assets/future.css` on top of `assets/university.css` for the sign-in
+forms and popups); every portal page keeps the shared theme
+(`app/site-chrome.php` + `assets/university.css`). Buttons,
 form controls and the dark-mode toggle stay consistent everywhere. On every
 page the brand links back to the university front page,
 and every portal (admissions, student, office homepage and office workspace) shows
