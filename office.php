@@ -15,7 +15,10 @@ session_start();
 if (isset($_SESSION['last_seen']) && time()-$_SESSION['last_seen']>1800) { $_SESSION=[]; session_regenerate_id(true); }
 $_SESSION['last_seen']=time();
 $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
+<<<<<<< HEAD
 if (!currentUser() && !defined('CRM_DOCUMENT_REQUEST') && !isset($_GET['certificate'])) { header('Location: index.php?page=login'); exit; }
+=======
+>>>>>>> parent of 549483e (new)
 require __DIR__ . '/app/actions.php';
 $page=is_string($_GET['page'] ?? null) ? $_GET['page'] : 'dashboard';
 $error=null;
@@ -44,7 +47,7 @@ try {
         staffApplication((int)$c['application_id']);
         ob_clean();serveCertificateFile($c);
     }
-    if (!$user) { header('Location: index.php?page=login'); exit; }
+    if (!$user) $page='login';
     elseif ($page==='login') redirect('dashboard');
     $allowed=['dashboard','institutes','courses','staff','enquiries','followups','admissions','students','settings','audit','payments','documents','notifications','teachers','batches','attendance','fee-plans','fee-reports','health','exams','announcements','support','applications','student-accounts'];
     if ($user && !in_array($page,$allowed,true)) { http_response_code(404); $page='notfound'; }

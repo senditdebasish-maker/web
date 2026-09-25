@@ -911,54 +911,6 @@ tbody tr:hover {
   font-size: 10px;
   padding: 9px 12px;
 }
-.admissions-page {
-  display: grid;
-  gap: 22px;
-  overflow: visible;
-  border: 0;
-  background: transparent;
-}
-.admissions-page > .list-toolbar,
-.admissions-page > .table-wrap,
-.admissions-page > .inline-note {
-  border: 1px solid var(--line);
-  background: #fff;
-  border-radius: 11px;
-}
-.admissions-page > .list-toolbar {
-  padding: 18px 23px;
-}
-.admissions-page > .table-wrap {
-  overflow-x: auto;
-}
-.admissions-page > .panel {
-  margin: 0;
-  min-width: 0;
-  box-shadow: 0 8px 24px rgba(44, 38, 70, 0.04);
-}
-.admissions-page > .panel .panel-heading {
-  background: #fff;
-  border-bottom: 1px solid var(--line);
-}
-.admissions-page > .panel table {
-  min-width: 620px;
-}
-.admissions-page > .panel th {
-  background: #faf9fd;
-}
-.admissions-page > .panel td,
-.admissions-page > .panel th {
-  padding-top: 15px;
-  padding-bottom: 15px;
-}
-.admissions-page > .panel .list-toolbar {
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  border-bottom: 1px solid var(--line);
-}
-.admissions-page > .panel .list-toolbar .button {
-  font-size: 10px;
-}
 .text-button {
   border: 0;
   background: none;

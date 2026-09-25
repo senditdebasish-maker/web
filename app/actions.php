@@ -43,10 +43,13 @@ function handleAction(): string {
             'admission_listing' => saveAdmissionListing(),
             'application_review' => reviewApplication(),
             'application_admit' => reviewApplication(true),
+<<<<<<< HEAD
             'approve_application' => approveApplicationAction(),
             'reject_application' => rejectApplicationAction(),
             'request_application_revision' => requestApplicationRevisionAction(),
             'cancel_application' => cancelApplicationAction(),
+=======
+>>>>>>> parent of 549483e (new)
             'applicant_toggle' => toggleApplicant(),
             'exam_create' => createExam(),
             'exam_grade' => gradeExam(),

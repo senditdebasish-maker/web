@@ -1,6 +1,6 @@
 # Student portal phase
 
-New students can now apply through **`student.php?page=admissions`** after using the main homepage sign-in. Staff approval creates the enrolled-student account and admission letter. See [Online admissions](ONLINE-ADMISSIONS.md); applicant and student access use the same secure public session.
+New students can now apply through **`apply.php`**. Staff approval creates the enrolled-student account and admission letter. See [Online admissions](ONLINE-ADMISSIONS.md); applicant and student sessions remain separate.
 
 ## Upgrade an already-installed CRM (do not reinstall)
 
