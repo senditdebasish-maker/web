@@ -21,6 +21,7 @@ try {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         $student=portalStudent(); $portalUser=currentStudentUser(); $applicant=currentApplicant();
         if(isset($_SESSION['suid'])&&!$portalUser){unset($_SESSION['applicant_id'],$_SESSION['applicant_version'],$_SESSION['applicant_email'],$_SESSION['applicant_site']);$applicant=null;}
         if($portalUser&&!$student){linkStudentUser($portalUser);$student=portalStudent();}
@@ -44,6 +45,8 @@ try {
             elseif($action==='upload_certificate'){$applicationId=uploadCertificate();header('Location: student.php?page=application&id='.$applicationId);exit;}
             elseif($action==='online_order'){
 =======
+=======
+>>>>>>> parent of ba104b3 (new)
 =======
 >>>>>>> parent of ba104b3 (new)
         if ($_SERVER['REQUEST_METHOD']==='POST') {
@@ -101,9 +104,12 @@ try {
             } else fail('Students cannot perform this action.');
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> parent of 549483e (new)
 =======
 >>>>>>> parent of 549483e (new)
+=======
+>>>>>>> parent of ba104b3 (new)
 =======
 >>>>>>> parent of ba104b3 (new)
             header('Location: student.php?page='.$next);exit;
@@ -121,6 +127,7 @@ try {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         if(!$student&&!$portalUser&&!$applicant){header('Location: index.php?page=login'.($page==='register'?'&show=create':''));exit;}
         elseif(!$student&&($portalUser||$applicant)&&!in_array($page,['dashboard','courses','admissions','course','apply','applications','application','profile','inquiries'],true))$page='dashboard';
         elseif($page==='login'||$page==='register'){header('Location: student.php');exit;}
@@ -131,6 +138,8 @@ try {
 =======
         if (!$student && !$portalUser) $page=$page==='register'?'register':'login';
 =======
+=======
+>>>>>>> parent of ba104b3 (new)
         if (!$student && !$portalUser) { header('Location: index.php?page=login'.($page==='register'?'&show=create':'')); exit; }
 >>>>>>> parent of ba104b3 (new)
         elseif ($portalUser && !$student) $page='account';

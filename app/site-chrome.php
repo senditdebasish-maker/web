@@ -99,6 +99,7 @@ function siteFooter(string $brand, string $kind, string $city = '', string $addr
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     $h .= '<div><h4>' . e(tr('Portals')) . '</h4><nav aria-label="Portals"><a href="' . e(sitePublicUrl('apply.php')) . '">' . e(tr('Apply online')) . '</a><a href="' . e(sitePublicUrl('student.php?page=admissions')) . '">' . e(tr('Student admissions')) . '</a><a href="' . e($home . '?page=login&show=create') . '">' . e(tr('Create account')) . '</a><a href="' . e($home . '?page=login') . '">' . e(tr('Sign in')) . '</a></nav></div>';
 =======
     $h .= '<div><h4>' . e(tr('Portals')) . '</h4><nav aria-label="Portals"><a href="' . e(sitePublicUrl('apply.php')) . '">' . e(tr('Apply online')) . '</a><a href="' . e(sitePublicUrl('student.php?page=register')) . '">' . e(tr('Create account')) . '</a><a href="' . e($home . '?page=login') . '">' . e(tr('Sign in')) . '</a><a href="' . e(sitePublicUrl('office.php')) . '">' . e(tr('Office login')) . '</a></nav></div>';
@@ -106,6 +107,9 @@ function siteFooter(string $brand, string $kind, string $city = '', string $addr
 =======
     $h .= '<div><h4>' . e(tr('Portals')) . '</h4><nav aria-label="Portals"><a href="' . e(sitePublicUrl('apply.php')) . '">' . e(tr('Apply online')) . '</a><a href="' . e(sitePublicUrl('student.php?page=register')) . '">' . e(tr('Create account')) . '</a><a href="' . e($home . '?page=login') . '">' . e(tr('Sign in')) . '</a><a href="' . e(sitePublicUrl('office.php')) . '">' . e(tr('Office login')) . '</a></nav></div>';
 >>>>>>> parent of 549483e (new)
+=======
+    $h .= '<div><h4>' . e(tr('Portals')) . '</h4><nav aria-label="Portals"><a href="' . e(sitePublicUrl('apply.php')) . '">' . e(tr('Apply online')) . '</a><a href="' . e($home . '?page=login&show=create') . '">' . e(tr('Create account')) . '</a><a href="' . e($home . '?page=login') . '">' . e(tr('Sign in')) . '</a><a href="' . e($home . '?page=login') . '">' . e(tr('Office login')) . '</a></nav></div>';
+>>>>>>> parent of ba104b3 (new)
 =======
     $h .= '<div><h4>' . e(tr('Portals')) . '</h4><nav aria-label="Portals"><a href="' . e(sitePublicUrl('apply.php')) . '">' . e(tr('Apply online')) . '</a><a href="' . e($home . '?page=login&show=create') . '">' . e(tr('Create account')) . '</a><a href="' . e($home . '?page=login') . '">' . e(tr('Sign in')) . '</a><a href="' . e($home . '?page=login') . '">' . e(tr('Office login')) . '</a></nav></div>';
 >>>>>>> parent of ba104b3 (new)

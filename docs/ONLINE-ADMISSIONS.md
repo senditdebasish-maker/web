@@ -5,6 +5,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 - **New applicants:** `apply.php` — course catalogue, course detail/contact, application form, private tracking, correction/resubmission, withdrawal and application help. Email verification happens on the master sign-in (`index.php?page=login`), which returns here afterwards.
 - **Student-portal applicants:** `student.php?page=admissions` — the same journey inside the student portal for verified student accounts: secure course catalogue, course details, application form, private tracking, certificate uploads, withdrawal and application help.
 =======
@@ -13,6 +14,9 @@
 =======
 - **New applicants:** `apply.php` — course catalogue, course detail/contact, email verification, application form, private tracking, correction/resubmission, withdrawal and application help.
 >>>>>>> parent of 549483e (new)
+=======
+- **New applicants:** `apply.php` — course catalogue, course detail/contact, application form, private tracking, correction/resubmission, withdrawal and application help. Email verification happens on the master sign-in (`index.php?page=login`), which returns here afterwards.
+>>>>>>> parent of ba104b3 (new)
 =======
 - **New applicants:** `apply.php` — course catalogue, course detail/contact, application form, private tracking, correction/resubmission, withdrawal and application help. Email verification happens on the master sign-in (`index.php?page=login`), which returns here afterwards.
 >>>>>>> parent of ba104b3 (new)

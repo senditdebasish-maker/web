@@ -25,6 +25,7 @@ function siteResumePending(): string {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     foreach (['northstar_auth', 'northstar_site', 'northstar_student', 'northstar_session', 'northstar_applicant'] as $name) {
 =======
     foreach (['northstar_student', 'northstar_session'] as $name) {
@@ -32,6 +33,9 @@ function siteResumePending(): string {
 =======
     foreach (['northstar_student', 'northstar_session'] as $name) {
 >>>>>>> parent of 549483e (new)
+=======
+    foreach (['northstar_student', 'northstar_session', 'northstar_applicant'] as $name) {
+>>>>>>> parent of ba104b3 (new)
 =======
     foreach (['northstar_student', 'northstar_session', 'northstar_applicant'] as $name) {
 >>>>>>> parent of ba104b3 (new)
@@ -52,6 +56,7 @@ function siteCsrfCheckAny(): void {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     foreach (['northstar_site', 'northstar_auth', 'northstar_student', 'northstar_session', 'northstar_applicant'] as $name) {
 =======
     foreach (['northstar_site', 'northstar_student', 'northstar_session'] as $name) {
@@ -59,6 +64,9 @@ function siteCsrfCheckAny(): void {
 =======
     foreach (['northstar_site', 'northstar_student', 'northstar_session'] as $name) {
 >>>>>>> parent of 549483e (new)
+=======
+    foreach (['northstar_site', 'northstar_student', 'northstar_session', 'northstar_applicant'] as $name) {
+>>>>>>> parent of ba104b3 (new)
 =======
     foreach (['northstar_site', 'northstar_student', 'northstar_session', 'northstar_applicant'] as $name) {
 >>>>>>> parent of ba104b3 (new)
@@ -78,6 +86,7 @@ function siteDetectAccount(string $email): ?string {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     if (one('SELECT id FROM users WHERE LOWER(email)=? AND active=1', [$email])) return 'staff';
     if (one('SELECT a.id FROM portal_accounts a JOIN students s ON s.id=a.student_id WHERE LOWER(a.email)=? AND a.active=1 AND LOWER(s.email)=LOWER(a.email)', [$email])) return 'student';
     if (one('SELECT id FROM student_users WHERE LOWER(email)=? AND active=1', [$email])) return 'student';
@@ -88,15 +97,20 @@ function siteDetectAccount(string $email): ?string {
 >>>>>>> parent of 549483e (new)
 =======
 >>>>>>> parent of ba104b3 (new)
+=======
+>>>>>>> parent of ba104b3 (new)
     if (one('SELECT id FROM users WHERE email=? AND active=1', [$email])) return 'staff';
     if (one('SELECT a.id FROM portal_accounts a JOIN students s ON s.id=a.student_id WHERE a.email=? AND a.active=1 AND LOWER(s.email)=a.email', [$email])
         || one('SELECT id FROM student_users WHERE email=? AND active=1', [$email])
         || one('SELECT id FROM students WHERE LOWER(email)=?', [$email])) return 'student';
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> parent of 549483e (new)
 =======
 >>>>>>> parent of 549483e (new)
+=======
+>>>>>>> parent of ba104b3 (new)
 =======
 >>>>>>> parent of ba104b3 (new)
     return null;

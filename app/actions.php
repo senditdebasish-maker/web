@@ -46,6 +46,7 @@ function handleAction(): string {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
             'approve_application' => approveApplicationAction(),
             'reject_application' => rejectApplicationAction(),
             'request_application_revision' => requestApplicationRevisionAction(),
@@ -54,6 +55,8 @@ function handleAction(): string {
 >>>>>>> parent of 549483e (new)
 =======
 >>>>>>> parent of 549483e (new)
+=======
+>>>>>>> parent of ba104b3 (new)
 =======
 >>>>>>> parent of ba104b3 (new)
             'applicant_toggle' => toggleApplicant(),

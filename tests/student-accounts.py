@@ -81,6 +81,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-student-accounts-') as temp:
         check(scalar('SELECT code_hash FROM student_user_codes ORDER BY expires_at DESC LIMIT 1')!=code,'verification code not stored as plaintext')
         check('Invalid, expired' in master_s.create_verify(step_new,'000000'),'incorrect verification code rejected')
 <<<<<<< HEAD
+<<<<<<< HEAD
         check('YOUR STUDENT SPACE' in master_s.create_verify(step_new,code) and 'Open admissions portal' in s.html,'verified email creates the student account')
 =======
         check('Invalid, expired' in s.post('register_verify',page='register',code='000000'),'incorrect verification code rejected')
@@ -89,6 +90,9 @@ with tempfile.TemporaryDirectory(prefix='northstar-student-accounts-') as temp:
 >>>>>>> parent of 549483e (new)
 =======
 >>>>>>> parent of 549483e (new)
+=======
+        check('STUDENT ACCOUNT' in master_s.create_verify(step_new,code) and 'Apply for admission' in s.html,'verified email creates the student account')
+>>>>>>> parent of ba104b3 (new)
 =======
         check('STUDENT ACCOUNT' in master_s.create_verify(step_new,code) and 'Apply for admission' in s.html,'verified email creates the student account')
 >>>>>>> parent of ba104b3 (new)
