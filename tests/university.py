@@ -119,6 +119,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         check('Principal&#039;s Message' in uni.html and 'id="principal"' in uni.html and 'f-gallery' in uni.html
               and 'PCI Approved' in uni.html,
               'homepage shows the principal message, campus life and badges')
@@ -145,15 +146,23 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
         check('Message from the Principal' in uni.html and 'PCI Approved' in uni.html and 'Campus Life' in uni.html,
               'homepage shows the principal message, badges and campus life')
         check('Shaping Healthcare Leaders' in uni.html and 'for a Healthier Tomorrow' in uni.html
+=======
+        check('Vice-Chancellor' in uni.html and 'Top recruiters' in uni.html and 'NAAC A++' in uni.html,
+              'homepage shows the message, badges and recruiters showcase')
+        check('TRADITION MEETS INNOVATION: EST. 1887' in uni.html and 'Nurturing global leaders.' in uni.html
+>>>>>>> parent of 392c080 (Homepage matches the college reference photo: full-bleed hero, principal message, program cards, campus photos)
               and 'ADMISSIONS 2024-25 OPEN FOR UNDERGRADUATE PROGRAMS' in uni.html and 'SCHOLARSHIPS 2024-25' in uni.html
-              and 'SEMESTER RESULTS DECLARED' in uni.html, 'homepage matches the college hero and ticker texts')
-        check('Our Programs' in uni.html and 'Latest Updates' in uni.html
+              and 'SEMESTER RESULTS DECLARED' in uni.html, 'homepage matches the replica hero and ticker texts')
+        check('ENGINEERING &amp; TECHNOLOGY' in uni.html and 'MEDICINE &amp; HEALTH SCIENCES' in uni.html
+              and 'MANAGEMENT STUDIES' in uni.html and 'ARTS &amp; HUMANITIES' in uni.html
+              and 'International Companies' in uni.html and 'DHL' in uni.html
               and 'Quick Links' in uni.html and 'Follow Us' in uni.html and 'u-vc-full' in uni.html,
-              'homepage shows programs, updates, principal feature and footer')
+              'homepage shows the program grid, recruiters, VC feature and footer')
         check('c-topbar' in uni.html and 'Student Login' in uni.html and 'Faculty Login' in uni.html and 'Admin Login' in uni.html,
               'homepage wears the college utility bar with all three logins')
         check('Download Brochure' in uni.html and 'college.css' in uni.html and 'Our Programs' in uni.html,
               'homepage shows the college header, programs and stylesheet')
+<<<<<<< HEAD
         check('Latest Updates' in uni.html and 'Campus Life' in uni.html
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -164,6 +173,10 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
 >>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
               and 'campus-learning.jpg' in uni.html and 'campus-sports.jpg' in uni.html,
               'homepage shows updates and campus life photos')
+=======
+        check('Latest Updates' in uni.html and 'Campus Life' in uni.html and 'id="placement"' in uni.html,
+              'homepage shows updates, campus life and recruiter strip')
+>>>>>>> parent of 392c080 (Homepage matches the college reference photo: full-bleed hero, principal message, program cards, campus photos)
         check('AICTE' in uni.get('index.php?page=brochure') and 'Download PDF' in uni.html,
               'brochure page renders live college data')
         uni.get('index.php?page=brochure&format=pdf')
@@ -173,8 +186,13 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
         check('No programs match' in uni.get('index.php?page=courses&q=zzz-no-such-course'),
               'program search reports no matches')
         uni_hi = Browser(base)
+<<<<<<< HEAD
         check('<html lang="hi">' in uni_hi.get('index.php?lang=hi') and 'छात्र लॉगिन' in uni_hi.html
               and 'प्राचार्य का संदेश' in uni_hi.html and '2024-25' not in uni_hi.html,
+=======
+        check('<html lang="hi">' in uni_hi.get('index.php?lang=hi') and 'अभी आवेदन करें' in uni_hi.html
+              and 'कुलपति का संदेश' in uni_hi.html and 'छात्रवृत्ति 2024-25' in uni_hi.html,
+>>>>>>> parent of 392c080 (Homepage matches the college reference photo: full-bleed hero, principal message, program cards, campus photos)
               'EN | हिन्दी toggle renders a real Hindi homepage')
         check('OUR CAMPUSES' in uni.get('index.php?page=about') and 'Howrah' in uni.html,
               'about page lists CRM campuses')

@@ -17,6 +17,7 @@ function collegeIcon(string $name): string {
         'home' => '<path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/>',
         'bus' => '<rect x="4" y="4" width="16" height="12" rx="2"/><path d="M4 11h16"/><circle cx="8" cy="18.5" r="1.6"/><circle cx="16" cy="18.5" r="1.6"/>',
         'search' => '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>',
+<<<<<<< HEAD
         'down' => '<path d="M12 3v11"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/>',
         'doc' => '<path d="M6 2.5h8L19 8v13.5H6V2.5Z"/><path d="M14 2.5V8h5"/><path d="M9 12h6M9 15.5h6"/>',
         'user' => '<circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.4-5.4 7-5.4s6.2 1.8 7 5.4"/>',
@@ -39,6 +40,8 @@ function collegeIcon(string $name): string {
         'card' => '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/>',
         'eye' => '<path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/>',
         'target' => '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.8"/><circle cx="12" cy="12" r="1.4"/>',
+=======
+>>>>>>> parent of 392c080 (Homepage matches the college reference photo: full-bleed hero, principal message, program cards, campus photos)
     ];
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . ($p[$name] ?? $p['shield']) . '</svg>';
 }
@@ -60,6 +63,7 @@ function collegeTrustBadges(): array {
         ['book', 'Digital Library'], ['home', 'Hostel Facility'], ['bus', 'Transport Facility'],
     ];
 }
+<<<<<<< HEAD
 // Degree full-form subtitle for program cards (starter template wording).
 function collegeDegreeLine(string $name): string {
     $n = strtolower($name);
@@ -105,6 +109,8 @@ function collegeSocial(): string {
     $li = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#0a66c2"/><text x="12" y="16.5" text-anchor="middle" font-size="10" font-weight="bold" fill="#fff" font-family="sans-serif">in</text></svg>';
     return '<div class="c-social"><span title="Facebook" aria-label="Facebook">' . $fb . '</span><span title="YouTube" aria-label="YouTube">' . $yt . '</span><span title="Instagram" aria-label="Instagram">' . $ig . '</span><span title="LinkedIn" aria-label="LinkedIn">' . $li . '</span></div>';
 }
+=======
+>>>>>>> parent of 392c080 (Homepage matches the college reference photo: full-bleed hero, principal message, program cards, campus photos)
 // Program card artwork keyed off the live course name; the building is the neutral fallback.
 function collegeProgramImage(string $name): string {
     $n = strtolower($name);
@@ -116,6 +122,7 @@ function collegeProgramImage(string $name): string {
 }
 function collegeNavItems(): array {
     $home = siteHomeUrl();
+<<<<<<< HEAD
     $pu = $home . '?page=';
     $apply = sitePublicUrl('apply.php');
     $student = sitePublicUrl('student.php');
@@ -161,6 +168,21 @@ function collegeNavItems(): array {
         ['label' => 'Research', 'url' => $pu . 'faculty', 'slug' => '', 'icon' => 'flask', 'kids' => []],
         ['label' => 'Notices', 'url' => $pu . 'notices', 'slug' => 'notices', 'icon' => 'bell', 'kids' => []],
         ['label' => 'Contact', 'url' => $pu . 'contact', 'slug' => 'contact', 'icon' => 'phone', 'kids' => []],
+=======
+    $key = $active === 'course' ? 'courses' : $active;
+    $items = [
+        ['Home', $home, 'home', []],
+        ['About Us', $home . '?page=about', 'about', [['About the College', $home . '?page=about'], ['Our Campuses', $home . '?page=about#campuses'], ['Contact Us', $home . '?page=contact']]],
+        ['Academics', $home . '?page=courses', 'courses', [['Programs & Courses', $home . '?page=courses'], ['Faculty', $home . '?page=faculty'], ['Admission Notices', $home . '?page=notices']]],
+        ['Admissions', $home . '?page=admissions', 'admissions', [['How to Join', $home . '?page=admissions'], ['Apply Now', sitePublicUrl('apply.php')], ['Track Application', $home . '?page=login&show=applicant']]],
+        ['Faculty', $home . '?page=faculty', 'faculty', []],
+        ['Facilities', $home . '?page=about#campuses', '', []],
+        ['Student Corner', sitePublicUrl('student.php'), '', [['Student Login', $home . '?page=login'], ['Student Dashboard', sitePublicUrl('student.php')], ['Create Account', $home . '?page=login&show=create'], ['Admission Inquiry', $home . '?page=login&show=inquiry']]],
+        ['Placement', $home . '#placement', '', []],
+        ['Research', $home . '?page=faculty', '', []],
+        ['Notices', $home . '?page=notices', 'notices', []],
+        ['Contact', $home . '?page=contact', 'contact', []],
+>>>>>>> parent of 392c080 (Homepage matches the college reference photo: full-bleed hero, principal message, program cards, campus photos)
     ];
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -184,8 +206,7 @@ function collegeNav(string $active): string {
     $h = '<nav class="c-nav" aria-label="College"><div class="c-wrap"><ul>';
     foreach ($items as [$label, $url, $slug, $kids]) {
         $cur = ($slug !== '' && $slug === $key) ? ' aria-current="page"' : '';
-        $prefix = $label === 'Home' ? '<span class="c-nav-ico">' . collegeIcon('home') . '</span> ' : '';
-        $h .= '<li' . ($kids ? ' class="c-has-kids"' : '') . '><a href="' . e($url) . '"' . $cur . '>' . $prefix . e($label) . ($kids ? ' <span class="c-caret" aria-hidden="true">▾</span>' : '') . '</a>';
+        $h .= '<li' . ($kids ? ' class="c-has-kids"' : '') . '><a href="' . e($url) . '"' . $cur . '>' . e($label) . ($kids ? ' <span class="c-caret" aria-hidden="true">▾</span>' : '') . '</a>';
         if ($kids) {
             $h .= '<ul class="c-drop">';
             foreach ($kids as [$klabel, $kurl]) $h .= '<li><a href="' . e($kurl) . '">' . e($klabel) . '</a></li>';
@@ -200,6 +221,7 @@ function collegeNav(string $active): string {
         }
         $h .= '</li>';
     }
+<<<<<<< HEAD
     return $h . '</ul></div></nav>';
 }
 <<<<<<< HEAD
@@ -232,6 +254,9 @@ function collegeDrawer(string $page): string {
     }
     $home = siteHomeUrl();
     $h .= '</ul></nav><div class="f-drawer-cta"><a class="f-btn ghost" href="' . e($home . '?page=login&show=inquiry') . '">' . e(tr('Enquire')) . '</a><a class="f-btn primary" href="' . e(sitePublicUrl('apply.php')) . '">' . e(tr('Apply Online')) . '</a></div></aside>';
+=======
+    $h .= '</ul><form class="c-search" action="' . e($home) . '" method="get" role="search"><input type="hidden" name="page" value="courses"><input type="search" name="q" placeholder="Search programs" aria-label="Search programs"><button type="submit" aria-label="Search">' . collegeIcon('search') . '</button></form></div></nav>';
+>>>>>>> parent of 392c080 (Homepage matches the college reference photo: full-bleed hero, principal message, program cards, campus photos)
     return $h;
 }
 function collegeHeader(string $brand, string $kind, string $city, string $phone, string $page, string $headerAction, array $ticker): string {
@@ -272,9 +297,9 @@ function collegeHeader(string $brand, string $kindLine, string $page, string $he
     $h = '<div class="c-topbar"><div class="c-wrap c-topbar-in"><span class="c-approvals">Approved by AICTE | PCI | Affiliated to MAKAUT, WB</span><span class="c-top-links">';
     if (str_contains($headerAction, 'u-profile-box')) $h .= $headerAction;
     else $h .= '<a href="' . e($home . '?page=login') . '">Student Login</a><a href="' . e($home . '?page=login') . '">Faculty Login</a><a href="' . e($home . '?page=login') . '">Admin Login</a>';
-    $h .= '<a class="c-top-search" href="' . e($home . '?page=courses') . '" aria-label="Search programs">' . collegeIcon('search') . '</a>' . siteToggle() . siteLangToggle($page) . '</span></div></div>';
+    $h .= siteToggle() . siteLangToggle($page) . '</span></div></div>';
     $h .= '<header class="c-head"><div class="c-wrap c-head-in"><a class="c-brand u-brand" href="' . e($home) . '" title="Back to the college homepage"><span class="c-crest">' . siteCrest() . '</span><span><strong>' . e($brand) . '</strong><small>' . e($kindLine) . '</small></span></a>';
-    $h .= '<span class="c-head-btns"><a href="' . e($home . '?page=login&show=inquiry') . '">' . collegeIcon('user') . '<span>Enquiry</span></a><a href="' . e($home . '?page=notices') . '">' . collegeIcon('down') . '<span>Download</span></a><a href="' . e($home . '?page=brochure') . '">' . collegeIcon('doc') . '<span>Download Brochure</span></a><a class="c-apply" href="' . e(sitePublicUrl('student.php?page=admissions')) . '">' . collegeIcon('userplus') . '<span>' . e(tr('Apply Now')) . '</span></a></span></div></header>';
+    $h .= '<span class="c-head-btns"><a href="' . e($home . '?page=login&show=inquiry') . '">Enquiry</a><a href="' . e($home . '?page=notices') . '">Download</a><a href="' . e($home . '?page=brochure') . '">Download Brochure</a><a class="c-apply" href="' . e(sitePublicUrl('student.php?page=admissions')) . '">' . e(tr('Apply Now')) . '</a></span></div></header>';
     $h .= collegeNav($page) . siteTicker($ticker);
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -327,7 +352,7 @@ function collegeFooter(string $brand, string $kind, string $city = '', string $a
         if ($phone !== '') $h .= '<p>☎ ' . e($phone) . '</p>';
     }
     $h .= '</div>';
-    $h .= '<div><h4>' . e(tr('Follow Us')) . '</h4>' . collegeSocial() . '<p class="c-script">Pharmacy for<br>a Healthier Tomorrow</p></div>';
+    $h .= '<div><h4>' . e(tr('Follow Us')) . '</h4>' . siteSocial() . '<p class="c-script">Pharmacy for<br>a Healthier Tomorrow</p></div>';
     $h .= '</div><div class="c-foot-bottom"><div class="c-wrap"><span>© ' . date('Y') . ' ' . e($brand) . '. ' . e(tr('All rights reserved.')) . '</span><span class="c-legal"><a href="#">Privacy Policy</a> | <a href="#">Terms of Use</a> | <a href="#">Sitemap</a></span><span>Designed for Knowledge. Driven by Care.</span></div></div></footer>';
 >>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
 =======
