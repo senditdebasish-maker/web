@@ -29,6 +29,7 @@ Public applications now support **status email alerts, certificate uploads, owne
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 Then use **Students → Enable student access** and share the master sign-in page **`index.php?page=login`**. Students use email OTP to see only their own admission, fee balance, payments, profile and PDF documents. Each student needs a unique personal email. No access is granted automatically. Changing the student's email or disabling access revokes their sessions; staff must re-enable a corrected address. Verified student accounts can also apply through the secure admissions portal at **`student.php?page=admissions`**.
 =======
 Then use **Students → Enable student access** and share **`student.php`**. Students use email OTP to see only their own admission, fee balance, payments, profile and PDF documents. Each student needs a unique personal email. No access is granted automatically. Changing the student's email or disabling access revokes their sessions; staff must re-enable a corrected address.
@@ -36,6 +37,9 @@ Then use **Students → Enable student access** and share **`student.php`**. Stu
 =======
 Then use **Students → Enable student access** and share **`student.php`**. Students use email OTP to see only their own admission, fee balance, payments, profile and PDF documents. Each student needs a unique personal email. No access is granted automatically. Changing the student's email or disabling access revokes their sessions; staff must re-enable a corrected address.
 >>>>>>> parent of 549483e (new)
+=======
+Then use **Students → Enable student access** and share the master sign-in page **`index.php?page=login`**. Students use email OTP to see only their own admission, fee balance, payments, profile and PDF documents. Each student needs a unique personal email. No access is granted automatically. Changing the student's email or disabling access revokes their sessions; staff must re-enable a corrected address.
+>>>>>>> parent of ba104b3 (new)
 =======
 Then use **Students → Enable student access** and share the master sign-in page **`index.php?page=login`**. Students use email OTP to see only their own admission, fee balance, payments, profile and PDF documents. Each student needs a unique personal email. No access is granted automatically. Changing the student's email or disabling access revokes their sessions; staff must re-enable a corrected address.
 >>>>>>> parent of ba104b3 (new)

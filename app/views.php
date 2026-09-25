@@ -43,6 +43,7 @@ header('Location: index.php?page=login'); exit;
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> parent of 549483e (new)
@@ -68,6 +69,8 @@ header('Location: index.php?page=login'); exit;
 </div></main>
 <?=siteFooter($obBrand,$obKind,$obCity,$obAddr,$obPhone)?>
 >>>>>>> parent of 549483e (new)
+=======
+>>>>>>> parent of ba104b3 (new)
 =======
 >>>>>>> parent of ba104b3 (new)
 =======

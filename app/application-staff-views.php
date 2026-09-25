@@ -9,6 +9,7 @@ $applicantSections=['Personal details'=>['name'=>'Full legal name','date_of_birt
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 <section class="panel"><div class="panel-heading"><div><h2><?=e($r['reference'])?> · <?=e($r['status'])?></h2><p>Version <?=(int)$r['version']?> · Submitted <?=e($r['submitted_at'])?> · Updated <?=e($r['updated_at'])?></p></div><a href="?page=applications">All applications →</a></div><div class="settings-body">
 <?php foreach($applicantSections as $heading=>$fields):?><h3><?=e($heading)?></h3><dl><?php foreach($fields as $k=>$label):?><dt><strong><?=e($label)?></strong></dt><dd><?=e((string)($data[$k]??''))?></dd><?php endforeach;?></dl><?php endforeach;?>
 <h3>Submission</h3><dl><dt><strong>Verified applicant email</strong></dt><dd><?=e($account['email'])?></dd><dt><strong>Additional information from applicant</strong></dt><dd><?=e((string)($data['note']??''))?></dd></dl>
@@ -23,6 +24,8 @@ formStart('approve_application');?><input type="hidden" name="application_id" va
 =======
 =======
 >>>>>>> parent of 549483e (new)
+=======
+>>>>>>> parent of ba104b3 (new)
 =======
 >>>>>>> parent of ba104b3 (new)
 =======
@@ -66,9 +69,12 @@ $pn=min(100000,max(1,(int)($_GET['p']??1)));$offset=($pn-1)*20;$tab=is_string($_
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> parent of 549483e (new)
 =======
 >>>>>>> parent of 549483e (new)
+=======
+>>>>>>> parent of ba104b3 (new)
 =======
 >>>>>>> parent of ba104b3 (new)
 =======

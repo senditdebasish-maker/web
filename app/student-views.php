@@ -10,8 +10,11 @@ $spButtons=siteToggle();
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 if($student||$portalUser||$applicant) {$spProfile=$student?['name'=>$student['name'],'role'=>'Student','url'=>'student.php']:($portalUser?['name'=>$portalUser['name'],'role'=>'Student','url'=>'student.php']:['name'=>$applicant['email']??'Applicant','role'=>'Applicant','url'=>'student.php?page=applications']);$spButtons.=siteProfileBox($spProfile).spForm('logout').'<button class="u-btn ghost" type="submit">Sign out ↗</button></form>';}
 =======
+=======
+>>>>>>> parent of ba104b3 (new)
 =======
 >>>>>>> parent of ba104b3 (new)
 if($student||$portalUser) $spButtons.=spForm('logout').'<button class="u-btn ghost" type="submit">Sign out ↗</button></form>';
@@ -64,6 +67,7 @@ try{ $acc=one('SELECT id FROM applicant_accounts WHERE email=?',[$portalUser['em
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> parent of 549483e (new)
 ?>
 <main class="u-page u-page-narrow">
@@ -89,6 +93,11 @@ try{ $acc=one('SELECT id FROM applicant_accounts WHERE email=?',[$portalUser['em
 <main class="u-page u-page-narrow">
 <?php if($error): ?><div class="u-alert error" role="alert"><?=e($error)?></div><?php endif; ?><?php if($flash): ?><div class="u-alert" role="status"><?=e($flash)?></div><?php endif; ?>
 >>>>>>> parent of ba104b3 (new)
+=======
+?>
+<main class="u-page u-page-narrow">
+<?php if($error): ?><div class="u-alert error" role="alert"><?=e($error)?></div><?php endif; ?><?php if($flash): ?><div class="u-alert" role="status"><?=e($flash)?></div><?php endif; ?>
+>>>>>>> parent of ba104b3 (new)
 <section class="u-card"><div class="u-eyebrow">STUDENT ACCOUNT</div><h1>Hello, <?=e(explode(' ',$portalUser['name'])[0])?>.</h1><p>Verified email: <strong><?=e($portalUser['email'])?></strong></p>
 <?php if($appRef): ?><p>Your latest application <strong><?=e($appRef)?></strong> is: <strong><?=e($appStatus)?></strong>.</p><?php if($appStatus==='Admitted'): ?><p>Your admission is approved. If the office has enabled your portal, <a href="student.php">refresh this page</a> to open your full student portal.</p><?php else: ?><p><a class="u-btn solid" href="apply.php?page=dashboard">Track your application &rarr;</a></p><?php endif; ?>
 <?php else: ?><p>You have not applied for admission yet. Your full portal &mdash; fees, payments, documents and results &mdash; opens after the office approves your application.</p><p><a class="u-btn solid" href="apply.php">Apply for admission &rarr;</a></p><?php endif; ?>
@@ -96,9 +105,12 @@ try{ $acc=one('SELECT id FROM applicant_accounts WHERE email=?',[$portalUser['em
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> parent of 549483e (new)
 =======
 >>>>>>> parent of 549483e (new)
+=======
+>>>>>>> parent of ba104b3 (new)
 =======
 >>>>>>> parent of ba104b3 (new)
 =======

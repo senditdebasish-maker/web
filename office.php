@@ -19,11 +19,14 @@ $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 if (!currentUser() && !defined('CRM_DOCUMENT_REQUEST') && !isset($_GET['certificate'])) { header('Location: index.php?page=login'); exit; }
 =======
 >>>>>>> parent of 549483e (new)
 =======
 >>>>>>> parent of 549483e (new)
+=======
+>>>>>>> parent of ba104b3 (new)
 =======
 >>>>>>> parent of ba104b3 (new)
 =======
