@@ -114,8 +114,9 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
               'homepage lists the open CRM program')
         check('data-theme-toggle' in uni.html and 'theme.js' in uni.html,
               'homepage offers the dark-mode toggle')
-        check('ticker-track' in uni.html and 'LATEST UPDATES' in uni.html and 'Admission helpline' in uni.html,
+        check('u-ticker' in uni.html and 'Admission helpline' in uni.html,
               'homepage ticker announces live admission dates')
+<<<<<<< HEAD
         check('Principal&#039;s Message' in uni.html and 'id="principal"' in uni.html and 'f-gallery' in uni.html
               and 'PCI Approved' in uni.html,
               'homepage shows the principal message, campus life and badges')
@@ -132,6 +133,21 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
               and 'nimita.css' not in uni.html and 'nimita.js' not in uni.html and 'font-awesome' not in uni.html,
               'homepage wears the future design system without legacy assets')
         check('Latest notices' in uni.html and 'f-gallery' in uni.html
+=======
+        check('Message from the Principal' in uni.html and 'PCI Approved' in uni.html and 'Campus Life' in uni.html,
+              'homepage shows the principal message, badges and campus life')
+        check('Shaping Healthcare Leaders' in uni.html and 'for a Healthier Tomorrow' in uni.html
+              and 'ADMISSIONS 2024-25 OPEN FOR UNDERGRADUATE PROGRAMS' in uni.html and 'SCHOLARSHIPS 2024-25' in uni.html
+              and 'SEMESTER RESULTS DECLARED' in uni.html, 'homepage matches the college hero and ticker texts')
+        check('Our Programs' in uni.html and 'Latest Updates' in uni.html
+              and 'Quick Links' in uni.html and 'Follow Us' in uni.html and 'u-vc-full' in uni.html,
+              'homepage shows programs, updates, principal feature and footer')
+        check('c-topbar' in uni.html and 'Student Login' in uni.html and 'Faculty Login' in uni.html and 'Admin Login' in uni.html,
+              'homepage wears the college utility bar with all three logins')
+        check('Download Brochure' in uni.html and 'college.css' in uni.html and 'Our Programs' in uni.html,
+              'homepage shows the college header, programs and stylesheet')
+        check('Latest Updates' in uni.html and 'Campus Life' in uni.html
+>>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
               and 'campus-learning.jpg' in uni.html and 'campus-sports.jpg' in uni.html,
               'homepage shows updates and campus life photos')
         check('AICTE' in uni.get('index.php?page=brochure') and 'Download PDF' in uni.html,

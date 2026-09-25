@@ -2,15 +2,14 @@
 declare(strict_types=1);
 // Northstar University website — single public front page driven live by CRM data.
 // Sessionless: reads public CRM data and redirects sign-in by account type.
-// Design: Nimita-style pharmacy college homepage (navy #062d5b, green #06965d).
-// Starter template strings (hero, features, stats, quote) are fixed; names,
-// addresses, programs, dates and faculty are live CRM data. Chrome is bilingual
-// (EN | हिन्दी). Inner pages reuse the shared theme/university stylesheets.
+// Design: classic academic replica (deep blue #1A365D, terracotta #C53030, gold).
+// Showcase strings (hero, badges, recruiters) are starter template; names, addresses,
+// programs, dates and faculty are live CRM data. Chrome is bilingual (EN | हिन्दी).
 ini_set('display_errors', '0');
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: same-origin');
 header('Cache-Control: no-store');
-header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:; form-action 'self'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'");
+header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; form-action 'self'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'");
 $root = __DIR__;
 // Language: ?lang=hi|en overrides, remembered in a cookie (no server session).
 $siteLang = 'en';
@@ -66,22 +65,7 @@ $HI = ['Home' => 'होम', 'About' => 'हमारे बारे में
 'Password' => 'पासवर्ड', 'Sign in to office' => 'कार्यालय में साइन इन करें', 'Track application' => 'आवेदन ट्रैक करें',
 'I applied — track my application' => 'मैंने आवेदन किया है — अपना आवेदन ट्रैक करें',
 'Enter the email from your application. We will send a verification code.' => 'अपने आवेदन वाला ईमेल लिखें। हम सत्यापन कोड भेजेंगे।',
-'Verify & view application' => 'सत्यापित करें व आवेदन देखें',
-'Approved by AICTE' => 'AICTE द्वारा अनुमोदित', 'PCI Approved' => 'PCI अनुमोदित', 'Affiliated to MAKAUT, WB' => 'MAKAUT, WB से संबद्ध',
-'Student Login' => 'छात्र लॉगिन', 'Faculty Login' => 'शिक्षक लॉगिन', 'Admin Login' => 'एडमिन लॉगिन',
-'Enquiry' => 'पूछताछ', 'Download' => 'डाउनलोड', 'Prospectus' => 'विवरणिका',
-'About Us' => 'हमारे बारे में', 'Academics' => 'शैक्षणिक', 'Facilities' => 'सुविधाएं', 'Student Corner' => 'छात्र कॉर्नर', 'Placement' => 'प्लेसमेंट', 'Research' => 'अनुसंधान',
-'LATEST UPDATES' => 'ताज़ा जानकारी', 'Latest Updates' => 'ताज़ा जानकारी', 'View All' => 'सभी देखें',
-'Pharmacy Education • Research • Healthcare' => 'फार्मेसी शिक्षा • अनुसंधान • स्वास्थ्य सेवा',
-'Shaping' => 'गढ़ रहे', 'Healthcare Leaders' => 'हेल्थकेयर लीडर्स',
-'Our' => 'हमारे', 'Life' => 'जीवन', 'Message from the' => 'संदेश', "Principal's Message" => 'प्राचार्य का संदेश',
-'Leadership' => 'नेतृत्व', 'Life at Campus' => 'परिसर जीवन', 'Welcome to our institution' => 'हमारे संस्थान में आपका स्वागत है', 'Welcome to' => 'स्वागत है',
-'Know More About Us' => 'हमारे बारे में और जानें', 'Learn More' => 'और जानें', 'Academic Excellence' => 'शैक्षणिक उत्कृष्टता',
-'Contact Us' => 'संपर्क करें', 'Downloads' => 'डाउनलोड', 'Examination' => 'परीक्षा', 'Results' => 'परिणाम', 'Scholarships' => 'छात्रवृत्ति', 'Grievance' => 'शिकायत',
-'NEW' => 'नया', 'Practical' => 'प्रायोगिक', 'Pharmacy' => 'फार्मेसी',
-'Begin Your Journey in Pharmacy' => 'फार्मेसी में अपनी यात्रा शुरू करें', 'Apply Online Now' => 'अभी ऑनलाइन आवेदन करें',
-'Modern Laboratories' => 'आधुनिक प्रयोगशालाएं', 'Academic Compliance' => 'शैक्षणिक अनुपालन', 'Placement Support' => 'प्लेसमेंट सहायता',
-'All Rights Reserved.' => 'सर्वाधिकार सुरक्षित।', 'Privacy Policy' => 'गोपनीयता नीति', 'Terms of Use' => 'उपयोग की शर्तें', 'Sitemap' => 'साइटमैप'];
+'Verify & view application' => 'सत्यापित करें व आवेदन देखें'];
 $configFile = getenv('CRM_CONFIG_FILE') ?: $root . '/config.php';
 $ready = is_file($configFile);
 if ($ready) {
@@ -341,6 +325,9 @@ $stats = [
     [count($institutes), tr('Campuses'), false],
     [count($cities), tr('Cities'), false],
 ];
+$vcMsg = $siteLang === 'hi'
+    ? $brand . ' में आपका हार्दिक स्वागत है। हमारी कक्षाएं, प्रयोगशालाएं और क्लीनिक एक ही उद्देश्य के लिए हैं — आपका विकास। स्नेही शिक्षकों, सत्यापित प्रवेश और आधुनिक छात्र पोर्टल के साथ हम आपके पहले आवेदन से दीक्षांत समारोह तक आपके साथ हैं।'
+    : siteVcMessage($brand);
 $formSession = $page === 'create-account' ? 'northstar_auth' : 'northstar_site';
 $profile = ($_SERVER['REQUEST_METHOD'] === 'GET') ? siteProfile() : null;
 siteSession($formSession);
@@ -349,7 +336,7 @@ $headerAction = $profile
     : '<a class="u-btn ghost" href="' . e(siteHomeUrl() . '?page=login') . '">' . e(tr('Sign In')) . '</a>';
 function uDocHead(string $title, string $brand): void {
     global $htmlLang;
-    echo '<!doctype html><html lang="' . e($htmlLang) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . e($title) . ' · ' . e($brand) . '</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"><link rel="stylesheet" href="assets/theme.css"><link rel="stylesheet" href="assets/university.css"><link rel="stylesheet" href="assets/college.css"><link rel="stylesheet" href="assets/nimita.css"><script src="assets/theme.js" defer></script><script src="assets/site.js" defer></script><script src="assets/nimita.js" defer></script></head><body class="college">';
+    echo '<!doctype html><html lang="' . e($htmlLang) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . e($title) . ' · ' . e($brand) . '</title><link rel="stylesheet" href="assets/theme.css"><link rel="stylesheet" href="assets/university.css"><link rel="stylesheet" href="assets/college.css"><script src="assets/theme.js" defer></script><script src="assets/site.js" defer></script></head><body class="college">';
 }
 ?>
 <?php uDocHead(tr(['home' => 'Admissions open', 'about' => 'About us', 'course' => 'Course details', 'courses' => 'Programs & courses', 'admissions' => 'Admissions', 'notices' => 'Notices & dates', 'faculty' => 'Faculty', 'contact' => 'Contact', 'brochure' => 'College brochure', 'login' => 'Sign in', 'create-account' => 'Create your account', 'notfound' => 'Page not found'][$page] ?? 'Page not found'), $brand); ?>
@@ -358,29 +345,26 @@ function uDocHead(string $title, string $brand): void {
 <?php if (!$ready): ?>
 <section class="u-card u-setup"><h1><?= e(tr('Welcome — setup required')) ?></h1><p>This university website is connected to the institute CRM, which has not been installed yet. The server administrator should open the setup wizard to create the database, owner account and first institute. This page updates itself automatically afterwards.</p><p><a class="u-btn solid" href="setup.php"><?= e(tr('Open setup wizard')) ?> →</a></p></section>
 <?php elseif ($page === 'home'): ?>
-<section class="hero"><div class="container hero-inner"><div class="hero-content">
-<div class="hero-label"><?= e(tr('Pharmacy Education • Research • Healthcare')) ?></div>
-<h2><?= e(tr('Shaping')) ?> <?= e(tr('Healthcare Leaders')) ?> <span><?= e(tr('for a Healthier Tomorrow')) ?></span></h2>
-<p class="hero-text">Build your future with quality pharmacy education, modern laboratories, experienced faculty and practical healthcare learning.</p>
-<div class="hero-buttons"><a href="apply.php" class="btn btn-green"><?= e(tr('Apply for Admission')) ?> <i class="fa-solid fa-arrow-right"></i></a><a href="#programs" class="btn btn-outline"><?= e(tr('Explore Programs')) ?> <i class="fa-solid fa-arrow-down"></i></a></div>
-</div></div><div class="hero-badge"><strong>Pharmacy for a Healthier World</strong><span>Knowledge • Skill • Service</span></div></section>
-<section class="quick-features"><div class="container"><div class="feature-box">
-<div class="feature"><div class="feature-icon"><i class="fa-solid fa-graduation-cap"></i></div><h4><?= e(tr('PCI Approved')) ?></h4><p>Quality Pharmacy Education</p></div>
-<div class="feature"><div class="feature-icon"><i class="fa-solid fa-users"></i></div><h4>Experienced Faculty</h4><p>Learn From Experts</p></div>
-<div class="feature"><div class="feature-icon"><i class="fa-solid fa-flask"></i></div><h4><?= e(tr('Modern Laboratories')) ?></h4><p>Practical Training</p></div>
-<div class="feature"><div class="feature-icon"><i class="fa-solid fa-building"></i></div><h4>Modern Campus</h4><p>Better Learning Environment</p></div>
-<div class="feature"><div class="feature-icon"><i class="fa-solid fa-briefcase"></i></div><h4><?= e(tr('Placement Support')) ?></h4><p>Career Guidance</p></div>
-<div class="feature"><div class="feature-icon"><i class="fa-solid fa-heart-pulse"></i></div><h4>Community Service</h4><p>Serve Society</p></div>
-</div></div></section>
-<section class="section welcome"><div class="container"><div class="welcome-grid">
-<div class="welcome-text">
-<div class="small-title"><?= e(tr('Welcome to our institution')) ?></div>
-<h2><?= e(tr('Welcome to')) ?> <span><?= e($brand) ?></span></h2>
-<p><?= e($brand) ?> is committed to providing quality pharmacy education and developing competent, ethical and responsible healthcare professionals.</p>
-<p>Through modern laboratories, experienced teachers, research opportunities and practical exposure, students are prepared to meet the evolving requirements of the pharmaceutical industry and healthcare sector.</p>
-<div class="welcome-list"><div><i class="fa-solid fa-circle-check"></i>Industry-oriented education</div><div><i class="fa-solid fa-circle-check"></i>Experienced teaching faculty</div><div><i class="fa-solid fa-circle-check"></i>Practical laboratory training</div><div><i class="fa-solid fa-circle-check"></i>Career &amp; placement guidance</div></div>
-<a href="?page=about" class="btn btn-green"><?= e(tr('Know More About Us')) ?> <i class="fa-solid fa-arrow-right"></i></a>
+<section class="u-hero" data-hero-slider>
+<div class="u-hero-slides">
+<article class="u-hero-slide is-active" style="--hero-image:url('assets/college-hero.jpg')"><div class="u-hero-inner c-hero-grid"><div><h1><?= e(tr('Shaping Healthcare Leaders')) ?><br><span class="c-accent"><?= e(tr('for a Healthier Tomorrow')) ?></span></h1><p class="c-hero-sub">Quality Pharmacy Education | Research Driven Learning | Community Healthcare</p><div class="u-cta"><a class="u-btn solid big" href="apply.php"><?= e(tr('Apply for Admission')) ?> →</a><a class="u-btn ghost big" href="?page=courses"><?= e(tr('Explore Programs')) ?> →</a></div></div></div></article>
+<article class="u-hero-slide" style="--hero-image:url('assets/program-bpharm.jpg')"><div class="u-hero-inner c-hero-grid"><div><div class="u-eyebrow">YOUR NEXT CHAPTER STARTS HERE</div><h1>Find your place to grow.</h1><p class="c-hero-sub">Admissions open · Apply online</p><p>Explore open programs, see the latest admission dates and begin your application in minutes.</p><div class="u-cta"><a class="u-btn solid big" href="?page=courses">Explore Programs →</a><a class="u-btn ghost big" href="?page=admissions">How to join</a></div></div></div></article>
+<article class="u-hero-slide" style="--hero-image:url('assets/program-mpharm.jpg')"><div class="u-hero-inner c-hero-grid"><div><div class="u-eyebrow">ONE SECURE FRONT DOOR</div><h1>Everything starts here.</h1><p class="c-hero-sub">One email · Every portal</p><p>Use one secure email verification flow to return to your admissions journey or campus portal.</p><div class="u-cta"><a class="u-btn solid big" href="?page=login">Open sign in →</a><a class="u-btn ghost big" href="?page=contact">Contact the institute</a></div></div></div></article>
+</div><div class="u-hero-controls" aria-label="Hero slides"><button type="button" data-hero-prev aria-label="Previous slide">←</button><div class="u-hero-dots"><button type="button" class="is-active" data-hero-dot="0" aria-label="Slide 1"></button><button type="button" data-hero-dot="1" aria-label="Slide 2"></button><button type="button" data-hero-dot="2" aria-label="Slide 3"></button></div><button type="button" data-hero-next aria-label="Next slide">→</button></div>
+</section>
+<section class="c-highlights" aria-label="Highlights"><div class="c-wrap"><?php foreach (collegeHighlights() as [$icon, $title, $sub]): ?><div><span class="c-hi-icon"><?= collegeIcon($icon) ?></span><div><strong><?= e($title) ?></strong><small><?= e($sub) ?></small></div></div><?php endforeach; ?></div></section>
+<div class="c-welcome"><div class="c-wrap c-welcome-grid">
+<div><div class="u-eyebrow">Welcome to</div><h2><?= e($brand) ?></h2><p><?= e($brand) ?> is committed to quality pharmacy education, research and ethical healthcare practice. Our mission is to prepare students with knowledge, skills and values for a rapidly evolving healthcare industry.</p><p><a class="u-btn solid c-btn-navy" href="?page=about">Know More About Us →</a></p></div>
+<div><aside class="c-quote"><?php if (is_file($root . '/assets/quote-photo.jpg')): ?><img class="c-quote-photo" src="assets/quote-photo.jpg" alt="Campus inspiration"><?php endif; ?><span class="c-quote-mark">“</span><blockquote>Dream is not that which you see while sleeping, it is something that does not let you sleep.</blockquote><cite>— Dr. A.P.J. Abdul Kalam</cite></aside></div>
+<div><div class="c-updates"><div class="c-updates-head"><h3>📢 Latest Updates</h3><a href="?page=notices">View All →</a></div><?php if (!$notices): ?><p class="u-muted"><?= e(tr('No admission notices right now.')) ?></p><?php else: ?><ul><?php foreach (array_slice($notices, 0, 5) as $n): $nts = strtotime((string)$n['closes']) ?: time(); ?><li><span class="c-date"><strong><?= e(date('d', $nts)) ?></strong><small><?= e(date('M', $nts)) ?></small></span><div><a href="student.php?page=course&course=<?= (int)$n['id'] ?>">Admissions <?= $n['closing'] ? 'closing soon' : 'open' ?>: <?= e($n['course']) ?></a><small><?= e($n['institute']) ?> · <?= e(tr('Apply by')) ?> <?= e($n['closes']) ?></small></div></li><?php endforeach; ?></ul><?php endif; ?></div></div>
+</div></div>
+<section class="u-section c-programs"><div class="c-sec-head"><h2>Our Programs</h2><a href="?page=courses">View All Programs →</a></div><?php if (!$programs): ?><p class="u-muted"><?= e(tr('Admissions are opening soon.')) ?> <?= e(tr('Check')) ?> <a href="?page=notices"><?= e(tr('Notices')) ?></a> <?= e(tr('or contact the office.')) ?></p><?php else: ?><div class="c-prog-cards"><?php foreach (array_slice($programs, 0, 4) as $p): ?><article><img src="<?= e(collegeProgramImage($p['name'])) ?>" alt="" loading="lazy"><div class="c-prog-body"><?php if (count($institutes) > 1): ?><div class="u-eyebrow"><?= e($p['institute_name']) ?></div><?php endif; ?><h3><?= e($p['name']) ?></h3><?php $deg = collegeDegreeLine($p['name']); if ($deg !== ''): ?><p class="c-degree"><?= e($deg) ?></p><?php endif; ?><p class="u-meta"><?= e($p['duration']) ?> · PCI Approved</p><a class="u-btn solid c-btn-navy" href="student.php?page=course&course=<?= (int)$p['id'] ?>">Learn More →</a></div></article><?php endforeach; ?></div><p class="u-more"><a href="?page=courses"><?= e(tr('View all')) ?> <?= count($allPrograms) ?> <?= e(tr('programs')) ?> →</a></p><?php endif; ?></section>
+<div class="u-stats-band c-spot"><div class="c-wrap"><?php foreach (collegeSpotStats() as [$icon, $num, $label]): ?><div><span class="c-stat-icon"><?= collegeIcon($icon) ?></span><strong><?= e($num) ?></strong><span><?= e($label) ?></span></div><?php endforeach; ?></div></div>
+<div class="c-duo c-wrap">
+<section class="u-section"><div class="c-sec-head"><h2>Campus Life</h2><a href="?page=about">View Gallery →</a></div><div class="c-tiles"><div class="c-camp"><img src="assets/campus-learning.jpg" alt="Students learning in the library" loading="lazy"><strong>Learning</strong></div><div class="c-camp"><img src="assets/campus-innovation.jpg" alt="Pharmacy research laboratory" loading="lazy"><strong>Innovation</strong></div><div class="c-camp"><img src="assets/campus-community.jpg" alt="Students in community service" loading="lazy"><strong>Community Service</strong></div><div class="c-camp"><img src="assets/campus-sports.jpg" alt="Cricket match on campus" loading="lazy"><strong>Beyond Classroom</strong></div></div></section>
+<section class="u-section"><div class="u-eyebrow"><?= e(tr('Message from the Principal')) ?></div><h2><?= e(tr('Message from the Principal')) ?></h2><div class="u-vc-full c-principal"><?php if (is_file($root . '/assets/principal-photo.jpg')): ?><img class="c-person-photo" src="assets/principal-photo.jpg" alt="<?= e(tr('Principal')) ?>, <?= e($brand) ?>"><?php else: ?><span class="u-vc-portrait"><?= e(strtoupper(mb_substr($brand, 0, 1))) ?></span><?php endif; ?><div><blockquote>“<?= e($vcMsg) ?>”</blockquote><cite><?= e(tr('Principal')) ?> · <?= e($brand) ?></cite><p><a class="u-btn solid c-btn-navy" href="?page=about">Read More →</a></p></div></div></section>
 </div>
+<<<<<<< HEAD
 <div>
 <div class="quote-card"><div class="quote-icon"><i class="fa-solid fa-quote-left"></i></div><p>"The purpose of education is to prepare students with knowledge, skills and values that allow them to contribute meaningfully to society."</p><div class="quote-author"><div class="principal-avatar"><i class="fa-solid fa-user-tie"></i></div><div><strong><?= e(tr("Principal's Message")) ?></strong><span><?= e($brand) ?></span></div></div></div>
 <div class="updates-card"><div class="updates-head"><h3><i class="fa-solid fa-bullhorn"></i><?= e(tr('Latest Updates')) ?></h3><a href="?page=notices" class="view-all"><?= e(tr('View All')) ?> →</a></div><div class="update-list"><?php if (!$notices): ?><p class="update-text"><?= e(tr('No admission notices right now.')) ?></p><?php else: ?><?php foreach (array_slice($notices, 0, 5) as $n): $nts = strtotime((string)$n['closes']) ?: time(); ?><div class="update"><div class="update-date"><strong><?= e(date('d', $nts)) ?></strong><small><?= e(date('M', $nts)) ?></small></div><div class="update-text"><a href="student.php?page=course&course=<?= (int)$n['id'] ?>">Admissions <?= $n['closing'] ? 'closing soon' : 'open' ?>: <?= e($n['course']) ?></a><?php if ($n['closing']): ?> <span class="new-badge"><?= e(tr('NEW')) ?></span><?php endif; ?></div></div><?php endforeach; ?><?php endif; ?></div></div>
@@ -416,6 +400,10 @@ function uDocHead(string $title, string $brand): void {
 <div class="facility"><i class="fa-solid fa-bus"></i><strong>Transport Facility</strong></div>
 </div></div></section>
 <section class="cta"><div class="container cta-inner"><div><h2><?= e(tr('Begin Your Journey in Pharmacy')) ?></h2><p>Applications are now open. Start your application online today.</p></div><div><a href="apply.php" class="btn btn-green"><?= e(tr('Apply Online Now')) ?> <i class="fa-solid fa-arrow-right"></i></a></div></div></section>
+=======
+<div class="c-trust"><div class="c-wrap"><?php foreach (collegeTrustBadges() as [$icon, $label]): ?><span><?= collegeIcon($icon) ?> <?= e($label) ?></span><?php endforeach; ?></div></div>
+<section class="u-cta-band"><div><h2><?= e(tr('Ready to join?')) ?></h2><p><?= e(tr('Create your free student account in a minute, then apply online.')) ?></p></div><div><a class="u-btn light big" href="?page=login&show=create"><?= e(tr('Create Student Account')) ?> →</a> <a class="u-btn ghost big" href="student.php?page=admissions"><?= e(tr('Apply for Admission')) ?> →</a> <a class="u-btn ghost big" href="?page=login"><?= e(tr('Sign In')) ?></a></div></section>
+>>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
 <?php elseif ($page === 'about'): ?>
 <section class="u-section"><div class="u-eyebrow"><?= e(tr('About us')) ?></div><h1><?= e($brand) ?></h1><p><?= e($brandKind) ?> programs across <?= count($institutes) ?: 'our' ?> <?= count($institutes) === 1 ? 'campus' : 'campuses' ?><?= $cities ? ' in ' . e(implode(', ', $cities)) : '' ?>. Every figure on this website comes live from the institute CRM — programs, dates, campuses and contacts update automatically when the office updates its records.</p><div class="u-facts"><?php foreach ($stats as [$n, $label]): ?><div><strong><?= (int)$n ?></strong><span><?= e($label) ?></span></div><?php endforeach; ?></div></section>
 <section class="u-section" id="campuses"><div class="u-eyebrow"><?= e(tr('OUR CAMPUSES')) ?></div><h2><?= e(tr('Where you will study')) ?></h2><?php if (!$institutes): ?><p class="u-muted">Campus details will appear here once the office adds institutes.</p><?php else: ?><div class="u-grid"><?php foreach ($institutes as $i): ?><article class="u-card"><h3><?= e($i['name']) ?></h3><p class="u-meta"><?= e($i['kind']) ?> · <?= e($i['city']) ?></p><?php if (trim($i['address']) !== ''): ?><p><?= e($i['address']) ?></p><?php endif; ?><p class="u-phone">☎ <?= e($i['phone']) ?></p></article><?php endforeach; ?></div><?php endif; ?></section>
