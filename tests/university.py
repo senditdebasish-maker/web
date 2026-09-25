@@ -110,26 +110,28 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
         owner = Browser(base, 'office.php')
         check('Northstar University' in uni.get() and '45 Park Street' in uni.html,
               'homepage brand and address come from the CRM')
-        check('Diploma in Pharmacy' in uni.html and 'Apply Now' in uni.html,
+        check('Diploma in Pharmacy' in uni.html and 'Apply Online' in uni.html,
               'homepage lists the open CRM program')
         check('data-theme-toggle' in uni.html and 'theme.js' in uni.html,
               'homepage offers the dark-mode toggle')
         check('ticker-track' in uni.html and 'LATEST UPDATES' in uni.html and 'Admission helpline' in uni.html,
               'homepage ticker announces live admission dates')
-        check('Message from the' in uni.html and 'principal-box' in uni.html and 'campus-gallery' in uni.html
+        check('Principal&#039;s Message' in uni.html and 'id="principal"' in uni.html and 'f-gallery' in uni.html
               and 'PCI Approved' in uni.html,
               'homepage shows the principal message, campus life and badges')
         check('Shaping Healthcare Leaders' in uni.html and 'for a Healthier Tomorrow' in uni.html
-              and 'ADMISSIONS 2024-25 OPEN FOR UNDERGRADUATE PROGRAMS' in uni.html and 'SCHOLARSHIPS 2024-25' in uni.html
-              and 'SEMESTER RESULTS DECLARED' in uni.html, 'homepage matches the college hero and ticker texts')
-        check('program-grid' in uni.html and 'Latest Updates' in uni.html
-              and 'Quick Links' in uni.html and 'principal-box' in uni.html and 'footer-bottom' in uni.html,
+              and 'ADMISSIONS 2024-25' not in uni.html and 'SCHOLARSHIPS 2024-25' not in uni.html
+              and 'SEMESTER RESULTS DECLARED' not in uni.html,
+              'homepage matches the college hero with a live-only ticker and no hardcoded years')
+        check('f-prog' in uni.html and 'Latest notices' in uni.html
+              and 'Quick Links' in uni.html and 'id="principal"' in uni.html and 'f-foot-bottom' in uni.html,
               'homepage shows programs, updates, principal feature and footer')
-        check('topbar-inner' in uni.html and 'Student Login' in uni.html and 'Faculty Login' in uni.html and 'Admin Login' in uni.html,
-              'homepage wears the college utility bar with all three logins')
-        check('Prospectus' in uni.html and 'nimita.css' in uni.html and 'nimita.js' in uni.html and 'font-awesome' in uni.html,
-              'homepage shows the college header and design assets')
-        check('Latest Updates' in uni.html and 'campus-gallery' in uni.html
+        check('f-topbar' in uni.html and 'Student Login' in uni.html and 'Staff Login' in uni.html,
+              'homepage wears the college utility bar with student and staff login')
+        check('future.css' in uni.html and 'future.js' in uni.html and 'Apply Online' in uni.html
+              and 'nimita.css' not in uni.html and 'nimita.js' not in uni.html and 'font-awesome' not in uni.html,
+              'homepage wears the future design system without legacy assets')
+        check('Latest notices' in uni.html and 'f-gallery' in uni.html
               and 'campus-learning.jpg' in uni.html and 'campus-sports.jpg' in uni.html,
               'homepage shows updates and campus life photos')
         check('AICTE' in uni.get('index.php?page=brochure') and 'Download PDF' in uni.html,
@@ -141,13 +143,13 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
         check('No programs match' in uni.get('index.php?page=courses&q=zzz-no-such-course'),
               'program search reports no matches')
         uni_hi = Browser(base)
-        check('<html lang="hi">' in uni_hi.get('index.php?lang=hi') and 'अभी आवेदन करें' in uni_hi.html
-              and 'प्राचार्य का संदेश' in uni_hi.html and 'छात्रवृत्ति 2024-25' in uni_hi.html,
+        check('<html lang="hi">' in uni_hi.get('index.php?lang=hi') and 'छात्र लॉगिन' in uni_hi.html
+              and 'प्राचार्य का संदेश' in uni_hi.html and '2024-25' not in uni_hi.html,
               'EN | हिन्दी toggle renders a real Hindi homepage')
         check('OUR CAMPUSES' in uni.get('index.php?page=about') and 'Howrah' in uni.html,
               'about page lists CRM campuses')
-        check('1 program open' in uni.get('index.php?page=courses') and 'Apply by' in uni.html,
-              'programs page reflects open listings')
+        check('2 Programs' in uni.get('index.php?page=courses') and 'Apply by' in uni.html,
+              'programs page lists every active course with open-listing dates')
         check('How to join' in uni.get('index.php?page=admissions') and '10+2 with Physics' in uni.html,
               'admissions page shows process and eligibility')
         check('Admission notices' in uni.get('index.php?page=notices'),
@@ -155,13 +157,21 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
         check('faculty directory will appear' in uni.get('index.php?page=faculty'),
               'empty faculty roster fails soft')
         execute("INSERT INTO teachers (institute_id,name,email,phone,qualification,active) VALUES (?,?,?,?,?,1)",
-                (iid, 'Dr. Public Teacher', 't@example.test', '9000000000', 'M.Pharm, PhD'))
+                (iid, 'Dr. Public Teacher', 't@example.test', '9111111111', 'M.Pharm, PhD'))
         check('Dr. Public Teacher' in uni.get('index.php?page=faculty') and 'M.Pharm, PhD' in uni.html,
               'faculty page reflects the CRM teaching roster')
-        check('t@example.test' not in uni.html and '9000000000' not in uni.html,
+        check('t@example.test' not in uni.html and '9111111111' not in uni.html,
               'faculty page hides personal contact details')
         check('Visit or call us' in uni.get('index.php?page=contact') and '+91 90000 00000' in uni.html,
               'contact page shows CRM phone numbers')
+        check('Laboratories' in uni.get('index.php?page=facilities') and 'id="hostel"' in uni.html
+              and 'id="transport"' in uni.html and 'id="activities"' in uni.html,
+              'facilities page anchors every campus-life section')
+        check('f-bottomnav' in uni.html and 'f-drawer' in uni.html and 'data-notice-search' in uni.get('index.php?page=notices'),
+              'mobile drawer, bottom navigation and notice search are present')
+        check('href="#"' not in uni.get() and 'href="#"' not in uni.get('index.php?page=about')
+              and 'href="#"' not in uni.get('index.php?page=courses'),
+              'public pages carry no dead placeholder links')
         login_html = uni.get('index.php?page=login')
         check('ONE SIGN-IN FOR EVERYONE' in login_html and 'id="modal-create"' in login_html
               and 'id="modal-inquiry"' in login_html and 'id="modal-recovery"' in login_html
@@ -287,7 +297,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
         check(MASTER_MARK in home and 'university.css' in home and 'page=login' in owner.url,
               'office address shares the themed master sign-in')
         spot = portal.get('student.php')
-        check(MASTER_MARK in spot and 'u-brand' in spot,
+        check(MASTER_MARK in spot and 'f-brand' in spot,
               'student address lands on the branded master sign-in')
         owner.login('owner@example.test')
         dash = owner.get('office.php?page=dashboard')

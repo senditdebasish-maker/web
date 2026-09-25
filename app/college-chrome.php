@@ -156,10 +156,10 @@ function collegeNavItems(): array {
 }
 function collegeNav(string $active): string {
     $key = $active === 'course' ? 'courses' : $active;
-    $h = '<nav class="f-navwrap" aria-label="' . e(tr('Primary')) . '"><div class="f-wrap"><ul class="f-nav" role="menubar">';
+    $h = '<nav class="f-navwrap" aria-label="' . e(tr('Primary')) . '"><div class="f-wrap"><ul class="f-nav-list" role="menubar">';
     foreach (collegeNavItems() as $it) {
         $act = ($it['slug'] !== '' && $it['slug'] === $key) ? ' aria-current="page"' : '';
-        $h .= '<li role="none"' . ($it['kids'] ? ' class="f-hasdrop"' : '') . '><a role="menuitem" href="' . e($it['url']) . '"' . $act . '>' . collegeIcon($it['icon']) . '<span>' . e(tr($it['label'])) . '</span>' . ($it['kids'] ? collegeIcon('chev') : '') . '</a>';
+        $h .= '<li role="none" class="f-nav-item"><a class="f-nav-link" role="menuitem" href="' . e($it['url']) . '"' . $act . '>' . collegeIcon($it['icon']) . '<span>' . e(tr($it['label'])) . '</span>' . ($it['kids'] ? collegeIcon('chev') : '') . '</a>';
         if ($it['kids']) {
             $h .= '<div class="f-drop" role="menu">';
             foreach ($it['kids'] as [$kl, $ku]) $h .= '<a role="menuitem" href="' . e($ku) . '">' . e(tr($kl)) . '</a>';
@@ -175,23 +175,23 @@ function nimitaTicker(array $items): string {
     if (!$items) return '';
     $track = '';
     foreach ([$items, $items] as $dup) foreach ($dup as $t) $track .= '<span class="f-ticker-item">' . e($t) . '</span>';
-    return '<div class="f-ticker" role="marquee" aria-label="' . e(tr('Latest updates')) . '"><div class="f-wrap f-ticker-in"><span class="f-ticker-label">' . collegeIcon('bell') . ' ' . e(tr('LATEST UPDATES')) . '</span><div class="f-ticker-view"><div class="f-ticker-track">' . $track . '</div></div></div></div>';
+    return '<div class="f-ticker" role="marquee" aria-label="' . e(tr('Latest updates')) . '"><div class="f-wrap f-ticker-in"><span class="f-ticker-title">' . collegeIcon('bell') . ' ' . e(tr('LATEST UPDATES')) . '</span><div class="f-ticker-view"><div class="f-ticker-track">' . $track . '</div></div></div></div>';
 }
 function collegeDrawer(string $page): string {
     $key = $page === 'course' ? 'courses' : $page;
     $h = '<div class="f-scrim" data-drawer-scrim></div><aside class="f-drawer" id="fDrawer" aria-hidden="true" aria-label="' . e(tr('Site menu')) . '">';
-    $h .= '<div class="f-drawer-head"><span class="f-drawer-title">' . e(tr('Menu')) . '</span><button class="f-drawer-close" data-drawer-close type="button" aria-label="' . e(tr('Close menu')) . '">' . collegeIcon('close') . '</button></div><nav aria-label="' . e(tr('Mobile')) . '"><ul class="f-drawer-list">';
+    $h .= '<div class="f-drawer-head"><span class="f-drawer-title">' . e(tr('Menu')) . '</span><button class="f-drawer-close" data-drawer-close type="button" aria-label="' . e(tr('Close menu')) . '">' . collegeIcon('close') . '</button></div><nav class="f-drawer-nav" aria-label="' . e(tr('Mobile')) . '"><ul class="f-drawer-list">';
     $i = 0;
     foreach (collegeNavItems() as $it) {
         $act = ($it['slug'] !== '' && $it['slug'] === $key) ? ' aria-current="page"' : '';
         if ($it['kids']) {
             $i++;
             $pid = 'facc' . $i;
-            $h .= '<li><button class="f-acc-btn" type="button" aria-expanded="false" aria-controls="' . $pid . '">' . collegeIcon($it['icon']) . '<span>' . e(tr($it['label'])) . '</span>' . collegeIcon('chev') . '</button><div class="f-acc-panel" id="' . $pid . '">';
+            $h .= '<li class="f-acc"><button class="f-acc-btn" type="button" aria-expanded="false" aria-controls="' . $pid . '">' . collegeIcon($it['icon']) . '<span>' . e(tr($it['label'])) . '</span>' . collegeIcon('chev') . '</button><div class="f-acc-panel" id="' . $pid . '">';
             foreach ($it['kids'] as [$kl, $ku]) $h .= '<a href="' . e($ku) . '">' . e(tr($kl)) . '</a>';
             $h .= '</div></li>';
         } else {
-            $h .= '<li><a class="f-drawer-link" href="' . e($it['url']) . '"' . $act . '>' . collegeIcon($it['icon']) . '<span>' . e(tr($it['label'])) . '</span></a></li>';
+            $h .= '<li class="f-acc"><a class="f-drawer-link" href="' . e($it['url']) . '"' . $act . '>' . collegeIcon($it['icon']) . '<span>' . e(tr($it['label'])) . '</span></a></li>';
         }
     }
     $home = siteHomeUrl();
@@ -203,18 +203,18 @@ function collegeHeader(string $brand, string $kind, string $city, string $phone,
     $pu = $home . '?page=';
     $login = $pu . 'login';
     $tagline = 'Education | Research | Healthcare | A Better Tomorrow';
-    $h = '<div class="f-topbar"><div class="f-wrap f-topbar-in"><div class="f-top-left">';
+    $h = '<div class="f-topbar"><div class="f-wrap"><div class="f-top-contact">';
     if ($phone !== '') $h .= '<a href="tel:' . e(preg_replace('/[^+0-9]/', '', $phone)) . '">' . collegeIcon('phone') . ' <span>' . e($phone) . '</span></a>';
-    if ($city !== '') $h .= '<span class="f-top-addr">' . collegeIcon('pin') . ' <span>' . e($city) . '</span></span>';
-    $h .= '</div><div class="f-top-right">';
+    if ($city !== '') $h .= '<span class="addr">' . collegeIcon('pin') . ' <span>' . e($city) . '</span></span>';
+    $h .= '</div><div class="f-top-links">';
     if (str_contains($headerAction, 'u-profile-box')) $h .= $headerAction;
-    else $h .= '<a href="' . e($login) . '">' . collegeIcon('user') . ' <span class="f-top-lbl">' . e(tr('Student Login')) . '</span></a><a href="' . e($login) . '">' . collegeIcon('shield') . ' <span class="f-top-lbl">' . e(tr('Staff Login')) . '</span></a>';
+    else $h .= '<a href="' . e($login) . '">' . collegeIcon('user') . ' <span class="lbl">' . e(tr('Student Login')) . '</span></a><a href="' . e($login) . '">' . collegeIcon('shield') . ' <span class="lbl">' . e(tr('Staff Login')) . '</span></a>';
     $h .= siteToggle() . siteLangToggle($page) . '</div></div></div>';
     $h .= '<header class="f-head"><div class="f-wrap f-head-in">';
     $h .= '<button class="f-burger" data-drawer-open type="button" aria-label="' . e(tr('Open menu')) . '" aria-expanded="false" aria-controls="fDrawer">' . collegeIcon('menu') . '</button>';
-    $h .= '<a href="' . e($home) . '" class="f-brand" aria-label="' . e($brand) . '"><span class="f-crest">' . collegeIcon('cap') . '</span><span class="f-brand-t"><strong>' . e($brand) . '</strong><small>' . e($tagline) . '</small></span></a>';
+    $h .= '<a href="' . e($home) . '" class="f-brand" aria-label="' . e($brand) . '"><span class="f-logo">' . collegeIcon('cap') . '</span><span class="f-brand-text"><strong>' . e($brand) . '</strong><small>' . e($tagline) . '</small></span></a>';
     $h .= '<div class="f-head-cta"><a class="f-btn ghost" href="' . e($pu . 'login&show=inquiry') . '">' . e(tr('Enquire')) . '</a><a class="f-btn primary" href="' . e(sitePublicUrl('apply.php')) . '">' . e(tr('Apply Online')) . '</a></div>';
-    $h .= '<a class="f-m-login" href="' . e($login) . '" aria-label="' . e(tr('Login')) . '">' . collegeIcon('user') . '</a>';
+    $h .= '<a class="f-mobile-login" href="' . e($login) . '" aria-label="' . e(tr('Login')) . '">' . collegeIcon('user') . '</a>';
     $h .= '</div>' . collegeNav($page) . '</header>';
     $h .= collegeDrawer($page) . nimitaTicker($ticker);
     $authedUrl = '';
@@ -233,7 +233,7 @@ function collegeFooter(string $brand, string $kind, string $city = '', string $a
     $pu = $home . '?page=';
     $student = sitePublicUrl('student.php');
     $h = '<footer class="f-footer"><div class="f-wrap"><div class="f-foot-grid">';
-    $h .= '<div><a href="' . e($home) . '" class="f-brand" style="margin-bottom:12px"><span class="f-crest">' . collegeIcon('cap') . '</span><span class="f-brand-t"><strong>' . e($brand) . '</strong><small>' . e($kind) . '</small></span></a>';
+    $h .= '<div><a href="' . e($home) . '" class="f-brand" style="margin-bottom:12px"><span class="f-logo">' . collegeIcon('cap') . '</span><span class="f-brand-text"><strong>' . e($brand) . '</strong><small>' . e($kind) . '</small></span></a>';
     $h .= '<p>' . e(tr('Building knowledgeable, skilled and responsible pharmacy professionals through quality education, research and healthcare.')) . '</p></div>';
     $links = [
         'Quick Links' => [['Home', $home], ['About Us', $pu . 'about'], ['Admissions', $pu . 'admissions'], ['Programs', $pu . 'courses'], ['Notices', $pu . 'notices'], ['Contact', $pu . 'contact']],
@@ -252,7 +252,7 @@ function collegeFooter(string $brand, string $kind, string $city = '', string $a
     if ($phone !== '') $h .= '<li>' . collegeIcon('phone') . '<a href="tel:' . e(preg_replace('/[^+0-9]/', '', $phone)) . '">' . e($phone) . '</a></li>';
     if ($loc === '' && $phone === '') $h .= '<li>' . collegeIcon('pin') . '<span>' . e(tr('Contact details will appear here soon.')) . '</span></li>';
     $h .= '<li>' . collegeIcon('clock') . '<span>' . e(tr('Mon - Sat: 10:00 AM - 5:00 PM')) . '</span></li></ul></div>';
-    $h .= '</div><div class="f-foot-bottom"><div>&copy; ' . date('Y') . ' ' . e($brand) . '. ' . e(tr('All Rights Reserved.')) . '</div><div>' . e(tr('Privacy Policy')) . ' &middot; ' . e(tr('Terms of Use')) . ' &middot; ' . e(tr('Sitemap')) . '</div></div></div></footer>';
+    $h .= '</div><div class="f-foot-bottom"><div class="f-wrap"><div>&copy; ' . date('Y') . ' ' . e($brand) . '. ' . e(tr('All Rights Reserved.')) . '</div><div>' . e(tr('Privacy Policy')) . ' &middot; ' . e(tr('Terms of Use')) . ' &middot; ' . e(tr('Sitemap')) . '</div></div></div></div></footer>';
     $h .= '<button class="f-backtop" data-backtop type="button" aria-label="' . e(tr('Back to top')) . '">' . collegeIcon('arrow') . '</button>';
     return $h;
 }
