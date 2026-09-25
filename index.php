@@ -372,6 +372,9 @@ $vcMsg = $siteLang === 'hi'
     : siteVcMessage($brand);
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
 =======
 >>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
 $formSession = $page === 'create-account' ? 'northstar_auth' : 'northstar_site';
@@ -400,6 +403,9 @@ function uDocHead(string $title, string $brand): void {
 <?php elseif ($page === 'home'): ?>
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
 =======
 >>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
 <section class="u-hero" data-hero-slider>
@@ -421,6 +427,7 @@ function uDocHead(string $title, string $brand): void {
 <section class="u-section"><div class="c-sec-head"><h2>Campus Life</h2><a href="?page=about">View Gallery →</a></div><div class="c-tiles"><div class="c-camp"><img src="assets/campus-learning.jpg" alt="Students learning in the library" loading="lazy"><strong>Learning</strong></div><div class="c-camp"><img src="assets/campus-innovation.jpg" alt="Pharmacy research laboratory" loading="lazy"><strong>Innovation</strong></div><div class="c-camp"><img src="assets/campus-community.jpg" alt="Students in community service" loading="lazy"><strong>Community Service</strong></div><div class="c-camp"><img src="assets/campus-sports.jpg" alt="Cricket match on campus" loading="lazy"><strong>Beyond Classroom</strong></div></div></section>
 <section class="u-section"><div class="u-eyebrow"><?= e(tr('Message from the Principal')) ?></div><h2><?= e(tr('Message from the Principal')) ?></h2><div class="u-vc-full c-principal"><?php if (is_file($root . '/assets/principal-photo.jpg')): ?><img class="c-person-photo" src="assets/principal-photo.jpg" alt="<?= e(tr('Principal')) ?>, <?= e($brand) ?>"><?php else: ?><span class="u-vc-portrait"><?= e(strtoupper(mb_substr($brand, 0, 1))) ?></span><?php endif; ?><div><blockquote>“<?= e($vcMsg) ?>”</blockquote><cite><?= e(tr('Principal')) ?> · <?= e($brand) ?></cite><p><a class="u-btn solid c-btn-navy" href="?page=about">Read More →</a></p></div></div></section>
 </div>
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <div>
@@ -458,6 +465,10 @@ function uDocHead(string $title, string $brand): void {
 <div class="facility"><i class="fa-solid fa-bus"></i><strong>Transport Facility</strong></div>
 </div></div></section>
 <section class="cta"><div class="container cta-inner"><div><h2><?= e(tr('Begin Your Journey in Pharmacy')) ?></h2><p>Applications are now open. Start your application online today.</p></div><div><a href="apply.php" class="btn btn-green"><?= e(tr('Apply Online Now')) ?> <i class="fa-solid fa-arrow-right"></i></a></div></div></section>
+=======
+<div class="c-trust"><div class="c-wrap"><?php foreach (collegeTrustBadges() as [$icon, $label]): ?><span><?= collegeIcon($icon) ?> <?= e($label) ?></span><?php endforeach; ?></div></div>
+<section class="u-cta-band"><div><h2><?= e(tr('Ready to join?')) ?></h2><p><?= e(tr('Create your free student account in a minute, then apply online.')) ?></p></div><div><a class="u-btn light big" href="?page=login&show=create"><?= e(tr('Create Student Account')) ?> →</a> <a class="u-btn ghost big" href="student.php?page=admissions"><?= e(tr('Apply for Admission')) ?> →</a> <a class="u-btn ghost big" href="?page=login"><?= e(tr('Sign In')) ?></a></div></section>
+>>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
 =======
 <div class="c-trust"><div class="c-wrap"><?php foreach (collegeTrustBadges() as [$icon, $label]): ?><span><?= collegeIcon($icon) ?> <?= e($label) ?></span><?php endforeach; ?></div></div>
 <section class="u-cta-band"><div><h2><?= e(tr('Ready to join?')) ?></h2><p><?= e(tr('Create your free student account in a minute, then apply online.')) ?></p></div><div><a class="u-btn light big" href="?page=login&show=create"><?= e(tr('Create Student Account')) ?> →</a> <a class="u-btn ghost big" href="student.php?page=admissions"><?= e(tr('Apply for Admission')) ?> →</a> <a class="u-btn ghost big" href="?page=login"><?= e(tr('Sign In')) ?></a></div></section>

@@ -118,6 +118,7 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
               'homepage ticker announces live admission dates')
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         check('Principal&#039;s Message' in uni.html and 'id="principal"' in uni.html and 'f-gallery' in uni.html
               and 'PCI Approved' in uni.html,
               'homepage shows the principal message, campus life and badges')
@@ -139,6 +140,8 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
               'homepage wears the future design system without legacy assets')
         check('Latest notices' in uni.html and 'f-gallery' in uni.html
 =======
+=======
+>>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
         check('Message from the Principal' in uni.html and 'PCI Approved' in uni.html and 'Campus Life' in uni.html,
               'homepage shows the principal message, badges and campus life')
         check('Shaping Healthcare Leaders' in uni.html and 'for a Healthier Tomorrow' in uni.html
@@ -153,6 +156,9 @@ with tempfile.TemporaryDirectory(prefix='northstar-university-') as temp:
               'homepage shows the college header, programs and stylesheet')
         check('Latest Updates' in uni.html and 'Campus Life' in uni.html
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
+=======
 >>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
 =======
 >>>>>>> parent of 00f5970 (Nimita-style pharmacy homepage: hero, features, programs, stats, campus, principal, facilities, CTA, footer)
