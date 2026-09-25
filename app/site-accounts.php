@@ -23,7 +23,11 @@ function siteSession(string $name): void {
 // Resume whichever portal session holds a pending OTP handshake (login or creation).
 function siteResumePending(): string {
 <<<<<<< HEAD
+<<<<<<< HEAD
     foreach (['northstar_auth', 'northstar_site', 'northstar_student', 'northstar_session', 'northstar_applicant'] as $name) {
+=======
+    foreach (['northstar_student', 'northstar_session'] as $name) {
+>>>>>>> parent of 549483e (new)
 =======
     foreach (['northstar_student', 'northstar_session'] as $name) {
 >>>>>>> parent of 549483e (new)
@@ -42,7 +46,11 @@ function siteCsrfCheck(): void {
 // (site or portal handshake). Accept the token whichever session issued it.
 function siteCsrfCheckAny(): void {
 <<<<<<< HEAD
+<<<<<<< HEAD
     foreach (['northstar_site', 'northstar_auth', 'northstar_student', 'northstar_session', 'northstar_applicant'] as $name) {
+=======
+    foreach (['northstar_site', 'northstar_student', 'northstar_session'] as $name) {
+>>>>>>> parent of 549483e (new)
 =======
     foreach (['northstar_site', 'northstar_student', 'northstar_session'] as $name) {
 >>>>>>> parent of 549483e (new)
@@ -60,16 +68,22 @@ function siteTakeFlash(): ?string {
 // registered users and admitted records awaiting portal access.
 function siteDetectAccount(string $email): ?string {
 <<<<<<< HEAD
+<<<<<<< HEAD
     if (one('SELECT id FROM users WHERE LOWER(email)=? AND active=1', [$email])) return 'staff';
     if (one('SELECT a.id FROM portal_accounts a JOIN students s ON s.id=a.student_id WHERE LOWER(a.email)=? AND a.active=1 AND LOWER(s.email)=LOWER(a.email)', [$email])) return 'student';
     if (one('SELECT id FROM student_users WHERE LOWER(email)=? AND active=1', [$email])) return 'student';
     if (function_exists('applicationsReady') && applicationsReady() && one('SELECT id FROM applicant_accounts WHERE LOWER(email)=? AND active=1', [$email])) return 'student';
     if (one('SELECT id FROM students WHERE LOWER(email)=?', [$email])) return 'student';
 =======
+=======
+>>>>>>> parent of 549483e (new)
     if (one('SELECT id FROM users WHERE email=? AND active=1', [$email])) return 'staff';
     if (one('SELECT a.id FROM portal_accounts a JOIN students s ON s.id=a.student_id WHERE a.email=? AND a.active=1 AND LOWER(s.email)=a.email', [$email])
         || one('SELECT id FROM student_users WHERE email=? AND active=1', [$email])
         || one('SELECT id FROM students WHERE LOWER(email)=?', [$email])) return 'student';
+<<<<<<< HEAD
+>>>>>>> parent of 549483e (new)
+=======
 >>>>>>> parent of 549483e (new)
     return null;
 }

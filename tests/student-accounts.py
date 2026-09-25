@@ -85,6 +85,9 @@ with tempfile.TemporaryDirectory(prefix='northstar-student-accounts-') as temp:
 =======
         check('Invalid, expired' in s.post('register_verify',page='register',code='000000'),'incorrect verification code rejected')
         check('STUDENT ACCOUNT' in s.post('register_verify',page='register',code=code) and 'Apply for admission' in s.html,'verified email creates the student account')
+<<<<<<< HEAD
+>>>>>>> parent of 549483e (new)
+=======
 >>>>>>> parent of 549483e (new)
         check(scalar('SELECT COUNT(*) FROM student_users')==1,'one student account created after verification')
         check('Your session expired' in master_s.create_verify(master_s.page(),code),'used verification code cannot be replayed')

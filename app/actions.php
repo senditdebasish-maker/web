@@ -44,10 +44,13 @@ function handleAction(): string {
             'application_review' => reviewApplication(),
             'application_admit' => reviewApplication(true),
 <<<<<<< HEAD
+<<<<<<< HEAD
             'approve_application' => approveApplicationAction(),
             'reject_application' => rejectApplicationAction(),
             'request_application_revision' => requestApplicationRevisionAction(),
             'cancel_application' => cancelApplicationAction(),
+=======
+>>>>>>> parent of 549483e (new)
 =======
 >>>>>>> parent of 549483e (new)
             'applicant_toggle' => toggleApplicant(),

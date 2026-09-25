@@ -97,7 +97,11 @@ function siteFooter(string $brand, string $kind, string $city = '', string $addr
     $h .= '<h4>' . e(tr('Follow Us')) . '</h4>' . siteSocial() . '</div>';
     $h .= '<div><h4>' . e(tr('Quick Links')) . '</h4><nav aria-label="University"><a href="' . e($home . '?page=about') . '">' . e(tr('About us')) . '</a><a href="' . e($home . '?page=courses') . '">' . e(tr('Programs')) . '</a><a href="' . e($home . '?page=admissions') . '">' . e(tr('Admissions')) . '</a><a href="' . e($home . '?page=notices') . '">' . e(tr('Notices')) . '</a><a href="' . e($home . '?page=faculty') . '">' . e(tr('Faculty')) . '</a></nav></div>';
 <<<<<<< HEAD
+<<<<<<< HEAD
     $h .= '<div><h4>' . e(tr('Portals')) . '</h4><nav aria-label="Portals"><a href="' . e(sitePublicUrl('apply.php')) . '">' . e(tr('Apply online')) . '</a><a href="' . e(sitePublicUrl('student.php?page=admissions')) . '">' . e(tr('Student admissions')) . '</a><a href="' . e($home . '?page=login&show=create') . '">' . e(tr('Create account')) . '</a><a href="' . e($home . '?page=login') . '">' . e(tr('Sign in')) . '</a></nav></div>';
+=======
+    $h .= '<div><h4>' . e(tr('Portals')) . '</h4><nav aria-label="Portals"><a href="' . e(sitePublicUrl('apply.php')) . '">' . e(tr('Apply online')) . '</a><a href="' . e(sitePublicUrl('student.php?page=register')) . '">' . e(tr('Create account')) . '</a><a href="' . e($home . '?page=login') . '">' . e(tr('Sign in')) . '</a><a href="' . e(sitePublicUrl('office.php')) . '">' . e(tr('Office login')) . '</a></nav></div>';
+>>>>>>> parent of 549483e (new)
 =======
     $h .= '<div><h4>' . e(tr('Portals')) . '</h4><nav aria-label="Portals"><a href="' . e(sitePublicUrl('apply.php')) . '">' . e(tr('Apply online')) . '</a><a href="' . e(sitePublicUrl('student.php?page=register')) . '">' . e(tr('Create account')) . '</a><a href="' . e($home . '?page=login') . '">' . e(tr('Sign in')) . '</a><a href="' . e(sitePublicUrl('office.php')) . '">' . e(tr('Office login')) . '</a></nav></div>';
 >>>>>>> parent of 549483e (new)

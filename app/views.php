@@ -40,7 +40,10 @@ function url(array $overrides=[]): string { return '?'.http_build_query(array_me
 header('Location: index.php?page=login'); exit;
 ?>
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> parent of 549483e (new)
 <?=siteHeader($obBrand,$obKind,'','<a class="u-btn ghost" href="student.php">Student sign-in</a><a class="u-btn ghost" href="apply.php">Admissions</a>'.siteToggle().siteBackLink())?>
 <main class="u-auth-wrap"><div class="u-card"><div class="u-eyebrow">WELCOME BACK</div><h1>Your workspace awaits</h1><p class="u-muted">Sign in to manage your institute community.</p>
 <?php if($error): ?><div class="u-alert error" role="alert"><?=e($error)?></div><?php endif; ?>

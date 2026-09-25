@@ -16,7 +16,10 @@ if (isset($_SESSION['last_seen']) && time()-$_SESSION['last_seen']>1800) { $_SES
 $_SESSION['last_seen']=time();
 $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
 <<<<<<< HEAD
+<<<<<<< HEAD
 if (!currentUser() && !defined('CRM_DOCUMENT_REQUEST') && !isset($_GET['certificate'])) { header('Location: index.php?page=login'); exit; }
+=======
+>>>>>>> parent of 549483e (new)
 =======
 >>>>>>> parent of 549483e (new)
 require __DIR__ . '/app/actions.php';

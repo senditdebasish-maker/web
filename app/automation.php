@@ -79,9 +79,12 @@ function uploadCertificate(): int {
         one('SELECT id FROM applicant_accounts WHERE id=?'.lockSuffix(),[$actor['id']]);$a=ownApplication((int)input('application_id'),$actor);$a=one('SELECT * FROM admission_applications WHERE id=?'.lockSuffix(),[$a['id']]);
         if((int)input('version')!==(int)$a['version'])fail('Application changed. Reload before uploading.');
 <<<<<<< HEAD
+<<<<<<< HEAD
         if(!in_array($a['status'],['Draft','Pending Review','Submitted','Under review','Changes requested','Revision'],true))fail('Uploads are closed for this application.');
         if((int)query('SELECT COUNT(*) FROM certificates WHERE application_id=?',[$a['id']])->fetchColumn()>=10)fail('Maximum ten document uploads per application. Ask the office for help.');
 =======
+=======
+>>>>>>> parent of 549483e (new)
         if(!in_array($a['status'],['Submitted','Under review','Changes requested'],true))fail('Uploads are closed for this application.');
         if((int)query('SELECT COUNT(*) FROM certificates WHERE application_id=?',[$a['id']])->fetchColumn()>=5)fail('Maximum five certificate uploads per application. Ask the office for help.');
 >>>>>>> parent of 549483e (new)

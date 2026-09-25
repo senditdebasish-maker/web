@@ -19,6 +19,7 @@ try {
     if (!$ready) { http_response_code(503); $page='unavailable'; }
     else {
 <<<<<<< HEAD
+<<<<<<< HEAD
         $student=portalStudent(); $portalUser=currentStudentUser(); $applicant=currentApplicant();
         if(isset($_SESSION['suid'])&&!$portalUser){unset($_SESSION['applicant_id'],$_SESSION['applicant_version'],$_SESSION['applicant_email'],$_SESSION['applicant_site']);$applicant=null;}
         if($portalUser&&!$student){linkStudentUser($portalUser);$student=portalStudent();}
@@ -46,6 +47,12 @@ try {
             requireCookies();
             if (!hash_equals($_SESSION['csrf'],input('csrf',128))) fail('Your form expired. Refresh and try again.');
             $action=input('action',40);
+=======
+        if ($_SERVER['REQUEST_METHOD']==='POST') {
+            requireCookies();
+            if (!hash_equals($_SESSION['csrf'],input('csrf',128))) fail('Your form expired. Refresh and try again.');
+            $action=input('action',40);
+>>>>>>> parent of 549483e (new)
             if (in_array($action,['register_request','register_verify'],true) && portalStudent()) { header('Location: student.php');exit; }
             if ($action==='request_otp') $next=requestOtp('student');
             elseif ($action==='verify_otp') $next=verifyOtp('student');
@@ -53,6 +60,9 @@ try {
             elseif ($action==='register_verify') $next=verifyStudentUserCode();
             elseif (in_array($action,['support_create','support_reply'],true)) $next=studentSupportAction($action);
             elseif ($action==='online_order') {
+<<<<<<< HEAD
+>>>>>>> parent of 549483e (new)
+=======
 >>>>>>> parent of 549483e (new)
                 $s=portalStudent();if(!$s)fail('Please sign in to pay online.');
                 $oid=beginOnlineOrder($s,input('amount',12));
@@ -61,7 +71,11 @@ try {
                 header('Location: student.php?page=payments&order='.$oid);exit;
             }
 <<<<<<< HEAD
+<<<<<<< HEAD
             elseif($action==='online_sync'){
+=======
+            elseif ($action==='online_sync') {
+>>>>>>> parent of 549483e (new)
 =======
             elseif ($action==='online_sync') {
 >>>>>>> parent of 549483e (new)
@@ -72,13 +86,19 @@ try {
                 header('Location: student.php?page=payments&order='.$oid);exit;
             }
 <<<<<<< HEAD
+<<<<<<< HEAD
             elseif($action==='logout'){$s=portalStudent();if($s)portalEvent((int)$s['id'],'logout');if(function_exists('clearSiteIdentity'))clearSiteIdentity();$_SESSION=[];session_regenerate_id(true);header('Location: index.php?page=login');exit;}
             else fail('Students cannot perform this action.');
 =======
+=======
+>>>>>>> parent of 549483e (new)
             elseif ($action==='logout') {
                 $s=portalStudent(); if($s) portalEvent((int)$s['id'],'logout');
                 $_SESSION=[];session_regenerate_id(true);$next='login';
             } else fail('Students cannot perform this action.');
+<<<<<<< HEAD
+>>>>>>> parent of 549483e (new)
+=======
 >>>>>>> parent of 549483e (new)
             header('Location: student.php?page='.$next);exit;
         }
@@ -93,6 +113,7 @@ try {
             ob_clean();header('Content-Type: application/pdf');header('Content-Disposition: attachment; filename="'.documentFilename($document).'"');header('Content-Length: '.strlen($pdf));echo $pdf;exit;
         }
 <<<<<<< HEAD
+<<<<<<< HEAD
         if(!$student&&!$portalUser&&!$applicant){header('Location: index.php?page=login'.($page==='register'?'&show=create':''));exit;}
         elseif(!$student&&($portalUser||$applicant)&&!in_array($page,['dashboard','courses','admissions','course','apply','applications','application','profile','inquiries'],true))$page='dashboard';
         elseif($page==='login'||$page==='register'){header('Location: student.php');exit;}
@@ -100,6 +121,15 @@ try {
         if($student && $page==='support' && isset($_GET['ticket']) && servicesReady()) ticketForStudent($student,(int)$_GET['ticket']);
     }
 } catch(DomainException $e) { $error=$e->getMessage();if($page==='support' && isset($_GET['ticket'])){unset($_GET['ticket']);if($_SERVER['REQUEST_METHOD']==='GET')http_response_code(403);}$student=$ready?portalStudent():null;$portalUser=$ready?currentStudentUser():null;$applicant=$ready?currentApplicant():null;if(!$student&&!$portalUser&&!$applicant){header('Location: index.php?page=login');exit;}if(!$student&&!in_array($page,['dashboard','courses','admissions','course','apply','applications','application','profile','inquiries'],true))$page='dashboard'; }
+=======
+        if (!$student && !$portalUser) $page=$page==='register'?'register':'login';
+        elseif ($portalUser && !$student) $page='account';
+        elseif ($page==='login'||$page==='register') { header('Location: student.php');exit; }
+        elseif (!in_array($page,['dashboard','payments','documents','profile','academics','results','announcements','support'],true)) { http_response_code(404);$page='notfound'; }
+        if($student && $page==='support' && isset($_GET['ticket']) && servicesReady()) ticketForStudent($student,(int)$_GET['ticket']);
+    }
+} catch(DomainException $e) { $error=$e->getMessage();if($page==='support' && isset($_GET['ticket'])){unset($_GET['ticket']);if($_SERVER['REQUEST_METHOD']==='GET')http_response_code(403);}$student=$ready?portalStudent():null;$portalUser=$ready?currentStudentUser():null;if(!$student)$page=$portalUser?'account':($page==='register'?'register':'login'); }
+>>>>>>> parent of 549483e (new)
 =======
         if (!$student && !$portalUser) $page=$page==='register'?'register':'login';
         elseif ($portalUser && !$student) $page='account';

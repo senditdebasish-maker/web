@@ -11,8 +11,13 @@ function applicationFormFields(array $data,string $privacy): void {
 [$apBrand,$apKind,$apCity,$apAddr,$apPhone]=siteBrand();
 $apButtons=siteToggle();
 <<<<<<< HEAD
+<<<<<<< HEAD
 if($actor) {$apButtons.=siteProfileBox(['name'=>$actor['email'],'role'=>'Applicant','url'=>'apply.php?page=dashboard']).apForm('logout').'<button class="u-btn ghost" type="submit">Sign out</button></form>';}
 else $apButtons.='<a class="u-btn ghost" href="index.php?page=login&show=applicant">Track application ↗</a>';
+=======
+if($actor) $apButtons.=apForm('logout').'<button class="u-btn ghost" type="submit">Sign out</button></form>';
+else $apButtons.='<a class="u-btn ghost" href="apply.php?page=login">Applicant sign-in ↗</a>';
+>>>>>>> parent of 549483e (new)
 =======
 if($actor) $apButtons.=apForm('logout').'<button class="u-btn ghost" type="submit">Sign out</button></form>';
 else $apButtons.='<a class="u-btn ghost" href="apply.php?page=login">Applicant sign-in ↗</a>';
@@ -33,7 +38,11 @@ $pn=min(100000,max(1,(int)($_GET['p']??1)));$list=publicCourses(($pn-1)*20);$mor
 <?php elseif($page==='apply'):
 $_SESSION['application_nonce']??=bin2hex(random_bytes(24));?>
 <<<<<<< HEAD
+<<<<<<< HEAD
 <section class="u-card"><div class="u-eyebrow">APPLICATION FORM</div><h1><?=e($course['name'])?></h1><p><?=e($course['institute_name'])?> · Verified email: <?=e($actor['email'])?></p><p>Quoted course fee at submission: ₹<?=number_format((int)$course['fee_minor']/100,2)?>. The office must confirm this fee when approving admission.</p><?=apUploadForm('submit_application')?><div class="u-form"><input type="hidden" name="course_id" value="<?=(int)$course['id']?>"><input type="hidden" name="request_key" value="<?=e($_SESSION['application_nonce'])?>"><input type="hidden" name="offer_token" value="<?=e(hash('sha256',json_encode($course,JSON_THROW_ON_ERROR)))?>"><div class="u-trap" aria-hidden="true"><label>Leave blank<input name="website" tabindex="-1" autocomplete="off"></label></div><?php applicationFormFields([],$course['privacy_notice']);?></div></form><p class="u-small">Complete all four steps — personal details, academic details, documents, then preview and submit. Saving a draft keeps your typed details and any attached documents. No payment is collected here; enrolled students pay separately after admission. Please submit only one active application.</p></section>
+=======
+<section class="u-card"><div class="u-eyebrow">APPLICATION FORM</div><h1><?=e($course['name'])?></h1><p><?=e($course['institute_name'])?> · Verified email: <?=e($actor['email'])?></p><p>Quoted course fee at submission: ₹<?=number_format((int)$course['fee_minor']/100,2)?>. The office must confirm this fee when approving admission.</p><?=apForm('submit_application')?><div class="u-form"><input type="hidden" name="course_id" value="<?=(int)$course['id']?>"><input type="hidden" name="request_key" value="<?=e($_SESSION['application_nonce'])?>"><input type="hidden" name="offer_token" value="<?=e(hash('sha256',json_encode($course,JSON_THROW_ON_ERROR)))?>"><div class="u-trap" aria-hidden="true"><label>Leave blank<input name="website" tabindex="-1" autocomplete="off"></label></div><?php applicationFormFields([],$course['privacy_notice']);?><button class="u-btn solid">Submit application for review →</button></div></form><p class="u-small">After submitting, upload certificates from your application page when the institute enables uploads. No payment is collected here; enrolled students pay separately after admission. Please submit only one active application.</p></section>
+>>>>>>> parent of 549483e (new)
 =======
 <section class="u-card"><div class="u-eyebrow">APPLICATION FORM</div><h1><?=e($course['name'])?></h1><p><?=e($course['institute_name'])?> · Verified email: <?=e($actor['email'])?></p><p>Quoted course fee at submission: ₹<?=number_format((int)$course['fee_minor']/100,2)?>. The office must confirm this fee when approving admission.</p><?=apForm('submit_application')?><div class="u-form"><input type="hidden" name="course_id" value="<?=(int)$course['id']?>"><input type="hidden" name="request_key" value="<?=e($_SESSION['application_nonce'])?>"><input type="hidden" name="offer_token" value="<?=e(hash('sha256',json_encode($course,JSON_THROW_ON_ERROR)))?>"><div class="u-trap" aria-hidden="true"><label>Leave blank<input name="website" tabindex="-1" autocomplete="off"></label></div><?php applicationFormFields([],$course['privacy_notice']);?><button class="u-btn solid">Submit application for review →</button></div></form><p class="u-small">After submitting, upload certificates from your application page when the institute enables uploads. No payment is collected here; enrolled students pay separately after admission. Please submit only one active application.</p></section>
 >>>>>>> parent of 549483e (new)

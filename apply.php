@@ -1,10 +1,16 @@
 <?php
 declare(strict_types=1);
 <<<<<<< HEAD
+<<<<<<< HEAD
 ini_set('display_errors','0'); ob_start();
 require __DIR__.'/app/bootstrap.php';
 require_once __DIR__.'/app/applications.php'; require_once __DIR__.'/app/site-accounts.php'; require_once __DIR__.'/app/automation.php';
 header('Cache-Control: no-store'); header('X-Content-Type-Options: nosniff'); header('Referrer-Policy: same-origin');
+=======
+ini_set('display_errors','0');ob_start();
+require __DIR__.'/app/bootstrap.php';require_once __DIR__.'/app/applications.php';
+header('Cache-Control: no-store');header('X-Content-Type-Options: nosniff');header('Referrer-Policy: same-origin');
+>>>>>>> parent of 549483e (new)
 =======
 ini_set('display_errors','0');ob_start();
 require __DIR__.'/app/bootstrap.php';require_once __DIR__.'/app/applications.php';
@@ -24,6 +30,21 @@ try{
             $c=one('SELECT c.* FROM certificates c JOIN admission_applications a ON a.id=c.application_id WHERE c.id=? AND a.applicant_id=?',[(int)$_GET['certificate'],$actor['id']]);
             if(!$c){http_response_code(404);exit('Upload not found.');}
             ob_clean();serveCertificateFile($c);
+<<<<<<< HEAD
+=======
+        }
+        if($_SERVER['REQUEST_METHOD']==='POST'){
+            requireCookies();
+            if(!hash_equals($_SESSION['csrf'],input('csrf',128)))fail('Your form expired. Refresh and try again.');
+            $action=input('action',40);$next='login';
+            if($action==='request_code')requestApplicantCode();
+            elseif($action==='verify_code'){verifyApplicantCode();$selected=(int)($_SESSION['apply_course']??0);$next=$selected && publicCourses(0,$selected)?'apply&course='.$selected:'dashboard';unset($_SESSION['apply_course']);}
+            elseif($action==='logout'){$_SESSION=[];session_regenerate_id(true);$next='courses';}
+            elseif(in_array($action,['submit_application','revise_application','withdraw_application'],true)){$id=applicantMutation($action);$next='application&id='.$id;}
+            elseif($action==='upload_certificate'){$id=uploadCertificate();$next='application&id='.$id;}
+            else fail('Applicants cannot perform this action.');
+            header('Location: apply.php?page='.$next);exit;
+>>>>>>> parent of 549483e (new)
         }
         if($_SERVER['REQUEST_METHOD']==='POST'){
             requireCookies();
@@ -55,9 +76,12 @@ try{
     if(!in_array($page,['unavailable','notfound'],true)){
         $actor=currentApplicant();
 <<<<<<< HEAD
+<<<<<<< HEAD
         if($page==='apply' && !$actor && publicCourses(0,(int)($_GET['course']??0))){$_SESSION['apply_course']=(int)$_GET['course'];header('Location: index.php?page=login&show=applicant&course='.(int)$_GET['course']);exit;}
         if(in_array($page,['dashboard','apply','application'],true)&&!$actor){header('Location: index.php?page=login&show=applicant');exit;}
 =======
+=======
+>>>>>>> parent of 549483e (new)
         if($page==='apply' && !$actor && publicCourses(0,(int)($_GET['course']??0)))$_SESSION['apply_course']=(int)$_GET['course'];
         if(in_array($page,['dashboard','apply','application'],true)&&!$actor)$page='login';
 >>>>>>> parent of 549483e (new)
@@ -67,8 +91,13 @@ try{
 }catch(DomainException $e){http_response_code(403);$error=$e->getMessage();$page='notfound';}
 catch(Throwable $e){http_response_code(503);$page='unavailable';$error='Admissions are temporarily unavailable. Contact the institute.';}
 <<<<<<< HEAD
+<<<<<<< HEAD
 $flash=$_SESSION['flash']??null; unset($_SESSION['flash']);
 require __DIR__.'/app/applicant-views.php';
+=======
+$flash=$_SESSION['flash']??null;unset($_SESSION['flash']);
+try{require __DIR__.'/app/applicant-views.php';}catch(Throwable $e){ob_clean();http_response_code(503);echo 'Admissions are temporarily unavailable. Contact the institute.';error_log('Northstar public admissions view failed.');}
+>>>>>>> parent of 549483e (new)
 =======
 $flash=$_SESSION['flash']??null;unset($_SESSION['flash']);
 try{require __DIR__.'/app/applicant-views.php';}catch(Throwable $e){ob_clean();http_response_code(503);echo 'Admissions are temporarily unavailable. Contact the institute.';error_log('Northstar public admissions view failed.');}
