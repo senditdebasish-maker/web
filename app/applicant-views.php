@@ -10,7 +10,7 @@ if($actor) {$apButtons.=siteProfileBox(['name'=>$actor['email'],'role'=>'Applica
 else $apButtons.='<a class="u-btn ghost" href="index.php?page=login&show=applicant">Track application ↗</a>';
 $apButtons.='<a class="u-btn ghost" href="student.php">Enrolled student portal ↗</a>';
 ?>
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admissions & applications · Northstar</title><link rel="stylesheet" href="assets/university.css"><link rel="stylesheet" href="assets/theme.css"><script src="assets/theme.js" defer></script><script src="assets/wizard.js" defer></script></head><body>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admissions & applications · Northstar</title><link rel="stylesheet" href="assets/university.css"><link rel="stylesheet" href="assets/theme.css"><link rel="stylesheet" href="assets/portal-theme.css?v=site-theme-v2"><script src="assets/theme.js" defer></script><script src="assets/wizard.js" defer></script></head><body class="portal-surface">
 <?=siteHeader($apBrand,$apKind,'',$apButtons)?>
 <main class="u-page"><nav class="u-tabs" aria-label="Admissions navigation"><a href="apply.php" <?=$page==='courses'?'aria-current="page"':''?>>Courses & institutes</a><a href="apply.php?page=dashboard" <?=in_array($page,['dashboard','application'],true)?'aria-current="page"':''?>>My applications</a><a href="apply.php?page=help" <?=$page==='help'?'aria-current="page"':''?>>How to apply</a></nav>
 <?php if($error):?><div class="u-alert error" role="alert"><?=e($error)?></div><?php endif;if($flash):?><div class="u-alert" role="status"><?=e($flash)?></div><?php endif;?>

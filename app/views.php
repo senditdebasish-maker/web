@@ -34,7 +34,7 @@ function editLink(string $page,int $id): string { return '<a class="text-link" h
 function scoped(string $alias=''): array { global $scope; return $scope ? [($alias ? $alias.'.':'').'institute_id = ?',[$scope]] : ['1=1',[]]; }
 function url(array $overrides=[]): string { return '?'.http_build_query(array_merge($_GET,$overrides)); }
 ?>
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Northstar · Institute CRM</title><?php if($user): ?><link rel="stylesheet" href="assets/app.css"><?php endif; ?><link rel="stylesheet" href="assets/university.css"><link rel="stylesheet" href="assets/theme.css"><?php if($user): ?><script src="assets/app.js" defer></script><?php endif; ?><script src="assets/theme.js" defer></script></head><body>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Northstar · Institute CRM</title><?php if($user): ?><link rel="stylesheet" href="assets/app.css?v=site-theme-v2"><?php endif; ?><link rel="stylesheet" href="assets/university.css"><link rel="stylesheet" href="assets/theme.css"><?php if($user): ?><script src="assets/app.js" defer></script><?php endif; ?><script src="assets/theme.js" defer></script></head><body>
 <?php if(!$user):
 // Master sign-in lives on the website now; office.php redirects logged-out visitors.
 header('Location: index.php?page=login'); exit;
